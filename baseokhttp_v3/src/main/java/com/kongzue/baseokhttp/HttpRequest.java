@@ -130,7 +130,7 @@ public class HttpRequest {
                 }
             }
         }
-        if (!isNull(jsonParameter)){
+        if (!isNull(jsonParameter)) {
             requestType = POST_JSON;
         }
         try {
@@ -488,15 +488,20 @@ public class HttpRequest {
         return this;
     }
     
-    public HttpRequest doPost(){
+    public HttpRequest doPost() {
         send();
         requestType = POST_REQUEST;
         return this;
     }
     
-    public HttpRequest doGet(){
+    public HttpRequest doGet() {
         send();
         requestType = GET_REQUEST;
+        return this;
+    }
+    
+    public HttpRequest setMediaType(MediaType mediaType) {
+        MEDIA_TYPE = mediaType;
         return this;
     }
 }

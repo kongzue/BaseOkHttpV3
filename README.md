@@ -182,6 +182,30 @@ HttpRequest.build(context,"http://你的接口地址")
         .doPost();
 ```
 
+默认上传文件使用的 mediaType 为 "image/png"，可使用以下代码进行修改：
+```
+.setMediaType(MediaType.parse("application/pdf"))       //设置为pdf类型
+```
+
+类型参考如下：
+
+内容 | 含义
+---|---
+text/html | HTML格式
+text/plain | 纯文本格式
+text/xml |  XML格式
+image/gif | gif图片格式
+image/jpeg | jpg图片格式
+image/png | png图片格式
+application/xhtml+xml | XHTML格式
+application/xml     |  XML数据格式
+application/atom+xml  | Atom XML聚合格式
+application/json    |  JSON数据格式
+application/pdf       | pdf格式
+application/msword  |  Word文档格式
+application/octet-stream | 二进制流数据（如常见的文件下载）
+multipart/form-data | 表单数据
+
 ## 额外功能
 
 ### 全局日志
