@@ -74,9 +74,9 @@ public class HttpRequest {
             httpRequest.headers = headers;
             httpRequest.listener = listener;
             httpRequest.parameter = parameter;
-            httpRequest.httpRequest = httpRequest;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
+            httpRequest.httpRequest = httpRequest;
             httpRequest.send();
         }
     }
@@ -94,9 +94,9 @@ public class HttpRequest {
             httpRequest.headers = headers;
             httpRequest.listener = listener;
             httpRequest.jsonParameter = jsonParameter;
-            httpRequest.httpRequest = httpRequest;
             httpRequest.url = url;
             httpRequest.requestType = POST_JSON;
+            httpRequest.httpRequest = httpRequest;
             httpRequest.send();
         }
     }
@@ -114,14 +114,14 @@ public class HttpRequest {
             httpRequest.headers = headers;
             httpRequest.listener = listener;
             httpRequest.parameter = parameter;
-            httpRequest.httpRequest = httpRequest;
             httpRequest.url = url;
             httpRequest.requestType = GET_REQUEST;
+            httpRequest.httpRequest = httpRequest;
             httpRequest.send();
         }
     }
     
-    public void send() {
+    private void send() {
         if (parameter != null && !parameter.entrySet().isEmpty()) {
             for (Map.Entry<String, Object> entry : parameter.entrySet()) {
                 if (entry.getValue() instanceof File) {
@@ -129,6 +129,9 @@ public class HttpRequest {
                     break;
                 }
             }
+        }
+        if (!isNull(jsonParameter)){
+            requestType = POST_JSON;
         }
         try {
             //全局参数拦截处理
@@ -433,9 +436,9 @@ public class HttpRequest {
     public static HttpRequest build(Context context, String url) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.httpRequest = httpRequest;
             httpRequest.context = context;
             httpRequest.url = url;
+            httpRequest.httpRequest = httpRequest;
             return httpRequest;
         }
     }
@@ -459,6 +462,11 @@ public class HttpRequest {
         return this;
     }
     
+    public HttpRequest setJsonParameter(String jsonParameter) {
+        this.jsonParameter = jsonParameter;
+        return this;
+    }
+    
     public HttpRequest addHeaders(String key, String value) {
         if (headers == null) headers = new Parameter();
         headers.add(key, value);
@@ -475,13 +483,20 @@ public class HttpRequest {
         return this;
     }
     
-    public HttpRequest setJsonParameter(String jsonParameter) {
-        this.jsonParameter = jsonParameter;
+    public HttpRequest setResponseListener(ResponseListener listener) {
+        this.listener = listener;
         return this;
     }
     
-    public HttpRequest setResponseListener(ResponseListener listener) {
-        this.listener = listener;
+    public HttpRequest doPost(){
+        send();
+        requestType = POST_REQUEST;
+        return this;
+    }
+    
+    public HttpRequest doGet(){
+        send();
+        requestType = GET_REQUEST;
         return this;
     }
 }

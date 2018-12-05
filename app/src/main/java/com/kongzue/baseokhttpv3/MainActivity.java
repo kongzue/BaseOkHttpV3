@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         })
-                        .send();
+                        .doPost();
             }
         });
     }
