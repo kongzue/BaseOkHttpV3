@@ -14,7 +14,7 @@
 </a>
 
 ## 简介
-- BaseOkHttp V3是基于BaseOkHttp V2(https://github.com/kongzue/BaseOkHttp)的升级版本，基于能够快速创建常用请求链接而封装的库。
+- BaseOkHttp V3是基于BaseOkHttp V2( https://github.com/kongzue/BaseOkHttp )的升级版本，基于能够快速创建常用请求链接而封装的库。
 - 本库中自带 OkHttp 库，并对其关联的 okio 库进行了包名的修改和封装，因此不会影响到您项目中的其他版本的 okHttp 库，亦不会产生冲突。
 - 若请求来自于一个 Activity，结束请求后自动回归主线程操作，不需要再做额外处理。
 - 提供统一返回监听器ResponseListener处理返回数据，避免代码反复臃肿。
