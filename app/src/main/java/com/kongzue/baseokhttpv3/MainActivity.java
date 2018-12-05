@@ -17,6 +17,8 @@ import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.Parameter;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity {
     
     private Button btnHttp;
@@ -69,10 +71,81 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+//                HttpRequest.build(context,"/femaleNameApi")
+//                        .addHeaders("Charset", "UTF-8")
+//                        .addParameter("page", "1")
+//                        .setResponseListener(new ResponseListener() {
+//                            @Override
+//                            public void onResponse(String response, Exception error) {
+//                                progressDialog.dismiss();
+//                                if (error == null) {
+//                                    resultHttp.setText(response);
+//                                } else {
+//                                    resultHttp.setText("请求失败");
+//                                    Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+//                                }
+//                            }
+//                        })
+//                        .doPost();
+
+
+//                progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
+//                HttpRequest.JSONPOST(context, "/femaleNameApi", "{\"key\":\"DFG1H56EH5JN3DFA\",\"token\":\"124ASFD53SDF65aSF47fgT211\"}", new ResponseListener() {
+//                    @Override
+//                    public void onResponse(String response, Exception error) {
+//                        progressDialog.dismiss();
+//                        if (error == null) {
+//                            resultHttp.setText(response);
+//                        } else {
+//                            resultHttp.setText("请求失败");
+//                            Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
+
+//                HttpRequest.build(context,"/femaleNameApi")
+//                        .setJsonParameter("{\"key\":\"DFG1H56EH5JN3DFA\",\"token\":\"124ASFD53SDF65aSF47fgT211\"}")
+//                        .setResponseListener(new ResponseListener() {
+//                            @Override
+//                            public void onResponse(String response, Exception error) {
+//                                progressDialog.dismiss();
+//                                if (error == null) {
+//                                    resultHttp.setText(response);
+//                                } else {
+//                                    resultHttp.setText("请求失败");
+//                                    Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+//                                }
+//                            }
+//                        })
+//                        .doPost();
+                
+                File file1 = new File("");
+                File file2 = new File("");
+                
+                progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
+                HttpRequest.POST(context, "/femaleNameApi", new Parameter()
+                                         .add("key", "DFG1H56EH5JN3DFA")
+                                         .add("imageFile1", file1)
+                                         .add("imageFile2", file2)
+                        , new ResponseListener() {
+                            @Override
+                            public void onResponse(String response, Exception error) {
+                                progressDialog.dismiss();
+                                if (error == null) {
+                                    resultHttp.setText(response);
+                                } else {
+                                    resultHttp.setText("请求失败");
+                                    Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
     
                 HttpRequest.build(context,"/femaleNameApi")
                         .addHeaders("Charset", "UTF-8")
                         .addParameter("page", "1")
+                        .addParameter("imageFile1", file1)
+                        .addParameter("imageFile2", file2)
                         .setResponseListener(new ResponseListener() {
                             @Override
                             public void onResponse(String response, Exception error) {
