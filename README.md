@@ -31,6 +31,7 @@ Maven仓库：
 </dependency>
 ```
 Gradle：
+
 在dependencies{}中添加引用：
 ```
 implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.0'
@@ -85,10 +86,12 @@ HttpRequest.build(context,"http://你的接口地址")
         .doPost();
 ```
 返回回调监听器只有一个，请在其中对 error 参数判空，若 error 不为空，则为请求失败，反之则为请求成功，请求成功后的数据存放在 response 参数中。
+
 之所以将请求成功与失败放在一个回调中主要目的是方便无论请求成功或失败都需要执行的代码，例如上述代码中的 progressDialog 等待对话框都需要关闭（dismiss掉），这样的写法更为方便。
 
 ## Json请求
 有时候我们需要使用已经处理好的json文本作为请求参数，此时可以使用 HttpRequest.JSONPOST(...) 方法创建 json 请求。
+
 json 请求中，参数为文本类型，创建请求方式如下：
 ```
 progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
@@ -133,7 +136,9 @@ Json请求只能以 POST 的方式进行，如果执行doGet(); 方法也会以 
 
 ## 文件上传
 要使用文件上传就需要将 File 类型的文件作为参数传入 Parameter，此时参数中亦可以传入其他文本类型的参数。
+
 一旦参数传入文件，请求必然为 POST 类型，即便调用了 HttpRequest.GET(...) 也会当作 POST 类型的请求发出。
+
 范例代码如下：
 ```
 progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
@@ -185,6 +190,7 @@ HttpRequest.build(context,"http://你的接口地址")
 BaseOkHttp.DEBUGMODE = true;
 ```
 BaseOkHttp V3支持增强型日志，使用输出日志内容是 json 字符串时，会自动格式化输出，方便查看。
+
 ![BaseOkHttp Logs](https://github.com/kongzue/Res/raw/master/app/src/main/res/mipmap-xxxhdpi/img_okhttp_logs.png)
 
 在您使用 BaseOkHttp 时可以在 Logcat 的筛选中使用字符 “>>>” 对日志进行筛选（Logcat日志界面上方右侧的搜索输入框）。
@@ -243,6 +249,7 @@ BaseOkHttp.SSLInAssetsFileName = "ssl.crt";
 
 ### 全局参数拦截器
 使用如下代码可以设置全局参数监听拦截器，此参数拦截器可以拦截并修改、新增所有请求携带的参数。
+
 此方法亦适用于需要对参数进行加密的场景：
 ```
 BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener() {
@@ -284,6 +291,7 @@ limitations under the License.
 ```
 
 本项目中使用的网络请求底层框架为square.okHttp3(https://github.com/square/okhttp )，感谢其为开源做出的贡献。
+
 相关协议如下：
 ```
 Licensed under the Apache License, Version 2.0 (the "License");
