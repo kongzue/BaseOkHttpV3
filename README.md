@@ -203,7 +203,7 @@ application/atom+xml  | Atom XML聚合格式
 application/json    |  JSON数据格式
 application/pdf       | pdf格式
 application/msword  |  Word文档格式
-application/octet-stream | 二进制流数据（如常见的文件下载）
+application/octet-stream | 二进制流数据
 multipart/form-data | 表单数据
 
 ## 额外功能
