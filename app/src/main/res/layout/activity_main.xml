@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="测试标准Http请求"
+            android:textSize="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="请求代码："
+            android:textSize="12dp" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/request_code"
+                android:background="#64000000"
+                android:padding="5dp"
+                android:textColor="#fff"
+                android:textIsSelectable="true"
+                android:textSize="12dp"
+                android:typeface="monospace" />
+
+        </HorizontalScrollView>
+
+        <Button
+            android:id="@+id/btn_http"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开始"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="返回结果："
+            android:textSize="12dp" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/result_http"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="#64000000"
+                android:padding="5dp"
+                android:textColor="#fff"
+                android:textIsSelectable="true"
+                android:textSize="12dp"
+                android:typeface="monospace" />
+
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+</RelativeLayout>
