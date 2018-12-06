@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.0-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.0.1-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp/3.0.0/link">
-<img src="https://img.shields.io/badge/Maven-3.0.0-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.1/link">
+<img src="https://img.shields.io/badge/Maven-3.0.1-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.0'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.1'
 ```
 
 试用版可以前往 http://fir.im/BaseOkHttp 下载
@@ -52,17 +52,19 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.0'
 
 ···· <a href="#全局请求地址">全局请求地址</a>
 
-···· <a href="#全局 Header 请求头">全局 Header 请求头</a>
+···· <a href="#全局-Header-请求头">全局 Header 请求头</a>
 
 ···· <a href="#全局请求返回拦截器">全局请求返回拦截器</a>
 
-···· <a href="#HTTPS 支持">HTTPS 支持</a>
+···· <a href="#HTTPS-支持">HTTPS 支持</a>
 
 ···· <a href="#全局参数拦截器">全局参数拦截器</a>
 
 ···· <a href="#请求超时">请求超时</a>
 
 · <a href="#开源协议">开源协议</a>
+
+· <a href="#更新日志">更新日志</a>
 
 ## 一般请求
 BaseOkHttp V3 提供两种请求写法，范例如下：
@@ -355,3 +357,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+## 更新日志
+v3.0.1：
+- 修复了一些bug；
