@@ -20,6 +20,10 @@ public class JsonFormat {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
     
     public static boolean formatJson(String msg) {
+        return formatJson(msg, 0);
+    }
+    
+    public static boolean formatJson(String msg, int e) {
         if (!DEBUGMODE) return false;
         String message;
         try {
@@ -32,15 +36,18 @@ public class JsonFormat {
             } else {
                 return false;
             }
-        } catch (JSONException e) {
+        } catch (JSONException err) {
             return false;
         }
         
         String[] lines = message.split(LINE_SEPARATOR);
         for (String line : lines) {
-            Log.i(">>>>>>", line);
+            if (e==0){
+                Log.i(">>>>>>", line);
+            }else{
+                Log.e(">>>>>>", line);
+            }
         }
         return true;
     }
-    
 }

@@ -7,6 +7,7 @@ import android.util.Log;
 import com.kongzue.baseokhttp.exceptions.NetworkErrorException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
 import com.kongzue.baseokhttp.listener.ResponseListener;
+import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.JsonFormat;
 import com.kongzue.baseokhttp.util.Parameter;
 
@@ -156,7 +157,15 @@ public class HttpRequest {
             }
             
             if (SSLInAssetsFileName == null || SSLInAssetsFileName.isEmpty()) {
-                okHttpClient = new OkHttpClient();
+                okHttpClient = new OkHttpClient.Builder()
+                        .connectTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
+                        .hostnameVerifier(new HostnameVerifier() {
+                            @Override
+                            public boolean verify(String hostname, SSLSession session) {
+                                return true;
+                            }
+                        })
+                        .build();
             } else {
                 okHttpClient = getOkHttpClient(context, context.getAssets().open(SSLInAssetsFileName));
             }
@@ -221,14 +230,17 @@ public class HttpRequest {
             }
             
             //请求头处理
+            if (DEBUGMODE) Log.i(">>>", "添加请求头:");
             if (overallHeader != null && !overallHeader.entrySet().isEmpty()) {
                 for (Map.Entry<String, Object> entry : overallHeader.entrySet()) {
                     builder.addHeader(entry.getKey(), entry.getValue() + "");
+                    if (DEBUGMODE) Log.i(">>>>>>", entry.getKey() + "=" + entry.getValue());
                 }
             }
             if (headers != null && !headers.entrySet().isEmpty()) {
                 for (Map.Entry<String, Object> entry : headers.entrySet()) {
                     builder.addHeader(entry.getKey(), entry.getValue() + "");
+                    if (DEBUGMODE) Log.i(">>>>>>", entry.getKey() + "=" + entry.getValue());
                 }
             }
             
@@ -237,7 +249,14 @@ public class HttpRequest {
             if (DEBUGMODE) {
                 Log.i(">>>", "-------------------------------------");
                 Log.i(">>>", "创建请求:" + url);
-                Log.i(">>>", "参数:" + (requestType == POST_JSON ? jsonParameter : parameter.toParameterString()));
+                Log.i(">>>", "参数:");
+                if (requestType == POST_JSON) {
+                    if (!JsonFormat.formatJson(jsonParameter)){
+                        Log.i(">>>>>>", jsonParameter);
+                    }
+                }else{
+                    parameter.toPrintString();
+                }
                 Log.i(">>>", "请求已发送 ->");
             }
             
@@ -250,7 +269,14 @@ public class HttpRequest {
                     isSending = false;
                     if (DEBUGMODE) {
                         Log.e(">>>", "请求失败:" + url);
-                        Log.e(">>>", "参数:" + (requestType == POST_JSON ? jsonParameter : parameter.toParameterString()));
+                        Log.e(">>>", "参数:");
+                        if (requestType == POST_JSON) {
+                            if (!JsonFormat.formatJson(jsonParameter,1)){
+                                Log.e(">>>>>>", jsonParameter);
+                            }
+                        }else{
+                            parameter.toPrintString(1);
+                        }
                         Log.e(">>>", "错误:" + e.toString());
                         Log.e(">>>", "=====================================");
                     }
@@ -291,7 +317,14 @@ public class HttpRequest {
                     final String strResponse = response.body().string();
                     if (DEBUGMODE) {
                         Log.i(">>>", "请求成功:" + url);
-                        Log.i(">>>", "参数:" + (requestType == POST_JSON ? jsonParameter : parameter.toParameterString()));
+                        Log.i(">>>", "参数:");
+                        if (requestType == POST_JSON) {
+                            if (!JsonFormat.formatJson(jsonParameter)){
+                                Log.i(">>>>>>", jsonParameter);
+                            }
+                        }else{
+                            parameter.toPrintString();
+                        }
                         Log.i(">>>", "返回内容:");
                         if (!JsonFormat.formatJson(strResponse)) {
                             Log.i(">>>", strResponse);
@@ -328,7 +361,14 @@ public class HttpRequest {
         } catch (Exception e) {
             if (DEBUGMODE) {
                 Log.e(">>>", "请求创建失败:" + url);
-                Log.e(">>>", "参数:" + (requestType == POST_JSON ? jsonParameter : parameter.toParameterString()));
+                Log.e(">>>", "参数:");
+                if (requestType == POST_JSON) {
+                    if (!JsonFormat.formatJson(jsonParameter,1)){
+                        Log.e(">>>>>>", jsonParameter);
+                    }
+                }else{
+                    parameter.toPrintString(1);
+                }
                 Log.e(">>>", "错误:" + e.toString());
                 e.printStackTrace();
                 Log.e(">>>", "=====================================");
@@ -368,9 +408,9 @@ public class HttpRequest {
             File sdcache = context.getExternalCacheDir();
             int cacheSize = 10 * 1024 * 1024;
             OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                    .connectTimeout(20, TimeUnit.SECONDS)
-                    .writeTimeout(20, TimeUnit.SECONDS)
-                    .readTimeout(20, TimeUnit.SECONDS)
+                    .connectTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
+                    .writeTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
+                    .readTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
                     .hostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(String hostname, SSLSession session) {

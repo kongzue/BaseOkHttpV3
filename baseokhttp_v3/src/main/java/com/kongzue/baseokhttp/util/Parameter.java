@@ -4,6 +4,8 @@ package com.kongzue.baseokhttp.util;
  * Created by myzcx on 2018/1/22.
  */
 
+import android.util.Log;
+
 import org.json.JSONObject;
 
 import java.io.File;
@@ -11,6 +13,8 @@ import java.util.TreeMap;
 
 import baseokhttp3.FormBody;
 import baseokhttp3.RequestBody;
+
+import static com.kongzue.baseokhttp.util.BaseOkHttp.DEBUGMODE;
 
 public class Parameter extends TreeMap<String, Object> {
     
@@ -38,6 +42,22 @@ public class Parameter extends TreeMap<String, Object> {
             }
         }
         return result;
+    }
+    
+    public void toPrintString() {
+        toPrintString(0);
+    }
+    
+    public void toPrintString(int e) {
+        if (!entrySet().isEmpty()) {
+            for (Entry<String, Object> entry : entrySet()) {
+                if (e == 0) {
+                    Log.i(">>>>>>", entry.getKey() + "=" + entry.getValue());
+                } else {
+                    Log.e(">>>>>>", entry.getKey() + "=" + entry.getValue());
+                }
+            }
+        }
     }
     
     public RequestBody toOkHttpParameter() {

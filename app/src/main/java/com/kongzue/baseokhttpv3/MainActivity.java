@@ -2,6 +2,7 @@ package com.kongzue.baseokhttpv3;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,8 +17,6 @@ import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.Parameter;
-
-import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     
@@ -119,10 +118,10 @@ public class MainActivity extends AppCompatActivity {
 //                            }
 //                        })
 //                        .doPost();
-                
+
 //                File file1 = new File("");
 //                File file2 = new File("");
-                
+
 //                progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
 //                HttpRequest.POST(context, "/femaleNameApi", new Parameter()
 //                                         .add("key", "DFG1H56EH5JN3DFA")
@@ -140,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 //                                }
 //                            }
 //                        });
-    
+
 //                HttpRequest.build(context,"/femaleNameApi")
 //                        .addHeaders("Charset", "UTF-8")
 //                        .addParameter("page", "1")
@@ -159,7 +158,9 @@ public class MainActivity extends AppCompatActivity {
 //                            }
 //                        })
 //                        .doPost();
+            
             }
         });
     }
+    
 }
