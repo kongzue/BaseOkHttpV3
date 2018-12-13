@@ -96,7 +96,7 @@ public class HttpRequest {
             httpRequest.listener = listener;
             httpRequest.jsonParameter = jsonParameter;
             httpRequest.url = url;
-            httpRequest.requestType = POST_JSON;
+            httpRequest.requestType = POST_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
         }
@@ -122,17 +122,63 @@ public class HttpRequest {
         }
     }
     
+    //PUT一步创建方法
+    public static void PUT(Context context, String url, Parameter parameter, ResponseListener listener) {
+        PUT(context, url, null, parameter, listener);
+    }
+    
+    //PUT一步创建总方法
+    public static void PUT(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener) {
+        synchronized (HttpRequest.class) {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.context = context;
+            httpRequest.headers = headers;
+            httpRequest.listener = listener;
+            httpRequest.parameter = parameter;
+            httpRequest.url = url;
+            httpRequest.requestType = PUT_REQUEST;
+            httpRequest.httpRequest = httpRequest;
+            httpRequest.send();
+        }
+    }
+    
+    //DELETE一步创建方法
+    public static void DELETE(Context context, String url, Parameter parameter, ResponseListener listener) {
+        DELETE(context, url, null, parameter, listener);
+    }
+    
+    //PUT一步创建总方法
+    public static void DELETE(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener) {
+        synchronized (HttpRequest.class) {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.context = context;
+            httpRequest.headers = headers;
+            httpRequest.listener = listener;
+            httpRequest.parameter = parameter;
+            httpRequest.url = url;
+            httpRequest.requestType = DELETE_REQUEST;
+            httpRequest.httpRequest = httpRequest;
+            httpRequest.send();
+        }
+    }
+    
+    private boolean isFileRequest = false;
+    private boolean isJsonRequest = false;
+    
     private void send() {
+        isFileRequest = false;
+        isJsonRequest = false;
+        
         if (parameter != null && !parameter.entrySet().isEmpty()) {
             for (Map.Entry<String, Object> entry : parameter.entrySet()) {
                 if (entry.getValue() instanceof File) {
-                    requestType = POST_FILE;
+                    isFileRequest = true;
                     break;
                 }
             }
         }
         if (!isNull(jsonParameter)) {
-            requestType = POST_JSON;
+            isJsonRequest = true;
         }
         try {
             //全局参数拦截处理
@@ -172,60 +218,64 @@ public class HttpRequest {
             
             //创建请求
             baseokhttp3.Request request;
-            baseokhttp3.Request.Builder builder = new Request.Builder();
+            baseokhttp3.Request.Builder builder = new baseokhttp3.Request.Builder();
             
+            if (parameter == null) parameter = new Parameter();
+            RequestBody requestBody = null;
+            
+            if (isFileRequest) {
+                MultipartBody.Builder multipartBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+                
+                if (parameter != null && !parameter.entrySet().isEmpty()) {
+                    for (Map.Entry<String, Object> entry : parameter.entrySet()) {
+                        if (entry.getValue() instanceof File) {
+                            File file = (File) entry.getValue();
+                            multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
+                            if (DEBUGMODE)
+                                Log.i(">>>", "添加图片：" + entry.getKey() + ":" + file.getName());
+                        } else {
+                            multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
+                        }
+                    }
+                } else {
+                    if (DEBUGMODE) {
+                        Log.e(">>>", "-------------------------------------");
+                        Log.e(">>>", "创建请求失败:无上传的文件");
+                        Log.e(">>>", "=====================================");
+                    }
+                    return;
+                }
+                requestBody = multipartBuilder.build();
+            } else if (isJsonRequest) {
+                if (isNull(jsonParameter)) {
+                    if (DEBUGMODE) {
+                        Log.e(">>>", "-------------------------------------");
+                        Log.e(">>>", "创建请求失败:" + jsonParameter + " 不是正确的json格式参数");
+                        Log.e(">>>", "=====================================");
+                    }
+                    return;
+                }
+                requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter);
+            } else {
+                requestBody = parameter.toOkHttpParameter();
+            }
+            
+            //请求类型处理
             switch (requestType) {
-                case POST_JSON:
-                    if (isNull(jsonParameter)) {
-                        if (DEBUGMODE) {
-                            Log.e(">>>", "-------------------------------------");
-                            Log.e(">>>", "创建请求失败:" + jsonParameter + " 不是正确的json格式参数");
-                            Log.e(">>>", "=====================================");
-                        }
-                        return;
-                    }
-                    RequestBody jsonRequestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter);
-                    builder.url(url);
-                    builder.post(jsonRequestBody);
+                case GET_REQUEST:               //GET
+                    builder.url(url + "?" + parameter.toParameterString());
                     break;
-                case POST_FILE:
-                    MultipartBody.Builder multipartBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-                    
-                    if (parameter != null && !parameter.entrySet().isEmpty()) {
-                        for (Map.Entry<String, Object> entry : parameter.entrySet()) {
-                            if (entry.getValue() instanceof File) {
-                                File file = (File) entry.getValue();
-                                multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
-                                if (DEBUGMODE)
-                                    Log.i(">>>", "添加图片：" + entry.getKey() + ":" + file.getName());
-                            } else {
-                                multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
-                            }
-                        }
-                    } else {
-                        if (DEBUGMODE) {
-                            Log.e(">>>", "-------------------------------------");
-                            Log.e(">>>", "创建请求失败:无上传的文件");
-                            Log.e(">>>", "=====================================");
-                        }
-                        return;
-                    }
-                    MultipartBody multipartRequestBody = multipartBuilder.build();
+                case PUT_REQUEST:               //PUT
                     builder.url(url);
-                    builder.post(multipartRequestBody);
+                    builder.put(requestBody);
                     break;
-                default:
-                    if (parameter == null) parameter = new Parameter();
-                    builder = new baseokhttp3.Request.Builder();
-                    RequestBody requestBody = parameter.toOkHttpParameter();
-                    
-                    //请求类型处理
-                    if (requestType == GET_REQUEST) {
-                        builder.url(url + "?" + parameter.toParameterString());
-                    } else {
-                        builder.url(url);
-                        builder.post(requestBody);
-                    }
+                case DELETE_REQUEST:            //DELETE
+                    builder.url(url);
+                    builder.delete(requestBody);
+                    break;
+                default:                        //POST
+                    builder.url(url);
+                    builder.post(requestBody);
                     break;
             }
             
@@ -250,11 +300,11 @@ public class HttpRequest {
                 Log.i(">>>", "-------------------------------------");
                 Log.i(">>>", "创建请求:" + url);
                 Log.i(">>>", "参数:");
-                if (requestType == POST_JSON) {
-                    if (!JsonFormat.formatJson(jsonParameter)){
+                if (isJsonRequest) {
+                    if (!JsonFormat.formatJson(jsonParameter)) {
                         Log.i(">>>>>>", jsonParameter);
                     }
-                }else{
+                } else {
                     parameter.toPrintString();
                 }
                 Log.i(">>>", "请求已发送 ->");
@@ -270,11 +320,11 @@ public class HttpRequest {
                     if (DEBUGMODE) {
                         Log.e(">>>", "请求失败:" + url);
                         Log.e(">>>", "参数:");
-                        if (requestType == POST_JSON) {
-                            if (!JsonFormat.formatJson(jsonParameter,1)){
+                        if (isJsonRequest) {
+                            if (!JsonFormat.formatJson(jsonParameter, 1)) {
                                 Log.e(">>>>>>", jsonParameter);
                             }
-                        }else{
+                        } else {
                             parameter.toPrintString(1);
                         }
                         Log.e(">>>", "错误:" + e.toString());
@@ -318,11 +368,11 @@ public class HttpRequest {
                     if (DEBUGMODE) {
                         Log.i(">>>", "请求成功:" + url);
                         Log.i(">>>", "参数:");
-                        if (requestType == POST_JSON) {
-                            if (!JsonFormat.formatJson(jsonParameter)){
+                        if (isJsonRequest) {
+                            if (!JsonFormat.formatJson(jsonParameter)) {
                                 Log.i(">>>>>>", jsonParameter);
                             }
-                        }else{
+                        } else {
                             parameter.toPrintString();
                         }
                         Log.i(">>>", "返回内容:");
@@ -362,11 +412,11 @@ public class HttpRequest {
             if (DEBUGMODE) {
                 Log.e(">>>", "请求创建失败:" + url);
                 Log.e(">>>", "参数:");
-                if (requestType == POST_JSON) {
-                    if (!JsonFormat.formatJson(jsonParameter,1)){
+                if (isJsonRequest) {
+                    if (!JsonFormat.formatJson(jsonParameter, 1)) {
                         Log.e(">>>>>>", jsonParameter);
                     }
-                }else{
+                } else {
                     parameter.toPrintString(1);
                 }
                 Log.e(">>>", "错误:" + e.toString());
@@ -528,16 +578,24 @@ public class HttpRequest {
         return this;
     }
     
-    public HttpRequest doPost() {
+    public void doPost() {
         send();
         requestType = POST_REQUEST;
-        return this;
     }
     
-    public HttpRequest doGet() {
+    public void doGet() {
         send();
         requestType = GET_REQUEST;
-        return this;
+    }
+    
+    public void doDelete() {
+        send();
+        requestType = DELETE_REQUEST;
+    }
+    
+    public void doPut() {
+        send();
+        requestType = PUT_REQUEST;
     }
     
     public HttpRequest setMediaType(MediaType mediaType) {

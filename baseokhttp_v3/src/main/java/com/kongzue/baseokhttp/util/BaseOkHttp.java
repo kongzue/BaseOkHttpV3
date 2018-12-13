@@ -15,8 +15,8 @@ public class BaseOkHttp {
     //请求类型
     public static final int POST_REQUEST = 0;       //普通POST
     public static final int GET_REQUEST = 1;        //普通GET
-    public static final int POST_JSON = 2;          //Json参数的POST
-    public static final int POST_FILE = 3;          //文件类型的POST
+    public static final int PUT_REQUEST = 2;
+    public static final int DELETE_REQUEST = 3;
     
     //是否开启调试模式
     public static boolean DEBUGMODE = false;

@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.2-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.0.3-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.2/link">
-<img src="https://img.shields.io/badge/Maven-3.0.2-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.3/link">
+<img src="https://img.shields.io/badge/Maven-3.0.3-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.2</version>
+  <version>3.0.3</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.2'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.3'
 ```
 
 试用版可以前往 http://fir.im/BaseOkHttp 下载
@@ -45,6 +45,8 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.2'
 · <a href="#Json请求">Json请求</a>
 
 · <a href="#文件上传">文件上传</a>
+
+· <a href="#PUT&DELETE">PUT&DELETE</a>
 
 · <a href="#额外功能">额外功能</a>
 
@@ -159,12 +161,12 @@ HttpRequest.build(context,"http://你的接口地址")
         })
         .doPost();
 ```
-Json请求只能以 POST 的方式进行，如果执行doGet(); 方法也会以 POST 的方式发出。
+因需要封装请求体，Json请求只能以非 GET 请求的方式进行。
 
 ## 文件上传
 要使用文件上传就需要将 File 类型的文件作为参数传入 Parameter，此时参数中亦可以传入其他文本类型的参数。
 
-一旦参数传入文件，请求必然为 POST 类型，即便调用了 HttpRequest.GET(...) 也会当作 POST 类型的请求发出。
+因需要封装请求体，文件上传只能以非 GET 请求的形式发送。
 
 范例代码如下：
 ```
@@ -232,6 +234,30 @@ application/pdf       | pdf格式
 application/msword  |  Word文档格式
 application/octet-stream | 二进制流数据
 multipart/form-data | 表单数据
+
+## PUT&DELETE
+从 3.0.3 版本起新增了 PUT 和 DELETE 请求方式，使用方法和一般请求一致，可以通过以下两种方法创建：
+```
+//PUT 请求：
+HttpRequest.PUT(context, "http://你的接口地址", new Parameter().add("page", "1"), new ResponseListener() {...});
+//DELETE 请求：
+HttpRequest.DELETE(context, "http://你的接口地址", new Parameter().add("page", "1"), new ResponseListener() {...});
+```
+也可适用流式代码创建：
+```
+HttpRequest.build(context,"http://你的接口地址")
+        .addHeaders("Charset", "UTF-8")
+        .addParameter("page", "1")
+        .addParameter("token", "A128")
+        .setResponseListener(new ResponseListener() {
+            @Override
+            public void onResponse(String response, Exception error) {
+                ...
+            }
+        })
+        .doPut();
+        //.doDelete();
+```
 
 ## 额外功能
 
@@ -359,6 +385,10 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.0.3：
+- 新增 put、delete 请求方法；
+- 完善了请求的创建逻辑；
+
 v3.0.2：
 - 日志新增打印请求头；
 - 日志请求参数打印增强；
