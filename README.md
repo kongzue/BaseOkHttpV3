@@ -46,7 +46,7 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.3'
 
 · <a href="#文件上传">文件上传</a>
 
-· <a href="#PUT&DELETE">PUT&DELETE</a>
+· <a href="#putdelete">PUT&DELETE</a>
 
 · <a href="#额外功能">额外功能</a>
 
