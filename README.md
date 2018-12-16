@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.3-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.0.4-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.3/link">
-<img src="https://img.shields.io/badge/Maven-3.0.3-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.4/link">
+<img src="https://img.shields.io/badge/Maven-3.0.4-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.3</version>
+  <version>3.0.4</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.3'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.4'
 ```
 
 试用版可以前往 http://fir.im/BaseOkHttp 下载
@@ -385,6 +385,10 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.0.4：
+- 默认禁止了网络环境差的重复请求；
+- 修复其他请求无法正常执行的 bug；
+
 v3.0.3：
 - 新增 put、delete 请求方法；
 - 完善了请求的创建逻辑；

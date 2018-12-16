@@ -204,6 +204,7 @@ public class HttpRequest {
             
             if (SSLInAssetsFileName == null || SSLInAssetsFileName.isEmpty()) {
                 okHttpClient = new OkHttpClient.Builder()
+                        .retryOnConnectionFailure(false)
                         .connectTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
                         .hostnameVerifier(new HostnameVerifier() {
                             @Override
@@ -458,6 +459,7 @@ public class HttpRequest {
             File sdcache = context.getExternalCacheDir();
             int cacheSize = 10 * 1024 * 1024;
             OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                    .retryOnConnectionFailure(false)
                     .connectTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
                     .writeTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
                     .readTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
@@ -579,23 +581,23 @@ public class HttpRequest {
     }
     
     public void doPost() {
-        send();
         requestType = POST_REQUEST;
+        send();
     }
     
     public void doGet() {
-        send();
         requestType = GET_REQUEST;
+        send();
     }
     
     public void doDelete() {
-        send();
         requestType = DELETE_REQUEST;
+        send();
     }
     
     public void doPut() {
-        send();
         requestType = PUT_REQUEST;
+        send();
     }
     
     public HttpRequest setMediaType(MediaType mediaType) {
