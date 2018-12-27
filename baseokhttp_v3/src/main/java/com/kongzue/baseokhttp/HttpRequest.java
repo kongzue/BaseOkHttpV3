@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
-import com.kongzue.baseokhttp.exceptions.NetworkErrorException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
@@ -164,6 +163,7 @@ public class HttpRequest {
     
     private boolean isFileRequest = false;
     private boolean isJsonRequest = false;
+    private boolean skipSSLCheck = false;
     
     private void send() {
         isFileRequest = false;
@@ -202,7 +202,9 @@ public class HttpRequest {
                 Log.e(">>>", "=====================================");
             }
             
-            if (SSLInAssetsFileName == null || SSLInAssetsFileName.isEmpty()) {
+            if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
+                okHttpClient = getOkHttpClient(context, context.getAssets().open(SSLInAssetsFileName));
+            } else {
                 okHttpClient = new OkHttpClient.Builder()
                         .retryOnConnectionFailure(false)
                         .connectTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
@@ -213,8 +215,6 @@ public class HttpRequest {
                             }
                         })
                         .build();
-            } else {
-                okHttpClient = getOkHttpClient(context, context.getAssets().open(SSLInAssetsFileName));
             }
             
             //创建请求
@@ -337,25 +337,25 @@ public class HttpRequest {
                             @Override
                             public void run() {
                                 if (responseInterceptListener != null) {
-                                    if (responseInterceptListener.onResponse(context, url, null, new NetworkErrorException())) {
+                                    if (responseInterceptListener.onResponse(context, url, null, e)) {
                                         if (listener != null)
-                                            listener.onResponse(null, new NetworkErrorException());
+                                            listener.onResponse(null, e);
                                     }
                                 } else {
                                     if (listener != null)
-                                        listener.onResponse(null, new NetworkErrorException());
+                                        listener.onResponse(null, e);
                                 }
                             }
                         });
                     } else {
                         if (responseInterceptListener != null) {
-                            if (responseInterceptListener.onResponse(context, url, null, new NetworkErrorException())) {
+                            if (responseInterceptListener.onResponse(context, url, null, e)) {
                                 if (listener != null)
-                                    listener.onResponse(null, new NetworkErrorException());
+                                    listener.onResponse(null, e);
                             }
                         } else {
                             if (listener != null)
-                                listener.onResponse(null, new NetworkErrorException());
+                                listener.onResponse(null, e);
                         }
                     }
                     
@@ -602,6 +602,11 @@ public class HttpRequest {
     
     public HttpRequest setMediaType(MediaType mediaType) {
         MEDIA_TYPE = mediaType;
+        return this;
+    }
+    
+    public HttpRequest skipSSLCheck() {
+        skipSSLCheck = true;
         return this;
     }
 }
