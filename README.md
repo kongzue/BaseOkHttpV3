@@ -37,6 +37,8 @@ Gradle：
 implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.6'
 ```
 
+![BaseOkHttpV3 Demo](https://github.com/kongzue/Res/raw/master/app/src/main/res/mipmap-xxxhdpi/baseokhttpv3demo.png)
+
 试用版可以前往 https://fir.im/BaseOkHttp3 下载
 
 ## 目录
