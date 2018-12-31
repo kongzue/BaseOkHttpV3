@@ -38,7 +38,7 @@ import static baseokhttp3.internal.ws.WebSocketProtocol.toggleMask;
 import static baseokhttp3.internal.ws.WebSocketProtocol.validateCloseCode;
 
 /**
- * An <a href="http://tools.ietf.org/html/rfc6455">RFC 6455</a>-compatible WebSocket frame writer.
+ * An <a href="http://tools.ietf.org/html/rfc6455">RFC 6455</a>-compatible BaseWebSocket frame writer.
  *
  * <p>This class is not thread safe.
  */

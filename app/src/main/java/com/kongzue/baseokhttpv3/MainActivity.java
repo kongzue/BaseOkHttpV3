@@ -8,22 +8,36 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
+import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.Parameter;
 
+import baseokhttp3.Response;
+import baseokio.ByteString;
+
 public class MainActivity extends AppCompatActivity {
+    
+    private Context context;
+    private ProgressDialog progressDialog;
     
     private Button btnHttp;
     private TextView resultHttp;
-    private Context context;
-    private ProgressDialog progressDialog;
+    private Button btnConnect;
+    private Button btnDisconnect;
+    private EditText editSend;
+    private Button btnSend;
+    private TextView resultWebsocket;
+    
+    private BaseWebSocket baseWebSocket;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +45,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         
         context = this;
-        
+    
         btnHttp = findViewById(R.id.btn_http);
         resultHttp = findViewById(R.id.result_http);
+        btnConnect = findViewById(R.id.btn_connect);
+        btnDisconnect = findViewById(R.id.btn_disconnect);
+        editSend = findViewById(R.id.edit_send);
+        btnSend = findViewById(R.id.btn_send);
+        resultWebsocket = findViewById(R.id.result_websocket);
         
         BaseOkHttp.DEBUGMODE = true;
         BaseOkHttp.serviceUrl = "https://www.apiopen.top";
@@ -161,6 +180,87 @@ public class MainActivity extends AppCompatActivity {
             
             }
         });
+        
+        btnConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resultWebsocket.setText("开始连接...");
+                btnConnect.setEnabled(false);
+                baseWebSocket = BaseWebSocket.BUILD(MainActivity.this,"wss://echo.websocket.org")
+                        .setWebSocketStatusListener(new WebSocketStatusListener() {
+                            @Override
+                            public void connected(Response response) {
+                                resultWebsocket.setText("已连接");
+                                btnDisconnect.setEnabled(true);
+                                btnConnect.setEnabled(false);
+                                editSend.setEnabled(true);
+                                btnSend.setEnabled(true);
+                            }
+                
+                            @Override
+                            public void onMessage(String message) {
+                                resultWebsocket.setText("收到返回消息："+message);
+                            }
+                
+                            @Override
+                            public void onMessage(ByteString message) {
+                    
+                            }
+                
+                            @Override
+                            public void onReconnect() {
+                                resultWebsocket.setText("正在重连");
+                                btnDisconnect.setEnabled(true);
+                                btnConnect.setEnabled(false);
+                                editSend.setEnabled(false);
+                                btnSend.setEnabled(false);
+                            }
+                
+                            @Override
+                            public void onDisconnected(int breakStatus) {
+                                resultWebsocket.setText("已断开连接");
+                                btnDisconnect.setEnabled(false);
+                                btnConnect.setEnabled(true);
+                                editSend.setEnabled(false);
+                                btnSend.setEnabled(false);
+                            }
+                
+                            @Override
+                            public void onConnectionFailed(Throwable t) {
+                                resultWebsocket.setText("连接失败");
+                                btnDisconnect.setEnabled(false);
+                                btnConnect.setEnabled(true);
+                                editSend.setEnabled(false);
+                                btnSend.setEnabled(false);
+                                t.printStackTrace();
+                            }
+                        })
+                        .startConnect();
+            }
+        });
+    
+        btnDisconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (baseWebSocket!=null)baseWebSocket.disConnect();
+            }
+        });
+        
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String s = editSend.getText().toString().trim();
+                if (!s.isEmpty()){
+                    if (baseWebSocket!=null)baseWebSocket.send(s);
+                }
+            }
+        });
+        
     }
     
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (baseWebSocket!=null)baseWebSocket.disConnect();
+    }
 }

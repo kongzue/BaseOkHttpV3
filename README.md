@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.5.1-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.0.6-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.5.1/link">
-<img src="https://img.shields.io/badge/Maven-3.0.5.1-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.6/link">
+<img src="https://img.shields.io/badge/Maven-3.0.6-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.5.1</version>
+  <version>3.0.6</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.5.1'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.6'
 ```
 
 试用版可以前往 http://fir.im/BaseOkHttp 下载
@@ -42,11 +42,13 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.5.1'
 ## 目录
 · <a href="#一般请求">一般请求</a>
 
-· <a href="#Json请求">Json请求</a>
+· <a href="#json请求">Json请求</a>
 
 · <a href="#文件上传">文件上传</a>
 
 · <a href="#putdelete">PUT&DELETE</a>
+
+· <a href="#websocket">WebSocket</a>
 
 · <a href="#额外功能">额外功能</a>
 
@@ -259,6 +261,57 @@ HttpRequest.build(context,"http://你的接口地址")
         //.doDelete();
 ```
 
+## WebSocket
+从 3.0.6 版本起新增了 WebSocket 封装工具类 BaseWebSocket，用于快速实现 WebSocket 请求连接。
+
+请先前往 AndroidManifest.xml 中添加检查网络连接状态权限：
+```
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+```
+
+使用方法：
+```
+//通过 BUILD 方法获取 baseWebSocket 实例化对象，参数 context 为上下文索引，url 为 websocket服务器地址：
+baseWebSocket = BaseWebSocket.BUILD(context, url)
+        //实现监听方法
+        .setWebSocketStatusListener(new WebSocketStatusListener() {
+            @Override
+            public void connected(Response response) {
+                //连接上时触发
+            }
+            @Override
+            public void onMessage(String message) {
+                //处理收到的消息 message
+            }
+            @Override
+            public void onMessage(ByteString message) {
+            }
+            @Override
+            public void onReconnect() {
+                //重新连接时触发
+            }
+            @Override
+            public void onDisconnected(int breakStatus) {
+                //断开连接时触发，breakStatus 值为 BREAK_NORMAL 时为正常断开，值为 BREAK_ABNORMAL  时为异常断开
+            }
+            @Override
+            public void onConnectionFailed(Throwable t) {
+                //连接错误处理
+                t.printStackTrace();
+            }
+        })
+        .startConnect();        //开始连接
+
+//发送消息
+baseWebSocket.send("Test!");
+
+//断开连接
+baseWebSocket.disConnect();
+
+//重新连接
+baseWebSocket.reConnect();
+```
+
 ## 额外功能
 
 ### 全局日志
@@ -387,8 +440,10 @@ limitations under the License.
 ```
 
 ## 更新日志
-v3.0.5.1：
+v3.0.6：
+- 新增 BaseWebSocket 封装类，可快速实现 WebSocket 请求与连接。
 - （此版本为小更新）新增 StringPOST 请求方式，可以丢任意文本封装为请求体发送给服务端，MediaType 默认为“text/plain”；
+- 升级 OkHttp 底层框架至 3.9.1 版本；
 
 v3.0.5：
 - 新增了 skipSSLCheck() 方法用于临时忽略使用 HTTPS 证书；

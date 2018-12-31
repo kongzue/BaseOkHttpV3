@@ -45,4 +45,10 @@ public class BaseOkHttp {
     //全局参数
     public static Parameter overallParameter;
     
+    //WebSocket自动重连步长（单位：秒）
+    public static int websocketReconnectInterval = 10;
+    
+    //WebSocket最大重连间隔（单位：秒）
+    public static int websocketReconnectTime = 120;
+    
 }
