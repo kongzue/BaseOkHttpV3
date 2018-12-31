@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.5-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.0.5.1-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.5/link">
-<img src="https://img.shields.io/badge/Maven-3.0.5-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.5.1/link">
+<img src="https://img.shields.io/badge/Maven-3.0.5.1-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.5</version>
+  <version>3.0.5.1</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.5'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.5.1'
 ```
 
 试用版可以前往 http://fir.im/BaseOkHttp 下载
@@ -287,6 +287,8 @@ HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), ne
 ```
 那么实际请求地址即 https://www.example.com/femaleNameApi ，使用更加轻松方便。
 
+注意，设置全局请求地址后，若 HttpRequest 的请求参数地址为“http”开头，则不会拼接全局请求地址。
+
 ### 全局 Header 请求头
 使用如下代码设置全局 Header 请求头：
 ```
@@ -385,6 +387,9 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.0.5.1：
+- （此版本为小更新）新增 StringPOST 请求方式，可以丢任意文本封装为请求体发送给服务端，MediaType 默认为“text/plain”；
+
 v3.0.5：
 - 新增了 skipSSLCheck() 方法用于临时忽略使用 HTTPS 证书；
 - 删除了自定义异常 NetworkErrorException 的使用；

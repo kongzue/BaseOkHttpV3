@@ -57,6 +57,7 @@ public class HttpRequest {
     private ResponseListener listener;
     private String url;
     private String jsonParameter;
+    private String stringParameter;
     private int requestType;
     
     private boolean isSending;
@@ -94,6 +95,26 @@ public class HttpRequest {
             httpRequest.headers = headers;
             httpRequest.listener = listener;
             httpRequest.jsonParameter = jsonParameter;
+            httpRequest.url = url;
+            httpRequest.requestType = POST_REQUEST;
+            httpRequest.httpRequest = httpRequest;
+            httpRequest.send();
+        }
+    }
+    
+    //String文本POST一步创建方法
+    public static void StringPOST(Context context, String url, String stringParameter, ResponseListener listener) {
+        StringPOST(context, url, null, stringParameter, listener);
+    }
+    
+    //String文本POST一步创建总方法
+    public static void StringPOST(Context context, String url, Parameter headers, String stringParameter, ResponseListener listener) {
+        synchronized (HttpRequest.class) {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.context = context;
+            httpRequest.headers = headers;
+            httpRequest.listener = listener;
+            httpRequest.stringParameter = stringParameter;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
             httpRequest.httpRequest = httpRequest;
@@ -163,11 +184,13 @@ public class HttpRequest {
     
     private boolean isFileRequest = false;
     private boolean isJsonRequest = false;
+    private boolean isStringRequest = false;
     private boolean skipSSLCheck = false;
     
     private void send() {
         isFileRequest = false;
         isJsonRequest = false;
+        isStringRequest = false;
         
         if (parameter != null && !parameter.entrySet().isEmpty()) {
             for (Map.Entry<String, Object> entry : parameter.entrySet()) {
@@ -179,7 +202,13 @@ public class HttpRequest {
         }
         if (!isNull(jsonParameter)) {
             isJsonRequest = true;
+            isStringRequest = false;
         }
+        if (!isNull(stringParameter)) {
+            isStringRequest = true;
+            isJsonRequest = false;
+        }
+        
         try {
             //全局参数拦截处理
             if (parameterInterceptListener != null) {
@@ -257,6 +286,16 @@ public class HttpRequest {
                     return;
                 }
                 requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter);
+            } else if (isStringRequest) {
+                if (isNull(stringParameter)) {
+                    if (DEBUGMODE) {
+                        Log.e(">>>", "-------------------------------------");
+                        Log.e(">>>", "创建请求失败:" + stringParameter);
+                        Log.e(">>>", "=====================================");
+                    }
+                    return;
+                }
+                requestBody = RequestBody.create(MediaType.parse("text/plain; charset=utf-8"), stringParameter);
             } else {
                 requestBody = parameter.toOkHttpParameter();
             }
@@ -305,6 +344,8 @@ public class HttpRequest {
                     if (!JsonFormat.formatJson(jsonParameter)) {
                         Log.i(">>>>>>", jsonParameter);
                     }
+                } else if (isStringRequest) {
+                    Log.i(">>>>>>", stringParameter);
                 } else {
                     parameter.toPrintString();
                 }
@@ -325,6 +366,8 @@ public class HttpRequest {
                             if (!JsonFormat.formatJson(jsonParameter, 1)) {
                                 Log.e(">>>>>>", jsonParameter);
                             }
+                        } else if (isStringRequest) {
+                            Log.i(">>>>>>", stringParameter);
                         } else {
                             parameter.toPrintString(1);
                         }
@@ -373,6 +416,8 @@ public class HttpRequest {
                             if (!JsonFormat.formatJson(jsonParameter)) {
                                 Log.i(">>>>>>", jsonParameter);
                             }
+                        } else if (isStringRequest) {
+                            Log.i(">>>>>>", stringParameter);
                         } else {
                             parameter.toPrintString();
                         }
@@ -416,6 +461,8 @@ public class HttpRequest {
                 if (isJsonRequest) {
                     if (!JsonFormat.formatJson(jsonParameter, 1)) {
                         Log.e(">>>>>>", jsonParameter);
+                    } else if (isStringRequest) {
+                        Log.i(">>>>>>", stringParameter);
                     }
                 } else {
                     parameter.toPrintString(1);
@@ -539,17 +586,19 @@ public class HttpRequest {
         if (parameter == null) parameter = new Parameter();
         parameter.add(key, value);
         this.jsonParameter = null;
+        this.stringParameter = null;
         return this;
     }
     
     public HttpRequest setParameter(Parameter parameter) {
         this.parameter = parameter;
         this.jsonParameter = null;
+        this.stringParameter = null;
         return this;
     }
     
-    public HttpRequest setParameter(String jsonParameter) {
-        this.jsonParameter = jsonParameter;
+    public HttpRequest setStringParameter(String stringParameter) {
+        this.stringParameter = stringParameter;
         this.parameter = null;
         return this;
     }
