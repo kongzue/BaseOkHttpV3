@@ -37,7 +37,7 @@ Gradle：
 implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.6'
 ```
 
-试用版可以前往 http://fir.im/BaseOkHttp 下载
+试用版可以前往 https://fir.im/BaseOkHttp3 下载
 
 ## 目录
 · <a href="#一般请求">一般请求</a>
