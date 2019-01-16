@@ -347,7 +347,7 @@ JsonMap map = JsonUtil.deCodeJsonObject(JsonStr);        //直接解析为Map对
 ```
 请注意对 map 进行判空处理，若解析失败，则会返回 null。
 
-### 对于已知JsonList文本
+### 对于已知JsonArray文本
 ```
 JsonList list = JsonUtil.deCodeJsonArray(JsonStr);        //直接解析为List对象，JsonList继承自ArrayList
 ```
