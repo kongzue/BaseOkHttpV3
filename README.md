@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.6-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.0.8-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.6/link">
-<img src="https://img.shields.io/badge/Maven-3.0.6-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.8/link">
+<img src="https://img.shields.io/badge/Maven-3.0.8-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.6</version>
+  <version>3.0.8</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.6'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.8'
 ```
 
 ![BaseOkHttpV3 Demo](https://github.com/kongzue/Res/raw/master/app/src/main/res/mipmap-xxxhdpi/baseokhttpv3demo.png)
@@ -44,13 +44,15 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.6'
 ## 目录
 · <a href="#一般请求">一般请求</a>
 
-· <a href="#json请求">Json请求</a>
+· <a href="#json请求">JSON请求</a>
 
 · <a href="#文件上传">文件上传</a>
 
 · <a href="#putdelete">PUT&DELETE</a>
 
 · <a href="#websocket">WebSocket</a>
+
+· <a href="#json解析">JSON解析</a>
 
 · <a href="#额外功能">额外功能</a>
 
@@ -122,7 +124,7 @@ HttpRequest.build(context,"http://你的接口地址")
 
 之所以将请求成功与失败放在一个回调中主要目的是方便无论请求成功或失败都需要执行的代码，例如上述代码中的 progressDialog 等待对话框都需要关闭（dismiss掉），这样的写法更为方便。
 
-## Json请求
+## JSON请求
 有时候我们需要使用已经处理好的json文本作为请求参数，此时可以使用 HttpRequest.JSONPOST(...) 方法创建 json 请求。
 
 json 请求中，参数为文本类型，创建请求方式如下：
@@ -314,6 +316,61 @@ baseWebSocket.disConnect();
 baseWebSocket.reConnect();
 ```
 
+## JSON解析
+从 3.0.7 版本起，新增 Json 解析功能，此功能基于 org.json 库二次实现，基本实现了无惧空指针异常的特性。
+
+因原始 org.json 库提供的 JsonObject 和 JsonArray 框架使用起来相对麻烦，我们对其进行了二次封装和完善，且因 BaseOkHttpV3提供的 Json 解析框架底层使用的是 Map 和 List，与适配器具有更好的兼容性。
+
+使用 BaseOkHttpV3提供的 Json 解析框架无需判断 Json 转换异常，可以直接将 Json 文本字符串传入解析。
+
+### 对于未知文本
+
+```
+Object obj = JsonUtil.deCodeJson(JsonStr);
+```
+deCodeJson 方法提供的是未知目标字符串是 JsonArray 还是 JsonObject 的情况下使用，返回对象为 Object，此时判断：
+```
+if(obj != null){
+    if (obj instanceof JsonMap){
+        //此对象为JsonObject，使用get(...)相关方法获取其中的值
+    }
+    if (obj instanceof JsonList){
+        //此对象为JsonArray，使用get(index)相关方法获取其中的子项
+    }
+}
+```
+请注意对 obj 进行判空处理，若解析失败，则会返回 null。
+
+### 对于已知JsonObject文本
+```
+JsonMap map = JsonUtil.deCodeJsonObject(JsonStr);        //直接解析为Map对象，JsonMap继承自LinkedHashMap，按照入栈顺序存储键值对集合
+```
+请注意对 map 进行判空处理，若解析失败，则会返回 null。
+
+### 对于已知JsonList文本
+```
+JsonList list = JsonUtil.deCodeJsonArray(JsonStr);        //直接解析为List对象，JsonList继承自ArrayList
+```
+请注意对 list 进行判空处理，若解析失败，则会返回 null。
+
+### 额外说明
+为方便解析使用，JsonMap 和 JsonList 都提供对应的如下方法来获取内部元素的值：
+```
+getString(...)
+getInt(...)
+getBoolean(...)
+getLong(...)
+getShort(...)
+getDouble(...)
+getFloat(...)
+getList(...)
+getJsonMap(...)
+```
+
+请注意，您亦可使用 Map、List 自带的 get(...) 方法获取元素的值，但 JsonMap 和 JsonList 提供的额外方法对于空指针元素，会返回一个默认值，例如对于实际是 null 的 String，会返回空字符串“”，对于实际是 null 的元素，获取其int值则为0,。
+
+这确实不够严谨，但更多的是为了提升开发效率，适应快速开发的生产要求。
+
 ## 额外功能
 
 ### 全局日志
@@ -442,6 +499,12 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.0.8：
+- 修改 JsonUtil 的子方法为静态方法，可直接使用，提升使用便利性；
+
+v3.0.7：
+- 新增 JSON 解析框架，包含 JsonUtil、JsonMap和JsonList 三个工具类。
+
 v3.0.6：
 - 新增 BaseWebSocket 封装类，可快速实现 WebSocket 请求与连接。
 - （此版本为小更新）新增 StringPOST 请求方式，可以丢任意文本封装为请求体发送给服务端，MediaType 默认为“text/plain”；

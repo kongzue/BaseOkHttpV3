@@ -2,7 +2,6 @@ package com.kongzue.baseokhttpv3;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,11 +13,12 @@ import android.widget.Toast;
 
 import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
-import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
+import com.kongzue.baseokhttp.util.JsonMap;
+import com.kongzue.baseokhttp.util.JsonUtil;
 import com.kongzue.baseokhttp.util.Parameter;
 
 import baseokhttp3.Response;
@@ -255,6 +255,70 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        
+        JsonMap map = JsonUtil.deCodeJsonObject("{\n" +
+                                   "    \"status\": 0,\n" +
+                                   "    \"msg\": \"\",\n" +
+                                   "    \"data\": [\n" +
+                                   "        {\n" +
+                                   "            \"id\": 1,\n" +
+                                   "            \"uid\": 0,\n" +
+                                   "            \"news_type\": 1,\n" +
+                                   "            \"title\": \"2018全国年月季展\",\n" +
+                                   "            \"cover\": [\n" +
+                                   "                \"http:\\/\\/cdn.fast.im\\/976e82634164f6d4c154aba1b70694fc.jpg?v=417002\",\n" +
+                                   "                \"http:\\/\\/cdn.fast.im\\/7c3a47753f3fce9adcbb485b8910bd6d.jpg?v=160138\",\n" +
+                                   "                \"http:\\/\\/cdn.fast.im\\/fbac7e70e4537daf745b47d57efbfd16.jpg?v=537642\"\n" +
+                                   "            ],\n" +
+                                   "            \"author\": \"莫凡\",\n" +
+                                   "            \"original\": \"https:\\/\\/baike.baidu.com\\/item\\/2019%E5%B9%B4%E4%B8%96%E7%95%8C%E6%9C%88%E5%AD%A3%E6%B4%B2%E9%99%85%E5%A4%A7%E4%BC%9A\\/20130890?fr=aladdin\",\n" +
+                                   "            \"video\": \"\\/static\\/admin\\/img\\/none.png\",\n" +
+                                   "            \"read_num\": 0,\n" +
+                                   "            \"share_num\": 0,\n" +
+                                   "            \"open_money\": 0,\n" +
+                                   "            \"is_money\": 1,\n" +
+                                   "            \"type\": 0,\n" +
+                                   "            \"create_time\": 1545361503,\n" +
+                                   "            \"update_time\": 1545749596,\n" +
+                                   "            \"status\": 1,\n" +
+                                   "            \"is_top\": 1,\n" +
+                                   "            \"sort\": 99,\n" +
+                                   "            \"share_point\": \"1\"\n" +
+                                   "        },\n" +
+                                   "        {\n" +
+                                   "            \"id\": 2,\n" +
+                                   "            \"uid\": 0,\n" +
+                                   "            \"news_type\": 1,\n" +
+                                   "            \"title\": \"二月河，走好\",\n" +
+                                   "            \"cover\": [\n" +
+                                   "                \"http:\\/\\/cdn.fast.im\\/cef46baff49f4430bbc50fbfce422653.jpg?v=178402\"\n" +
+                                   "            ],\n" +
+                                   "            \"author\": \"舞动华夏\",\n" +
+                                   "            \"original\": \"\",\n" +
+                                   "            \"video\": \"http:\\/\\/cdn.fast.im\\/6377476da96b78be6529fdd4de4e6320.mp4?v=309054\",\n" +
+                                   "            \"read_num\": 0,\n" +
+                                   "            \"share_num\": 0,\n" +
+                                   "            \"open_money\": 0,\n" +
+                                   "            \"is_money\": 1,\n" +
+                                   "            \"type\": 1,\n" +
+                                   "            \"create_time\": 1545361503,\n" +
+                                   "            \"update_time\": 1545749567,\n" +
+                                   "            \"status\": 1,\n" +
+                                   "            \"is_top\": 0,\n" +
+                                   "            \"sort\": 100,\n" +
+                                   "            \"share_point\": \"1\"\n" +
+                                   "        }\n" +
+                                   "    ],\n" +
+                                   "    \"page\": {\n" +
+                                   "        \"total\": 2,\n" +
+                                   "        \"per_page\": 25,\n" +
+                                   "        \"current_page\": 1,\n" +
+                                   "        \"last_page\": 1\n" +
+                                   "    }\n" +
+                                   "}");
+        Log.i(">>>", "json->map: "+map);
+        Log.i(">>>", "getTest.per_page: "+map.getJsonMap("page").getString("per_page"));
+        Log.i(">>>", "getTest.title: "+map.getList("data").getJsonMap(1).getString("title"));
         
     }
     
