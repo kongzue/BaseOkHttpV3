@@ -11,47 +11,95 @@ import java.util.TreeMap;
  * CreateTime: 2019/1/16 17:57
  */
 public class JsonMap extends LinkedHashMap<String, Object> {
-    
+
     public String getString(String key) {
         Object value = get(key);
         return value == null ? "" : value + "";
     }
-    
+
     public int getInt(String key) {
-        Object value = get(key);
-        return value == null ? 0 : (int) value;
+        return getInt(key, 0);
     }
-    
+
+    public int getInt(String key, int emptyValue) {
+        int result = emptyValue;
+        try {
+            result = Integer.parseInt(get(key) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public boolean getBoolean(String key) {
-        Object value = get(key);
-        return value == null ? false : (boolean) value;
+        return getBoolean(key, false);
     }
-    
+
+    public boolean getBoolean(String key, boolean emptyValue) {
+        boolean result = emptyValue;
+        try {
+            result = Boolean.parseBoolean(get(key) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public long getLong(String key) {
-        Object value = get(key);
-        return value == null ? 0 : (long) value;
+        return getLong(key, 0);
     }
-    
+
+    public long getLong(String key, long emptyValue) {
+        long result = emptyValue;
+        try {
+            result = Long.parseLong(get(key) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public short getShort(String key) {
-        Object value = get(key);
-        return value == null ? 0 : (short) value;
+        return getShort(key, (short) 0);
     }
-    
+
+    public short getShort(String key, short emptyValue) {
+        short result = emptyValue;
+        try {
+            result = Short.parseShort(get(key) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public double getDouble(String key) {
-        Object value = get(key);
-        return value == null ? 0 : (double) value;
+        return getDouble(key, 0);
     }
-    
+
+    public double getDouble(String key, double emptyValue) {
+        double result = emptyValue;
+        try {
+            result = Double.parseDouble(get(key) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public float getFloat(String key) {
-        Object value = get(key);
-        return value == null ? 0 : (float) value;
+        return getFloat(key, 0);
     }
-    
+
+    public float getFloat(String key, float emptyValue) {
+        float result = emptyValue;
+        try {
+            result = Float.parseFloat(get(key) + "");
+        } catch (Exception e) {
+        }
+        return emptyValue;
+    }
+
     public JsonList getList(String key) {
         Object value = get(key);
         return value == null ? new JsonList() : (JsonList) value;
     }
-    
+
     public JsonMap getJsonMap(String key) {
         Object value = get(key);
         return value == null ? new JsonMap() : (JsonMap) value;

@@ -16,35 +16,83 @@ public class JsonList extends ArrayList {
         Object value = get(index);
         return value == null ? "" : value + "";
     }
-    
+
     public int getInt(int index) {
-        Object value = get(index);
-        return value == null ? 0 : (int) value;
+        return getInt(index, 0);
     }
-    
+
+    public int getInt(int index, int emptyValue) {
+        int result = emptyValue;
+        try {
+            result = Integer.parseInt(get(index) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public boolean getBoolean(int index) {
-        Object value = get(index);
-        return value == null ? false : (boolean) value;
+        return getBoolean(index, false);
     }
-    
+
+    public boolean getBoolean(int index, boolean emptyValue) {
+        boolean result = emptyValue;
+        try {
+            result = Boolean.parseBoolean(get(index) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public long getLong(int index) {
-        Object value = get(index);
-        return value == null ? 0 : (long) value;
+        return getLong(index, 0);
     }
-    
+
+    public long getLong(int index, long emptyValue) {
+        long result = emptyValue;
+        try {
+            result = Long.parseLong(get(index) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public short getShort(int index) {
-        Object value = get(index);
-        return value == null ? 0 : (short) value;
+        return getShort(index, (short) 0);
     }
-    
+
+    public short getShort(int index, short emptyValue) {
+        short result = emptyValue;
+        try {
+            result = Short.parseShort(get(index) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public double getDouble(int index) {
-        Object value = get(index);
-        return value == null ? 0 : (double) value;
+        return getDouble(index, 0);
     }
-    
+
+    public double getDouble(int index, double emptyValue) {
+        double result = emptyValue;
+        try {
+            result = Double.parseDouble(get(index) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     public float getFloat(int index) {
-        Object value = get(index);
-        return value == null ? 0 : (float) value;
+        return getFloat(index, 0);
+    }
+
+    public float getFloat(int index, float emptyValue) {
+        float result = emptyValue;
+        try {
+            result = Float.parseFloat(get(index) + "");
+        } catch (Exception e) {
+        }
+        return emptyValue;
     }
     
     public JsonList getList(int index) {

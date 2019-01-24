@@ -81,4 +81,8 @@ public class JsonUtil {
     private static void loge(String s) {
         Log.e(">>>", s);
     }
+
+    private JsonUtil(){
+
+    }
 }
