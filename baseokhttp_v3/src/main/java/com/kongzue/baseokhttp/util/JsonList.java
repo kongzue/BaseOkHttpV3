@@ -97,12 +97,20 @@ public class JsonList extends ArrayList {
     
     public JsonList getList(int index) {
         Object value = get(index);
-        return value == null ? new JsonList() : (JsonList) value;
+        try {
+            return value == null ? new JsonList() : (JsonList) value;
+        }catch (Exception e){
+            return new JsonList();
+        }
     }
     
     public JsonMap getJsonMap(int index) {
         Object value = get(index);
-        return value == null ? new JsonMap() : (JsonMap) value;
+        try {
+            return value == null ? new JsonMap() : (JsonMap) value;
+        }catch (Exception e){
+            return new JsonMap();
+        }
     }
     
 }

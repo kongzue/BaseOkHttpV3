@@ -97,11 +97,19 @@ public class JsonMap extends LinkedHashMap<String, Object> {
 
     public JsonList getList(String key) {
         Object value = get(key);
-        return value == null ? new JsonList() : (JsonList) value;
+        try {
+            return value == null ? new JsonList() : (JsonList) value;
+        } catch (Exception e) {
+            return new JsonList();
+        }
     }
 
     public JsonMap getJsonMap(String key) {
         Object value = get(key);
-        return value == null ? new JsonMap() : (JsonMap) value;
+        try {
+            return value == null ? new JsonMap() : (JsonMap) value;
+        }catch (Exception e){
+            return new JsonMap();
+        }
     }
 }
