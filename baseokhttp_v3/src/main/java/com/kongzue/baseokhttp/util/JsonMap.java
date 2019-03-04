@@ -11,16 +11,16 @@ import java.util.TreeMap;
  * CreateTime: 2019/1/16 17:57
  */
 public class JsonMap extends LinkedHashMap<String, Object> {
-
+    
     public String getString(String key) {
         Object value = get(key);
         return value == null ? "" : value + "";
     }
-
+    
     public int getInt(String key) {
         return getInt(key, 0);
     }
-
+    
     public int getInt(String key, int emptyValue) {
         int result = emptyValue;
         try {
@@ -29,11 +29,11 @@ public class JsonMap extends LinkedHashMap<String, Object> {
         }
         return result;
     }
-
+    
     public boolean getBoolean(String key) {
         return getBoolean(key, false);
     }
-
+    
     public boolean getBoolean(String key, boolean emptyValue) {
         boolean result = emptyValue;
         try {
@@ -42,11 +42,11 @@ public class JsonMap extends LinkedHashMap<String, Object> {
         }
         return result;
     }
-
+    
     public long getLong(String key) {
         return getLong(key, 0);
     }
-
+    
     public long getLong(String key, long emptyValue) {
         long result = emptyValue;
         try {
@@ -55,11 +55,11 @@ public class JsonMap extends LinkedHashMap<String, Object> {
         }
         return result;
     }
-
+    
     public short getShort(String key) {
         return getShort(key, (short) 0);
     }
-
+    
     public short getShort(String key, short emptyValue) {
         short result = emptyValue;
         try {
@@ -68,11 +68,11 @@ public class JsonMap extends LinkedHashMap<String, Object> {
         }
         return result;
     }
-
+    
     public double getDouble(String key) {
         return getDouble(key, 0);
     }
-
+    
     public double getDouble(String key, double emptyValue) {
         double result = emptyValue;
         try {
@@ -81,11 +81,11 @@ public class JsonMap extends LinkedHashMap<String, Object> {
         }
         return result;
     }
-
+    
     public float getFloat(String key) {
         return getFloat(key, 0);
     }
-
+    
     public float getFloat(String key, float emptyValue) {
         float result = emptyValue;
         try {
@@ -94,7 +94,7 @@ public class JsonMap extends LinkedHashMap<String, Object> {
         }
         return emptyValue;
     }
-
+    
     public JsonList getList(String key) {
         Object value = get(key);
         try {
@@ -103,13 +103,18 @@ public class JsonMap extends LinkedHashMap<String, Object> {
             return new JsonList();
         }
     }
-
+    
     public JsonMap getJsonMap(String key) {
         Object value = get(key);
         try {
             return value == null ? new JsonMap() : (JsonMap) value;
-        }catch (Exception e){
+        } catch (Exception e) {
             return new JsonMap();
         }
+    }
+    
+    public JsonMap set(String key, Object value) {
+        put(key, value);
+        return this;
     }
 }

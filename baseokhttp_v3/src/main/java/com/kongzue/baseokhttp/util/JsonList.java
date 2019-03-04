@@ -113,4 +113,8 @@ public class JsonList extends ArrayList {
         }
     }
     
+    public JsonList set(Object value) {
+        super.add(value);
+        return this;
+    }
 }
