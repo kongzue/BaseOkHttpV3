@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 resultWebsocket.setText("开始连接...");
                 btnConnect.setEnabled(false);
-                baseWebSocket = BaseWebSocket.BUILD(MainActivity.this,"wss://echo.websocket.org")
+                baseWebSocket = BaseWebSocket.BUILD(MainActivity.this,"http://fs.fast.im:9508")
                         .setWebSocketStatusListener(new WebSocketStatusListener() {
                             @Override
                             public void connected(Response response) {

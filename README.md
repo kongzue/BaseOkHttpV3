@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.9-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.0.9.1-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.9/link">
-<img src="https://img.shields.io/badge/Maven-3.0.9-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.9.1/link">
+<img src="https://img.shields.io/badge/Maven-3.0.9.1-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.9</version>
+  <version>3.0.9.1</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.9'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.9.1'
 ```
 
 ![BaseOkHttpV3 Demo](https://github.com/kongzue/Res/raw/master/app/src/main/res/mipmap-xxxhdpi/baseokhttpv3demo.png)
@@ -499,6 +499,9 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.0.9.1：
+- 修正 JsonUtil 解析过程中误将所有空格剔除的 bug；
+
 v3.0.9：
 - JsonList 新增方法 set(Object) 可使用流式代码添加内容；
 - JsonMap 新增方法 set(String, Object) 可使用流式代码添加内容；

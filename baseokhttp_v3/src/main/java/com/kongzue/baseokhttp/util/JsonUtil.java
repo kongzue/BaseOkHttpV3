@@ -20,7 +20,6 @@ public class JsonUtil {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
     
     public static Object deCodeJson(String jsonStr) {
-        jsonStr = jsonStr.replace(" ", "");
         jsonStr = jsonStr.replace(LINE_SEPARATOR, "");
         JsonMap result = new JsonMap();
         try {
