@@ -402,6 +402,8 @@ baseWebSocket.reConnect();
 
 使用 BaseOkHttpV3提供的 Json 解析框架无需判断 Json 转换异常，可以直接将 Json 文本字符串传入解析。
 
+另外，JsonMap 和 JsonList 的 `toString()` 方法可输出该对象原始 json 文本；
+
 从 3.1.0 版本起提供直接解析返回值为 jsonMap 对象，详见 <a href="#一般请求">一般请求</a>
 
 ### 对于未知文本
