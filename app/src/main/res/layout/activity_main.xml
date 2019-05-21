@@ -140,7 +140,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
                 android:orientation="horizontal">
 
                 <EditText
@@ -160,6 +159,41 @@
                     android:textSize="14dp" />
 
             </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="下载文件测试"
+                android:textSize="20dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_download"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="开始下载" />
+
+                <Button
+                    android:id="@+id/btn_download_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:text="停止下载" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/psg_download"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:max="100"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"/>
 
         </LinearLayout>
     </ScrollView>

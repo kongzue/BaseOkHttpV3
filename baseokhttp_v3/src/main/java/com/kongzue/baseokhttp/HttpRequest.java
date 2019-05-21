@@ -4,18 +4,26 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
+import com.kongzue.baseokhttp.exceptions.DecodeJsonException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
+import com.kongzue.baseokhttp.listener.BaseResponseListener;
+import com.kongzue.baseokhttp.listener.JsonResponseListener;
+import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.JsonFormat;
+import com.kongzue.baseokhttp.util.JsonMap;
+import com.kongzue.baseokhttp.util.JsonUtil;
 import com.kongzue.baseokhttp.util.Parameter;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,8 +41,8 @@ import baseokhttp3.Callback;
 import baseokhttp3.MediaType;
 import baseokhttp3.MultipartBody;
 import baseokhttp3.OkHttpClient;
-import baseokhttp3.Request;
 import baseokhttp3.RequestBody;
+import baseokhttp3.Response;
 
 import static com.kongzue.baseokhttp.util.BaseOkHttp.*;
 
@@ -48,13 +56,15 @@ import static com.kongzue.baseokhttp.util.BaseOkHttp.*;
 public class HttpRequest {
     
     private OkHttpClient okHttpClient;
+    private Call httpCall;
     private MediaType MEDIA_TYPE = MediaType.parse("image/png");
     
     private Parameter parameter;
     private Parameter headers;
     private Context context;
     private HttpRequest httpRequest;
-    private ResponseListener listener;
+    private ResponseListener responseListener;
+    private JsonResponseListener jsonResponseListener;
     private String url;
     private String jsonParameter;
     private String stringParameter;
@@ -63,17 +73,22 @@ public class HttpRequest {
     private boolean isSending;
     
     //POST一步创建方法
-    public static void POST(Context context, String url, Parameter parameter, ResponseListener listener) {
+    public static void POST(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         POST(context, url, null, parameter, listener);
     }
     
     //POST一步创建总方法
-    public static void POST(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener) {
+    public static void POST(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = context;
             httpRequest.headers = headers;
-            httpRequest.listener = listener;
+            if (listener instanceof ResponseListener) {
+                httpRequest.responseListener = (ResponseListener) listener;
+            }
+            if (listener instanceof JsonResponseListener) {
+                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
+            }
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
@@ -83,17 +98,22 @@ public class HttpRequest {
     }
     
     //JSON格式POST一步创建方法
-    public static void JSONPOST(Context context, String url, String jsonParameter, ResponseListener listener) {
+    public static void JSONPOST(Context context, String url, String jsonParameter, BaseResponseListener listener) {
         JSONPOST(context, url, null, jsonParameter, listener);
     }
     
     //JSON格式POST一步创建总方法
-    public static void JSONPOST(Context context, String url, Parameter headers, String jsonParameter, ResponseListener listener) {
+    public static void JSONPOST(Context context, String url, Parameter headers, String jsonParameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = context;
             httpRequest.headers = headers;
-            httpRequest.listener = listener;
+            if (listener instanceof ResponseListener) {
+                httpRequest.responseListener = (ResponseListener) listener;
+            }
+            if (listener instanceof JsonResponseListener) {
+                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
+            }
             httpRequest.jsonParameter = jsonParameter;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
@@ -103,17 +123,22 @@ public class HttpRequest {
     }
     
     //String文本POST一步创建方法
-    public static void StringPOST(Context context, String url, String stringParameter, ResponseListener listener) {
+    public static void StringPOST(Context context, String url, String stringParameter, BaseResponseListener listener) {
         StringPOST(context, url, null, stringParameter, listener);
     }
     
     //String文本POST一步创建总方法
-    public static void StringPOST(Context context, String url, Parameter headers, String stringParameter, ResponseListener listener) {
+    public static void StringPOST(Context context, String url, Parameter headers, String stringParameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = context;
             httpRequest.headers = headers;
-            httpRequest.listener = listener;
+            if (listener instanceof ResponseListener) {
+                httpRequest.responseListener = (ResponseListener) listener;
+            }
+            if (listener instanceof JsonResponseListener) {
+                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
+            }
             httpRequest.stringParameter = stringParameter;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
@@ -123,17 +148,22 @@ public class HttpRequest {
     }
     
     //GET一步创建方法
-    public static void GET(Context context, String url, Parameter parameter, ResponseListener listener) {
+    public static void GET(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         GET(context, url, null, parameter, listener);
     }
     
     //GET一步创建总方法
-    public static void GET(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener) {
+    public static void GET(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = context;
             httpRequest.headers = headers;
-            httpRequest.listener = listener;
+            if (listener instanceof ResponseListener) {
+                httpRequest.responseListener = (ResponseListener) listener;
+            }
+            if (listener instanceof JsonResponseListener) {
+                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
+            }
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = GET_REQUEST;
@@ -143,17 +173,22 @@ public class HttpRequest {
     }
     
     //PUT一步创建方法
-    public static void PUT(Context context, String url, Parameter parameter, ResponseListener listener) {
+    public static void PUT(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         PUT(context, url, null, parameter, listener);
     }
     
     //PUT一步创建总方法
-    public static void PUT(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener) {
+    public static void PUT(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = context;
             httpRequest.headers = headers;
-            httpRequest.listener = listener;
+            if (listener instanceof ResponseListener) {
+                httpRequest.responseListener = (ResponseListener) listener;
+            }
+            if (listener instanceof JsonResponseListener) {
+                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
+            }
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = PUT_REQUEST;
@@ -163,22 +198,37 @@ public class HttpRequest {
     }
     
     //DELETE一步创建方法
-    public static void DELETE(Context context, String url, Parameter parameter, ResponseListener listener) {
+    public static void DELETE(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         DELETE(context, url, null, parameter, listener);
     }
     
     //PUT一步创建总方法
-    public static void DELETE(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener) {
+    public static void DELETE(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = context;
             httpRequest.headers = headers;
-            httpRequest.listener = listener;
+            if (listener instanceof ResponseListener) {
+                httpRequest.responseListener = (ResponseListener) listener;
+            }
+            if (listener instanceof JsonResponseListener) {
+                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
+            }
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = DELETE_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
+        }
+    }
+    
+    //DOWNLOAD一步创建
+    public static void DOWNLOAD(Context context, String url, File downloadFile, OnDownloadListener onDownloadListener) {
+        synchronized (HttpRequest.class) {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.context = context;
+            httpRequest.url = url;
+            httpRequest.doDownload(downloadFile, onDownloadListener);
         }
     }
     
@@ -210,6 +260,8 @@ public class HttpRequest {
         }
         
         try {
+            if (parameter == null) parameter = new Parameter();
+            
             //全局参数拦截处理
             if (parameterInterceptListener != null) {
                 parameter = parameterInterceptListener.onIntercept(parameter);
@@ -250,7 +302,6 @@ public class HttpRequest {
             baseokhttp3.Request request;
             baseokhttp3.Request.Builder builder = new baseokhttp3.Request.Builder();
             
-            if (parameter == null) parameter = new Parameter();
             RequestBody requestBody = null;
             
             if (isFileRequest) {
@@ -262,7 +313,19 @@ public class HttpRequest {
                             File file = (File) entry.getValue();
                             multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
                             if (DEBUGMODE)
-                                Log.i(">>>", "添加图片：" + entry.getKey() + ":" + file.getName());
+                                Log.i(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
+                        } else if (entry.getValue() instanceof List) {
+                            List valueList = (List) entry.getValue();
+                            for (Object value : valueList) {
+                                if (value instanceof File) {
+                                    File file = (File) value;
+                                    multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
+                                    if (DEBUGMODE)
+                                        Log.i(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
+                                } else {
+                                    multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
+                                }
+                            }
                         } else {
                             multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
                         }
@@ -354,7 +417,8 @@ public class HttpRequest {
             
             isSending = true;
             checkTimeOut();
-            okHttpClient.newCall(request).enqueue(new Callback() {
+            httpCall = okHttpClient.newCall(request);
+            httpCall.enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, final IOException e) {
                     if (!isSending) return;
@@ -375,33 +439,24 @@ public class HttpRequest {
                         Log.e(">>>", "=====================================");
                     }
                     //回到主线程处理
-                    if (context instanceof Activity) {
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (responseInterceptListener != null) {
-                                    if (responseInterceptListener.onResponse(context, url, null, e)) {
-                                        if (listener != null)
-                                            listener.onResponse(null, e);
-                                    }
-                                } else {
-                                    if (listener != null)
-                                        listener.onResponse(null, e);
+                    runOnMain(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseInterceptListener != null) {
+                                if (responseInterceptListener.onResponse(context, url, null, e)) {
+                                    if (responseListener != null)
+                                        responseListener.onResponse(null, e);
+                                    if (jsonResponseListener != null)
+                                        jsonResponseListener.onResponse(null, e);
                                 }
+                            } else {
+                                if (responseListener != null)
+                                    responseListener.onResponse(null, e);
+                                if (jsonResponseListener != null)
+                                    jsonResponseListener.onResponse(null, e);
                             }
-                        });
-                    } else {
-                        if (responseInterceptListener != null) {
-                            if (responseInterceptListener.onResponse(context, url, null, e)) {
-                                if (listener != null)
-                                    listener.onResponse(null, e);
-                            }
-                        } else {
-                            if (listener != null)
-                                listener.onResponse(null, e);
                         }
-                    }
-                    
+                    });
                 }
                 
                 @Override
@@ -429,29 +484,36 @@ public class HttpRequest {
                     }
                     
                     //回到主线程处理
-                    if (context instanceof Activity) {
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (responseInterceptListener != null) {
-                                    if (responseInterceptListener.onResponse(context, url, strResponse, null)) {
-                                        if (listener != null)
-                                            listener.onResponse(strResponse, null);
+                    runOnMain(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseInterceptListener != null) {
+                                if (responseInterceptListener.onResponse(context, url, strResponse, null)) {
+                                    if (responseListener != null)
+                                        responseListener.onResponse(strResponse, null);
+                                    if (jsonResponseListener != null) {
+                                        JsonMap data = JsonUtil.deCodeJsonObject(strResponse);
+                                        if (data != null) {
+                                            jsonResponseListener.onResponse(data, null);
+                                        } else {
+                                            jsonResponseListener.onResponse(null, new DecodeJsonException(strResponse));
+                                        }
                                     }
-                                } else {
-                                    if (listener != null) listener.onResponse(strResponse, null);
+                                }
+                            } else {
+                                if (responseListener != null)
+                                    responseListener.onResponse(strResponse, null);
+                                if (jsonResponseListener != null) {
+                                    JsonMap data = JsonUtil.deCodeJsonObject(strResponse);
+                                    if (data != null) {
+                                        jsonResponseListener.onResponse(data, null);
+                                    } else {
+                                        jsonResponseListener.onResponse(null, new DecodeJsonException(strResponse));
+                                    }
                                 }
                             }
-                        });
-                    } else {
-                        if (responseInterceptListener != null) {
-                            if (responseInterceptListener.onResponse(context, url, strResponse, null)) {
-                                if (listener != null) listener.onResponse(strResponse, null);
-                            }
-                        } else {
-                            if (listener != null) listener.onResponse(strResponse, null);
                         }
-                    }
+                    });
                 }
             });
         } catch (Exception e) {
@@ -465,12 +527,148 @@ public class HttpRequest {
                         Log.i(">>>>>>", stringParameter);
                     }
                 } else {
-                    parameter.toPrintString(1);
+                    if (parameter != null) parameter.toPrintString(1);
                 }
                 Log.e(">>>", "错误:" + e.toString());
                 e.printStackTrace();
                 Log.e(">>>", "=====================================");
             }
+        }
+    }
+    
+    private void download() {
+        try {
+            if (!url.startsWith("http")) {
+                url = serviceUrl + url;
+            }
+            if (isNull(url)) {
+                Log.e(">>>", "-------------------------------------");
+                Log.e(">>>", "创建请求失败: 请求地址不能为空");
+                Log.e(">>>", "=====================================");
+            }
+            
+            if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
+                okHttpClient = getOkHttpClient(context, context.getAssets().open(SSLInAssetsFileName));
+            } else {
+                okHttpClient = new OkHttpClient.Builder()
+                        .retryOnConnectionFailure(false)
+                        .connectTimeout(30, TimeUnit.SECONDS)
+                        .hostnameVerifier(new HostnameVerifier() {
+                            @Override
+                            public boolean verify(String hostname, SSLSession session) {
+                                return true;
+                            }
+                        })
+                        .build();
+            }
+            
+            //创建请求
+            baseokhttp3.Request request;
+            baseokhttp3.Request.Builder builder = new baseokhttp3.Request.Builder();
+            
+            builder.url(url);
+            builder.addHeader("Connection", "close");
+            request = builder.build();
+            
+            if (DEBUGMODE) {
+                Log.i(">>>", "-------------------------------------");
+                Log.i(">>>", "开始下载:" + url);
+                Log.i(">>>", "=====================================");
+            }
+            httpCall = okHttpClient.newCall(request);
+            httpCall.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, final IOException e) {
+                    if (DEBUGMODE) {
+                        Log.e(">>>", "-------------------------------------");
+                        Log.e(">>>", "下载失败:" + e.getMessage());
+                        e.printStackTrace();
+                        Log.e(">>>", "=====================================");
+                    }
+                    runOnMain(new Runnable() {
+                        @Override
+                        public void run() {
+                            onDownloadListener.onDownloadFailed(e);
+                        }
+                    });
+                }
+                
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    
+                    InputStream is = null;
+                    byte[] buf = new byte[2048];
+                    int len = 0;
+                    FileOutputStream fos = null;
+                    
+                    //储存下载文件的目录
+                    File dir = downloadFile.getParentFile();
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+                    
+                    try {
+                        is = response.body().byteStream();
+                        long total = response.body().contentLength();
+                        fos = new FileOutputStream(downloadFile);
+                        long sum = 0;
+                        while ((len = is.read(buf)) != -1) {
+                            fos.write(buf, 0, len);
+                            sum += len;
+                            final int progress = (int) (sum * 1.0f / total * 100);
+                            if (DEBUGMODE) {
+                                Log.i(">>>", "下载中:" + progress);
+                            }
+                            runOnMain(new Runnable() {
+                                @Override
+                                public void run() {
+                                    onDownloadListener.onDownloading(progress);
+                                }
+                            });
+                        }
+                        fos.flush();
+                        //下载完成
+                        if (DEBUGMODE) {
+                            Log.i(">>>", "-------------------------------------");
+                            Log.i(">>>", "下载完成:" + url);
+                            Log.i(">>>", "存储文件:" + downloadFile.getAbsolutePath());
+                            Log.i(">>>", "=====================================");
+                        }
+                        runOnMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                onDownloadListener.onDownloadSuccess(downloadFile);
+                            }
+                        });
+                    } catch (final Exception e) {
+                        if (DEBUGMODE) {
+                            Log.e(">>>", "-------------------------------------");
+                            Log.e(">>>", "下载过程错误:" + e.getMessage());
+                            e.printStackTrace();
+                            Log.e(">>>", "=====================================");
+                        }
+                        runOnMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                onDownloadListener.onDownloadFailed(e);
+                            }
+                        });
+                    } finally {
+                        try {
+                            if (is != null) {
+                                is.close();
+                            }
+                            if (fos != null) {
+                                fos.close();
+                            }
+                        } catch (IOException e) {
+                        
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) {
+        
         }
     }
     
@@ -482,20 +680,19 @@ public class HttpRequest {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (isSending && listener != null) {
+                if (isSending) {
                     isSending = false;
                     Log.e(">>>", "请求超时 ×");
                     Log.e(">>>", "=====================================");
-                    if (context instanceof Activity) {
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onResponse(null, new TimeOutException());
-                            }
-                        });
-                    } else {
-                        listener.onResponse(null, new TimeOutException());
-                    }
+                    runOnMain(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (responseListener != null)
+                                responseListener.onResponse(null, new TimeOutException());
+                            if (jsonResponseListener != null)
+                                jsonResponseListener.onResponse(null, new TimeOutException());
+                        }
+                    });
                 }
             }
         }, TIME_OUT_DURATION * 1000);
@@ -625,7 +822,12 @@ public class HttpRequest {
     }
     
     public HttpRequest setResponseListener(ResponseListener listener) {
-        this.listener = listener;
+        this.responseListener = listener;
+        return this;
+    }
+    
+    public HttpRequest setJsonResponseListener(JsonResponseListener jsonResponseListener) {
+        this.jsonResponseListener = jsonResponseListener;
         return this;
     }
     
@@ -649,6 +851,16 @@ public class HttpRequest {
         send();
     }
     
+    private File downloadFile;
+    private OnDownloadListener onDownloadListener;
+    
+    public void doDownload(File downloadFile, OnDownloadListener onDownloadListener) {
+        requestType = DOWNLOAD;
+        this.downloadFile = downloadFile;
+        this.onDownloadListener = onDownloadListener;
+        download();
+    }
+    
     public HttpRequest setMediaType(MediaType mediaType) {
         MEDIA_TYPE = mediaType;
         return this;
@@ -657,5 +869,24 @@ public class HttpRequest {
     public HttpRequest skipSSLCheck() {
         skipSSLCheck = true;
         return this;
+    }
+    
+    public File getDownloadFile() {
+        return downloadFile;
+    }
+    
+    public void stop() {
+        if (httpCall != null) httpCall.cancel();
+    }
+    
+    private void runOnMain(Runnable runnable) {
+        if (context instanceof Activity) {
+            ((Activity) context).runOnUiThread(runnable);
+        } else {
+            if (DEBUGMODE) {
+                Log.e(">>>", "context 不是 Activity，本次请求在异步线程返回 >>>");
+            }
+            runnable.run();
+        }
     }
 }

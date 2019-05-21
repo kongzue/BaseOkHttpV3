@@ -12,6 +12,16 @@ import java.util.TreeMap;
  */
 public class JsonMap extends LinkedHashMap<String, Object> {
     
+    private String jsonStr = "";
+    
+    public JsonMap() {
+    
+    }
+    
+    public JsonMap(String jsonStr) {
+        this.jsonStr = jsonStr;
+    }
+    
     public String getString(String key) {
         Object value = get(key);
         return value == null ? "" : value + "";
@@ -116,5 +126,10 @@ public class JsonMap extends LinkedHashMap<String, Object> {
     public JsonMap set(String key, Object value) {
         put(key, value);
         return this;
+    }
+    
+    @Override
+    public String toString() {
+        return jsonStr;
     }
 }

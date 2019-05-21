@@ -12,6 +12,16 @@ import java.util.ArrayList;
  */
 public class JsonList extends ArrayList {
     
+    private String jsonStr = "";
+    
+    public JsonList() {
+    
+    }
+    
+    public JsonList(String jsonStr) {
+        this.jsonStr = jsonStr;
+    }
+    
     public String getString(int index) {
         Object value = get(index);
         return value == null ? "" : value + "";
@@ -116,5 +126,10 @@ public class JsonList extends ArrayList {
     public JsonList set(Object value) {
         super.add(value);
         return this;
+    }
+    
+    @Override
+    public String toString() {
+        return jsonStr;
     }
 }

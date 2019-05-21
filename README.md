@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.0.9.1-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.0-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.0.9.1/link">
-<img src="https://img.shields.io/badge/Maven-3.0.9.1-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.0/link">
+<img src="https://img.shields.io/badge/Maven-3.1.0-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.0.9.1</version>
+  <version>3.1.0</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.9.1'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.0'
 ```
 
 ![BaseOkHttpV3 Demo](https://github.com/kongzue/Res/raw/master/app/src/main/res/mipmap-xxxhdpi/baseokhttpv3demo.png)
@@ -47,6 +47,8 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.9.1'
 · <a href="#json请求">JSON请求</a>
 
 · <a href="#文件上传">文件上传</a>
+
+· <a href="#文件下载">文件下载</a>
 
 · <a href="#putdelete">PUT&DELETE</a>
 
@@ -69,6 +71,8 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.0.9.1'
 ···· <a href="#全局参数拦截器">全局参数拦截器</a>
 
 ···· <a href="#请求超时">请求超时</a>
+
+···· <a href="#停止请求">停止请求</a>
 
 · <a href="#开源协议">开源协议</a>
 
@@ -123,6 +127,21 @@ HttpRequest.build(context,"http://你的接口地址")
 返回回调监听器只有一个，请在其中对 error 参数判空，若 error 不为空，则为请求失败，反之则为请求成功，请求成功后的数据存放在 response 参数中。
 
 之所以将请求成功与失败放在一个回调中主要目的是方便无论请求成功或失败都需要执行的代码，例如上述代码中的 progressDialog 等待对话框都需要关闭（dismiss掉），这样的写法更为方便。
+
+3.1.0 版本起提供直接解析返回值为 jsonMap 对象，可使用 JsonResponseListener 监听器返回：
+```
+HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new JsonResponseListener() {
+    @Override
+    public void onResponse(JsonMap main, Exception error) {
+        if (error == null) {
+            resultHttp.setText(main.getString("msg"));
+        } else {
+            resultHttp.setText("请求失败");
+            Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+});
+```
 
 ## JSON请求
 有时候我们需要使用已经处理好的json文本作为请求参数，此时可以使用 HttpRequest.JSONPOST(...) 方法创建 json 请求。
@@ -241,6 +260,66 @@ application/msword  |  Word文档格式
 application/octet-stream | 二进制流数据
 multipart/form-data | 表单数据
 
+## 文件下载
+首先请确保您的 APP 已经在 AndroidManifest.xml 声明读写权限：
+```
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+```
+并确保您以获得该权限许可。
+
+您可以使用以下代码启动下载进程：
+```
+HttpRequest.DOWNLOAD(
+        MainActivity.this,
+        "http://cdn.to-future.net/apk/tofuture.apk",
+        new File(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "BaseOkHttpV3"), "to-future.apk"),
+        new OnDownloadListener() {
+            @Override
+            public void onDownloadSuccess(File file) {
+                Toast.makeText(context, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
+            }
+            @Override
+            public void onDownloading(int progress) {
+                psgDownload.setProgress(progress);
+            }
+            @Override
+            public void onDownloadFailed(Exception e) {
+                Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT);
+            }
+        }
+);
+```
+
+也可以使用build创建：
+```
+httpRequest = HttpRequest.build(MainActivity.this, "http://cdn.to-future.net/apk/tofuture.apk");
+httpRequest.doDownload(
+        new File(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "BaseOkHttpV3"), "to-future.apk"),
+        new OnDownloadListener() {
+            @Override
+            public void onDownloadSuccess(File file) {
+                Toast.makeText(context, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
+            }
+            
+            @Override
+            public void onDownloading(int progress) {
+                psgDownload.setProgress(progress);
+            }
+            
+            @Override
+            public void onDownloadFailed(Exception e) {
+                Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT);
+            }
+        }
+);
+
+//停止下载：
+httpRequest.stop();
+```
+
+额外的，若存储文件的父文件夹不存在，会自动创建。
+
 ## PUT&DELETE
 从 3.0.3 版本起新增了 PUT 和 DELETE 请求方式，使用方法和一般请求一致，可以通过以下两种方法创建：
 ```
@@ -323,6 +402,8 @@ baseWebSocket.reConnect();
 
 使用 BaseOkHttpV3提供的 Json 解析框架无需判断 Json 转换异常，可以直接将 Json 文本字符串传入解析。
 
+从 3.1.0 版本起提供直接解析返回值为 jsonMap 对象，详见 <a href="#一般请求">一般请求</a>
+
 ### 对于未知文本
 
 ```
@@ -368,6 +449,8 @@ getJsonMap(...)
 ```
 
 请注意，您亦可使用 Map、List 自带的 get(...) 方法获取元素的值，但 JsonMap 和 JsonList 提供的额外方法对于空指针元素，会返回一个默认值，例如对于实际是 null 的 String，会返回空字符串“”，对于实际是 null 的元素，获取其int值则为0,。
+
+若您需要空值判断，可以通过例如 `getInt(String key, int emptyValue)` 来进行，若为空值会返回您提供的 emptyValue。
 
 这确实不够严谨，但更多的是为了提升开发效率，适应快速开发的生产要求。
 
@@ -464,6 +547,12 @@ private String makeSign(String parameterString){
 BaseOkHttp.TIME_OUT_DURATION = 10;
 ```
 
+### 停止请求
+可使用以下方法停止请求过程：
+```
+stop();     //停止请求
+```
+
 ## 开源协议
 ```
 Copyright Kongzue BaseOkHttp
@@ -499,6 +588,14 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.0：
+- 新增 setJsonResponseListener 返回监听器，可直接返回已解析的 jsonMap，新增解析 Json 异常：DecodeJsonException；
+- 新增文件下载功能，以及下载进度监听器 OnDownloadListener；
+- 修复参数拦截器 parameter 为空的问题；
+- 新增 stop() 方法可以停止请求进程（但请注意已发出的请求无法撤回）；
+- JsonMap 和 JsonList 新增 toString() 可输出该对象原始 json 文本；
+- 修改部分日志文案；
+
 v3.0.9.1：
 - 修正 JsonUtil 解析过程中误将所有空格剔除的 bug；
 

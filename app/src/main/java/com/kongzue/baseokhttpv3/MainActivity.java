@@ -2,17 +2,21 @@ package com.kongzue.baseokhttpv3;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
+import com.kongzue.baseokhttp.listener.JsonResponseListener;
+import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
@@ -20,6 +24,8 @@ import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.JsonMap;
 import com.kongzue.baseokhttp.util.JsonUtil;
 import com.kongzue.baseokhttp.util.Parameter;
+
+import java.io.File;
 
 import baseokhttp3.Response;
 import baseokio.ByteString;
@@ -33,9 +39,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView resultHttp;
     private Button btnConnect;
     private Button btnDisconnect;
+    private TextView resultWebsocket;
     private EditText editSend;
     private Button btnSend;
-    private TextView resultWebsocket;
+    private Button btnDownload;
+    private Button btnDownloadCancel;
+    private ProgressBar psgDownload;
     
     private BaseWebSocket baseWebSocket;
     
@@ -45,14 +54,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         
         context = this;
-    
+        
         btnHttp = findViewById(R.id.btn_http);
         resultHttp = findViewById(R.id.result_http);
         btnConnect = findViewById(R.id.btn_connect);
         btnDisconnect = findViewById(R.id.btn_disconnect);
+        resultWebsocket = findViewById(R.id.result_websocket);
         editSend = findViewById(R.id.edit_send);
         btnSend = findViewById(R.id.btn_send);
-        resultWebsocket = findViewById(R.id.result_websocket);
+        btnDownload = findViewById(R.id.btn_download);
+        btnDownloadCancel = findViewById(R.id.btn_download_cancel);
+        psgDownload = findViewById(R.id.psg_download);
         
         BaseOkHttp.DEBUGMODE = true;
         BaseOkHttp.serviceUrl = "https://www.apiopen.top";
@@ -67,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 if (error != null) {
                     return true;
                 } else {
-                    Log.i("!!!", "onResponse: " + response);
+                    //Log.i("!!!", "onResponse: " + response);
                     return true;
                 }
             }
@@ -186,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 resultWebsocket.setText("开始连接...");
                 btnConnect.setEnabled(false);
-                baseWebSocket = BaseWebSocket.BUILD(MainActivity.this,"http://fs.fast.im:9508")
+                baseWebSocket = BaseWebSocket.BUILD(MainActivity.this, "http://fs.fast.im:9508")
                         .setWebSocketStatusListener(new WebSocketStatusListener() {
                             @Override
                             public void connected(Response response) {
@@ -196,17 +208,17 @@ public class MainActivity extends AppCompatActivity {
                                 editSend.setEnabled(true);
                                 btnSend.setEnabled(true);
                             }
-                
+                            
                             @Override
                             public void onMessage(String message) {
-                                resultWebsocket.setText("收到返回消息："+message);
+                                resultWebsocket.setText("收到返回消息：" + message);
                             }
-                
+                            
                             @Override
                             public void onMessage(ByteString message) {
-                    
+                            
                             }
-                
+                            
                             @Override
                             public void onReconnect() {
                                 resultWebsocket.setText("正在重连");
@@ -215,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
                                 editSend.setEnabled(false);
                                 btnSend.setEnabled(false);
                             }
-                
+                            
                             @Override
                             public void onDisconnected(int breakStatus) {
                                 resultWebsocket.setText("已断开连接");
@@ -224,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                                 editSend.setEnabled(false);
                                 btnSend.setEnabled(false);
                             }
-                
+                            
                             @Override
                             public void onConnectionFailed(Throwable t) {
                                 resultWebsocket.setText("连接失败");
@@ -238,11 +250,11 @@ public class MainActivity extends AppCompatActivity {
                         .startConnect();
             }
         });
-    
+        
         btnDisconnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (baseWebSocket!=null)baseWebSocket.disConnect();
+                if (baseWebSocket != null) baseWebSocket.disConnect();
             }
         });
         
@@ -250,81 +262,77 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String s = editSend.getText().toString().trim();
-                if (!s.isEmpty()){
-                    if (baseWebSocket!=null)baseWebSocket.send(s);
+                if (!s.isEmpty()) {
+                    if (baseWebSocket != null) baseWebSocket.send(s);
                 }
             }
         });
         
-        JsonMap map = JsonUtil.deCodeJsonObject("{\n" +
-                                   "    \"status\": 0,\n" +
-                                   "    \"msg\": \"\",\n" +
-                                   "    \"data\": [\n" +
-                                   "        {\n" +
-                                   "            \"id\": 1,\n" +
-                                   "            \"uid\": 0,\n" +
-                                   "            \"news_type\": 1,\n" +
-                                   "            \"title\": \"2018全国年月季展\",\n" +
-                                   "            \"cover\": [\n" +
-                                   "                \"http:\\/\\/cdn.fast.im\\/976e82634164f6d4c154aba1b70694fc.jpg?v=417002\",\n" +
-                                   "                \"http:\\/\\/cdn.fast.im\\/7c3a47753f3fce9adcbb485b8910bd6d.jpg?v=160138\",\n" +
-                                   "                \"http:\\/\\/cdn.fast.im\\/fbac7e70e4537daf745b47d57efbfd16.jpg?v=537642\"\n" +
-                                   "            ],\n" +
-                                   "            \"author\": \"莫凡\",\n" +
-                                   "            \"original\": \"https:\\/\\/baike.baidu.com\\/item\\/2019%E5%B9%B4%E4%B8%96%E7%95%8C%E6%9C%88%E5%AD%A3%E6%B4%B2%E9%99%85%E5%A4%A7%E4%BC%9A\\/20130890?fr=aladdin\",\n" +
-                                   "            \"video\": \"\\/static\\/admin\\/img\\/none.png\",\n" +
-                                   "            \"read_num\": 0,\n" +
-                                   "            \"share_num\": 0,\n" +
-                                   "            \"open_money\": 0,\n" +
-                                   "            \"is_money\": 1,\n" +
-                                   "            \"type\": 0,\n" +
-                                   "            \"create_time\": 1545361503,\n" +
-                                   "            \"update_time\": 1545749596,\n" +
-                                   "            \"status\": 1,\n" +
-                                   "            \"is_top\": 1,\n" +
-                                   "            \"sort\": 99,\n" +
-                                   "            \"share_point\": \"1\"\n" +
-                                   "        },\n" +
-                                   "        {\n" +
-                                   "            \"id\": 2,\n" +
-                                   "            \"uid\": 0,\n" +
-                                   "            \"news_type\": 1,\n" +
-                                   "            \"title\": \"二月河，走好\",\n" +
-                                   "            \"cover\": [\n" +
-                                   "                \"http:\\/\\/cdn.fast.im\\/cef46baff49f4430bbc50fbfce422653.jpg?v=178402\"\n" +
-                                   "            ],\n" +
-                                   "            \"author\": \"舞动华夏\",\n" +
-                                   "            \"original\": \"\",\n" +
-                                   "            \"video\": \"http:\\/\\/cdn.fast.im\\/6377476da96b78be6529fdd4de4e6320.mp4?v=309054\",\n" +
-                                   "            \"read_num\": 0,\n" +
-                                   "            \"share_num\": 0,\n" +
-                                   "            \"open_money\": 0,\n" +
-                                   "            \"is_money\": 1,\n" +
-                                   "            \"type\": 1,\n" +
-                                   "            \"create_time\": 1545361503,\n" +
-                                   "            \"update_time\": 1545749567,\n" +
-                                   "            \"status\": 1,\n" +
-                                   "            \"is_top\": 0,\n" +
-                                   "            \"sort\": 100,\n" +
-                                   "            \"share_point\": \"1\"\n" +
-                                   "        }\n" +
-                                   "    ],\n" +
-                                   "    \"page\": {\n" +
-                                   "        \"total\": 2,\n" +
-                                   "        \"per_page\": 25,\n" +
-                                   "        \"current_page\": 1,\n" +
-                                   "        \"last_page\": 1\n" +
-                                   "    }\n" +
-                                   "}");
-        Log.i(">>>", "json->map: "+map);
-        Log.i(">>>", "getTest.per_page: "+map.getJsonMap("page").getString("per_page"));
-        Log.i(">>>", "getTest.title: "+map.getList("data").getJsonMap(1).getString("title"));
+        btnDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnDownload.setEnabled(false);
+                btnDownloadCancel.setEnabled(true);
+                httpRequest = HttpRequest.build(MainActivity.this, "http://cdn.to-future.net/apk/tofuture.apk");
+                httpRequest.doDownload(
+                        new File(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "BaseOkHttpV3"), "to-future.apk"),
+                        new OnDownloadListener() {
+                            @Override
+                            public void onDownloadSuccess(File file) {
+                                Toast.makeText(context, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
+                            }
+                            
+                            @Override
+                            public void onDownloading(int progress) {
+                                psgDownload.setProgress(progress);
+                            }
+                            
+                            @Override
+                            public void onDownloadFailed(Exception e) {
+                                Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT);
+                            }
+                        }
+                );
+    
+                HttpRequest.DOWNLOAD(
+                        MainActivity.this,
+                        "http://cdn.to-future.net/apk/tofuture.apk",
+                        new File(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "BaseOkHttpV3"), "to-future.apk"),
+                        new OnDownloadListener() {
+                            @Override
+                            public void onDownloadSuccess(File file) {
+                                Toast.makeText(context, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
+                            }
+    
+                            @Override
+                            public void onDownloading(int progress) {
+                                psgDownload.setProgress(progress);
+                            }
+    
+                            @Override
+                            public void onDownloadFailed(Exception e) {
+                                Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT);
+                            }
+                        }
+                );
+            }
+        });
         
+        btnDownloadCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnDownload.setEnabled(true);
+                btnDownloadCancel.setEnabled(false);
+                httpRequest.stop();
+            }
+        });
     }
+    
+    private HttpRequest httpRequest;
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (baseWebSocket!=null)baseWebSocket.disConnect();
+        if (baseWebSocket != null) baseWebSocket.disConnect();
     }
 }

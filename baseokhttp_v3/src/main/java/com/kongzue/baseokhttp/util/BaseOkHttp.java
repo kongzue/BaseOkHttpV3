@@ -17,6 +17,7 @@ public class BaseOkHttp {
     public static final int GET_REQUEST = 1;        //普通GET
     public static final int PUT_REQUEST = 2;
     public static final int DELETE_REQUEST = 3;
+    public static final int DOWNLOAD = 4;
     
     //是否开启调试模式
     public static boolean DEBUGMODE = false;
