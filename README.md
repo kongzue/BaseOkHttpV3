@@ -97,7 +97,7 @@ HttpRequest.POST(context, "http://你的接口地址", new Parameter().add("page
     }
 });
 ```
-一般请求中，使用 HttpRequest.POST(...) 方法可直接创建 POST 请求，相应的，HttpRequest.GET(...) 可创建 GET 请求，另外可选额外的方法增加 header 请求头：
+一般请求中，使用 HttpRequest.POST(...) 方法可直接创建 POST 请求，相应的，`HttpRequest.GET(...)` 可创建 GET 请求，另外可选额外的方法增加 header 请求头：
 ```
 HttpRequest.POST(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener);
 HttpRequest.GET(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener);
@@ -128,7 +128,7 @@ HttpRequest.build(context,"http://你的接口地址")
 
 之所以将请求成功与失败放在一个回调中主要目的是方便无论请求成功或失败都需要执行的代码，例如上述代码中的 progressDialog 等待对话框都需要关闭（dismiss掉），这样的写法更为方便。
 
-3.1.0 版本起提供直接解析返回值为 jsonMap 对象，可使用 JsonResponseListener 监听器返回：
+3.1.0 版本起提供直接解析返回值为 jsonMap 对象，可使用 `JsonResponseListener` 监听器返回：
 ```
 HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new JsonResponseListener() {
     @Override
@@ -144,7 +144,7 @@ HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), ne
 ```
 
 ## JSON请求
-有时候我们需要使用已经处理好的json文本作为请求参数，此时可以使用 HttpRequest.JSONPOST(...) 方法创建 json 请求。
+有时候我们需要使用已经处理好的json文本作为请求参数，此时可以使用 `HttpRequest.JSONPOST(...)` 方法创建 json 请求。
 
 json 请求中，参数为文本类型，创建请求方式如下：
 ```
@@ -162,7 +162,7 @@ HttpRequest.JSONPOST(context, "http://你的接口地址", "{\"key\":\"DFG1H56EH
     }
 });
 ```
-Json请求中，可使用 HttpRequest.JSONPOST(...) 快速创建 Json 请求，另外可选额外的方法增加 header 请求头：
+Json请求中，可使用 `HttpRequest.JSONPOST(...)` 快速创建 Json 请求，另外可选额外的方法增加 header 请求头：
 ```
 HttpRequest.JSONPOST(Context context, String url, Parameter headers, String jsonParameter, ResponseListener listener)
 ```
@@ -396,9 +396,9 @@ baseWebSocket.reConnect();
 ```
 
 ## JSON解析
-从 3.0.7 版本起，新增 Json 解析功能，此功能基于 org.json 库二次实现，基本实现了无惧空指针异常的特性。
+从 3.0.7 版本起，新增 Json 解析功能，此功能基于 `org.json` 库二次实现，基本实现了无惧空指针异常的特性。
 
-因原始 org.json 库提供的 JsonObject 和 JsonArray 框架使用起来相对麻烦，我们对其进行了二次封装和完善，且因 BaseOkHttpV3提供的 Json 解析框架底层使用的是 Map 和 List，与适配器具有更好的兼容性。
+因原始 `org.json` 库提供的 JsonObject 和 JsonArray 框架使用起来相对麻烦，我们对其进行了二次封装和完善，且因 BaseOkHttpV3提供的 Json 解析框架底层使用的是 Map 和 List，与适配器具有更好的兼容性。
 
 使用 BaseOkHttpV3提供的 Json 解析框架无需判断 Json 转换异常，可以直接将 Json 文本字符串传入解析。
 
@@ -450,7 +450,7 @@ getList(...)
 getJsonMap(...)
 ```
 
-请注意，您亦可使用 Map、List 自带的 get(...) 方法获取元素的值，但 JsonMap 和 JsonList 提供的额外方法对于空指针元素，会返回一个默认值，例如对于实际是 null 的 String，会返回空字符串“”，对于实际是 null 的元素，获取其int值则为0,。
+请注意，您亦可使用 Map、List 自带的 `get(...)` 方法获取元素的值，但 JsonMap 和 JsonList 提供的额外方法对于空指针元素，会返回一个默认值，例如对于实际是 null 的 String，会返回空字符串“”，对于实际是 null 的元素，获取其int值则为0。
 
 若您需要空值判断，可以通过例如 `getInt(String key, int emptyValue)` 来进行，若为空值会返回您提供的 emptyValue。
 
@@ -521,7 +521,7 @@ BaseOkHttp.SSLInAssetsFileName = "ssl.crt";
 ```
 即可使用Https请求方式。
 
-另外，可使用 BaseOkHttp.httpsVerifyServiceUrl=(boolean) 设置是否校验请求主机地址与设置的 HttpRequest.serviceUrl 一致；
+另外，可使用 `BaseOkHttp.httpsVerifyServiceUrl=(boolean)` 设置是否校验请求主机地址与设置的 HttpRequest.serviceUrl 一致；
 
 ### 全局参数拦截器
 使用如下代码可以设置全局参数监听拦截器，此参数拦截器可以拦截并修改、新增所有请求携带的参数。
