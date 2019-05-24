@@ -37,6 +37,8 @@ Gradle：
 implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.0'
 ```
 
+新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：https://www.jianshu.com/p/528a3def1cf4
+
 ![BaseOkHttpV3 Demo](https://github.com/kongzue/Res/raw/master/app/src/main/res/mipmap-xxxhdpi/baseokhttpv3demo.png)
 
 试用版可以前往 https://fir.im/BaseOkHttp3 下载
