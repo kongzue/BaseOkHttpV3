@@ -805,6 +805,11 @@ public class HttpRequest {
         return this;
     }
     
+    public HttpRequest setJsonParameter(JsonMap jsonParameter) {
+        this.jsonParameter = jsonParameter.toString();
+        return this;
+    }
+    
     public HttpRequest addHeaders(String key, String value) {
         if (headers == null) headers = new Parameter();
         headers.add(key, value);

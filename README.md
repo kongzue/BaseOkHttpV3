@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.0-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.1-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.0/link">
-<img src="https://img.shields.io/badge/Maven-3.1.0-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.1/link">
+<img src="https://img.shields.io/badge/Maven-3.1.1-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -14,7 +14,7 @@
 </a>
 
 ## 简介
-- BaseOkHttp V3是基于BaseOkHttp V2( https://github.com/kongzue/BaseOkHttp )的升级版本，基于能够快速创建常用请求链接而封装的库。
+- BaseOkHttp V3是基于BaseOkHttp V2( <https://github.com/kongzue/BaseOkHttp> )的升级版本，基于能够快速创建常用请求链接而封装的库。
 - 本库中自带 OkHttp 库，并对其关联的 okio 库进行了包名的修改和封装，因此不会影响到您项目中的其他版本的 okHttp 库，亦不会产生冲突。
 - 若请求来自于一个 Activity，结束请求后自动回归主线程操作，不需要再做额外处理。
 - 提供统一返回监听器ResponseListener处理返回数据，避免代码反复臃肿。
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.0</version>
+  <version>3.1.1</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,14 +34,14 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.0'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.1'
 ```
 
-新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：https://www.jianshu.com/p/528a3def1cf4
+新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
 
 ![BaseOkHttpV3 Demo](https://github.com/kongzue/Res/raw/master/app/src/main/res/mipmap-xxxhdpi/baseokhttpv3demo.png)
 
-试用版可以前往 https://fir.im/BaseOkHttp3 下载
+试用版可以前往 <https://fir.im/BaseOkHttp3> 下载
 
 ## 目录
 · <a href="#一般请求">一般请求</a>
@@ -484,7 +484,7 @@ BaseOkHttp.serviceUrl = "https://www.example.com";
 ```
 HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new ResponseListener() {...});
 ```
-那么实际请求地址即 https://www.example.com/femaleNameApi ，使用更加轻松方便。
+那么实际请求地址即 <https://www.example.com/femaleNameApi> ，使用更加轻松方便。
 
 注意，设置全局请求地址后，若 HttpRequest 的请求参数地址为“http”开头，则不会拼接全局请求地址。
 
@@ -574,7 +574,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
-本项目中使用的网络请求底层框架为square.okHttp3(https://github.com/square/okhttp )，感谢其为开源做出的贡献。
+本项目中使用的网络请求底层框架为square.okHttp3(<https://github.com/square/okhttp> )，感谢其为开源做出的贡献。
 
 相关协议如下：
 ```
@@ -592,6 +592,10 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.1：
+- 新增 setJsonParameter(JsonMap) 方法用以直接设置 json 请求参数；
+- JsonMap 和 JsonList 新增 toString() 可根据内容变化输出 json 文本；
+
 v3.1.0：
 - 新增 setJsonResponseListener 返回监听器，可直接返回已解析的 jsonMap，新增解析 Json 异常：DecodeJsonException；
 - 新增文件下载功能，以及下载进度监听器 OnDownloadListener；

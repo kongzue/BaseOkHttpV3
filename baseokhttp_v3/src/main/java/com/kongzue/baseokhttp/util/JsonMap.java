@@ -1,6 +1,9 @@
 package com.kongzue.baseokhttp.util;
 
+import org.json.JSONObject;
+
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -12,14 +15,8 @@ import java.util.TreeMap;
  */
 public class JsonMap extends LinkedHashMap<String, Object> {
     
-    private String jsonStr = "";
-    
     public JsonMap() {
     
-    }
-    
-    public JsonMap(String jsonStr) {
-        this.jsonStr = jsonStr;
     }
     
     public String getString(String key) {
@@ -130,6 +127,28 @@ public class JsonMap extends LinkedHashMap<String, Object> {
     
     @Override
     public String toString() {
-        return jsonStr;
+        return getJsonObj().toString();
+    }
+    
+    public JSONObject getJsonObj() {
+        JSONObject main = null;
+        try {
+            main = new JSONObject();
+            
+            Set<String> keys = keySet();
+            for (String key : keys) {
+                Object value = get(key);
+                if (value instanceof JsonMap) {
+                    main.put(key, ((JsonMap) value).getJsonObj());
+                } else if (value instanceof JsonList) {
+                    main.put(key, ((JsonList) value).getJsonArray());
+                } else {
+                    main.put(key, value);
+                }
+            }
+        } catch (Exception e) {
+        
+        }
+        return main;
     }
 }

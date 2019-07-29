@@ -1,7 +1,11 @@
 package com.kongzue.baseokhttp.util;
 
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Author: @Kongzue
@@ -12,25 +16,19 @@ import java.util.ArrayList;
  */
 public class JsonList extends ArrayList {
     
-    private String jsonStr = "";
-    
     public JsonList() {
     
-    }
-    
-    public JsonList(String jsonStr) {
-        this.jsonStr = jsonStr;
     }
     
     public String getString(int index) {
         Object value = get(index);
         return value == null ? "" : value + "";
     }
-
+    
     public int getInt(int index) {
         return getInt(index, 0);
     }
-
+    
     public int getInt(int index, int emptyValue) {
         int result = emptyValue;
         try {
@@ -39,11 +37,11 @@ public class JsonList extends ArrayList {
         }
         return result;
     }
-
+    
     public boolean getBoolean(int index) {
         return getBoolean(index, false);
     }
-
+    
     public boolean getBoolean(int index, boolean emptyValue) {
         boolean result = emptyValue;
         try {
@@ -52,11 +50,11 @@ public class JsonList extends ArrayList {
         }
         return result;
     }
-
+    
     public long getLong(int index) {
         return getLong(index, 0);
     }
-
+    
     public long getLong(int index, long emptyValue) {
         long result = emptyValue;
         try {
@@ -65,11 +63,11 @@ public class JsonList extends ArrayList {
         }
         return result;
     }
-
+    
     public short getShort(int index) {
         return getShort(index, (short) 0);
     }
-
+    
     public short getShort(int index, short emptyValue) {
         short result = emptyValue;
         try {
@@ -78,11 +76,11 @@ public class JsonList extends ArrayList {
         }
         return result;
     }
-
+    
     public double getDouble(int index) {
         return getDouble(index, 0);
     }
-
+    
     public double getDouble(int index, double emptyValue) {
         double result = emptyValue;
         try {
@@ -91,11 +89,11 @@ public class JsonList extends ArrayList {
         }
         return result;
     }
-
+    
     public float getFloat(int index) {
         return getFloat(index, 0);
     }
-
+    
     public float getFloat(int index, float emptyValue) {
         float result = emptyValue;
         try {
@@ -109,7 +107,7 @@ public class JsonList extends ArrayList {
         Object value = get(index);
         try {
             return value == null ? new JsonList() : (JsonList) value;
-        }catch (Exception e){
+        } catch (Exception e) {
             return new JsonList();
         }
     }
@@ -118,7 +116,7 @@ public class JsonList extends ArrayList {
         Object value = get(index);
         try {
             return value == null ? new JsonMap() : (JsonMap) value;
-        }catch (Exception e){
+        } catch (Exception e) {
             return new JsonMap();
         }
     }
@@ -130,6 +128,28 @@ public class JsonList extends ArrayList {
     
     @Override
     public String toString() {
-        return jsonStr;
+        return getJsonArray().toString();
+    }
+    
+    public JSONArray getJsonArray() {
+        JSONArray main = null;
+        try {
+            main = new JSONArray();
+            
+            for (int i = 0; i < size(); i++) {
+                Object item = get(i);
+                if (item instanceof JsonMap) {
+                    main.put(((JsonMap) item).getJsonObj());
+                } else if (item instanceof JsonList) {
+                    main.put(((JsonList) item).getJsonArray());
+                } else {
+                    main.put(item);
+                }
+            }
+            
+        } catch (Exception e) {
+        
+        }
+        return main;
     }
 }

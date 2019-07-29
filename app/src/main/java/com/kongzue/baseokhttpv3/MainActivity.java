@@ -21,6 +21,8 @@ import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
+import com.kongzue.baseokhttp.util.JsonFormat;
+import com.kongzue.baseokhttp.util.JsonList;
 import com.kongzue.baseokhttp.util.JsonMap;
 import com.kongzue.baseokhttp.util.JsonUtil;
 import com.kongzue.baseokhttp.util.Parameter;
@@ -89,12 +91,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
-                HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new ResponseListener() {
+                HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new JsonResponseListener() {
                     @Override
-                    public void onResponse(String response, Exception error) {
+                    public void onResponse(JsonMap main, Exception error) {
                         progressDialog.dismiss();
                         if (error == null) {
-                            resultHttp.setText(response);
+                            resultHttp.setText(main.toString());
                         } else {
                             resultHttp.setText("请求失败");
                             Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();

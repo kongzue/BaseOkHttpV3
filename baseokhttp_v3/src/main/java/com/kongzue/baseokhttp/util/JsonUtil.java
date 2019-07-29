@@ -21,7 +21,7 @@ public class JsonUtil {
     
     public static Object deCodeJson(String jsonStr) {
         jsonStr = jsonStr.replace(LINE_SEPARATOR, "");
-        JsonMap result = new JsonMap(jsonStr);
+        JsonMap result = new JsonMap();
         try {
             if (jsonStr.startsWith("{")) {
                 JSONObject jsonObject = new JSONObject(jsonStr);
@@ -59,7 +59,7 @@ public class JsonUtil {
     }
     
     public static JsonList deCodeJsonArray(String jsonStr) {
-        JsonList result = new JsonList(jsonStr);
+        JsonList result = new JsonList();
         try {
             JSONArray jsonArray = new JSONArray(jsonStr);
             for (int i = 0; i < jsonArray.length(); i++) {
