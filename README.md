@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.1-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.2-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.1/link">
-<img src="https://img.shields.io/badge/Maven-3.1.1-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.2/link">
+<img src="https://img.shields.io/badge/Maven-3.1.2-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.1</version>
+  <version>3.1.2</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.1'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.2'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -75,6 +75,8 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.1'
 ···· <a href="#请求超时">请求超时</a>
 
 ···· <a href="#停止请求">停止请求</a>
+
+···· <a href="#Cookie">Cookie</a>
 
 · <a href="#开源协议">开源协议</a>
 
@@ -590,7 +592,18 @@ BaseOkHttp.TIME_OUT_DURATION = 10;
 ### 停止请求
 可使用以下方法停止请求过程：
 ```
-stop();     //停止请求
+httpRequest。stop();     //停止请求
+```
+
+### Cookie
+设置 Cookie 请求头：
+```
+httpRequest.setCookie(String);
+```
+
+开启自动存储和携带服务端返回的 Cookie：
+```
+BaseOkHttp.autoSaveCookies = true;
 ```
 
 ## 开源协议
@@ -628,6 +641,11 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.2:
+- 修复了 url 传入 null 可能造成异常的问题；
+- 代码格式化规范；
+- 新增 Cookie 管理方法，详情参见 <a href="#Cookie">Cookie</a>；
+
 v3.1.1：
 - 新增 setJsonParameter(JsonMap) 方法用以直接设置 json 请求参数；
 - JsonMap 和 JsonList 新增 toString() 可根据内容变化输出 json 文本；

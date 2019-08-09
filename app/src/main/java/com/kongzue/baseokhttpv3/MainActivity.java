@@ -9,10 +9,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kongzue.baseframework.BaseAdapter;
+import com.kongzue.baseframework.interfaces.SimpleAdapterSettings;
 import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     
     private Button btnHttp;
+    private ListView listView;
     private TextView resultHttp;
     private Button btnConnect;
     private Button btnDisconnect;
@@ -48,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnDownloadCancel;
     private ProgressBar psgDownload;
     
+    
     private BaseWebSocket baseWebSocket;
     
     @Override
@@ -56,8 +61,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         
         context = this;
-        
+    
         btnHttp = findViewById(R.id.btn_http);
+        listView = findViewById(R.id.listView);
         resultHttp = findViewById(R.id.result_http);
         btnConnect = findViewById(R.id.btn_connect);
         btnDisconnect = findViewById(R.id.btn_disconnect);
@@ -96,7 +102,27 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JsonMap main, Exception error) {
                         progressDialog.dismiss();
                         if (error == null) {
-                            resultHttp.setText(main.toString());
+                            //resultHttp.setText(main.toString());
+                            JsonList dataList = main.getList("data");
+                            
+                            BaseAdapter<ViewHolder,JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
+                                    MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
+                                @Override
+                                public ViewHolder setViewHolder(View convertView) {
+                                    ViewHolder viewHolder = new ViewHolder();
+                                    viewHolder.txtList = convertView.findViewById(R.id.txt_list);
+    
+                                    return viewHolder;
+                                }
+    
+                                @Override
+                                public void setData(ViewHolder viewHolder, JsonMap data, int index) {
+                                    viewHolder.txtList.setText(data.getString("femalename"));
+                                }
+                            });
+    
+                            listView.setAdapter(baseAdapter);
+                            
                         } else {
                             resultHttp.setText("请求失败");
                             Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
@@ -336,5 +362,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (baseWebSocket != null) baseWebSocket.disConnect();
+    }
+    
+    class ViewHolder{
+        TextView txtList;
     }
 }

@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -38,6 +40,9 @@ import javax.net.ssl.TrustManagerFactory;
 import baseokhttp3.Cache;
 import baseokhttp3.Call;
 import baseokhttp3.Callback;
+import baseokhttp3.Cookie;
+import baseokhttp3.CookieJar;
+import baseokhttp3.HttpUrl;
 import baseokhttp3.MediaType;
 import baseokhttp3.MultipartBody;
 import baseokhttp3.OkHttpClient;
@@ -47,11 +52,11 @@ import baseokhttp3.Response;
 import static com.kongzue.baseokhttp.util.BaseOkHttp.*;
 
 /**
- * Author: @Kongzue
- * Github: https://github.com/kongzue/
- * Homepage: http://kongzue.com/
- * Mail: myzcxhh@live.cn
- * CreateTime: 2018/12/5 17:25
+ * @author: Kongzue
+ * @github: https://github.com/kongzue/
+ * @homepage: http://kongzue.com/
+ * @mail: myzcxhh@live.cn
+ * @createTime: 2018/12/5 17:25
  */
 public class HttpRequest {
     
@@ -68,6 +73,10 @@ public class HttpRequest {
     private String url;
     private String jsonParameter;
     private String stringParameter;
+    
+    private String cookieStr;
+    private HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
+    
     private int requestType;
     
     private boolean isSending;
@@ -260,7 +269,9 @@ public class HttpRequest {
         }
         
         try {
-            if (parameter == null) parameter = new Parameter();
+            if (parameter == null) {
+                parameter = new Parameter();
+            }
             
             //全局参数拦截处理
             if (parameterInterceptListener != null) {
@@ -274,13 +285,13 @@ public class HttpRequest {
                 }
             }
             
-            if (!url.startsWith("http")) {
-                url = serviceUrl + url;
-            }
             if (isNull(url)) {
                 Log.e(">>>", "-------------------------------------");
                 Log.e(">>>", "创建请求失败: 请求地址不能为空");
                 Log.e(">>>", "=====================================");
+            }
+            if (!url.startsWith("http")) {
+                url = serviceUrl + url;
             }
             
             if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
@@ -312,16 +323,18 @@ public class HttpRequest {
                         if (entry.getValue() instanceof File) {
                             File file = (File) entry.getValue();
                             multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
-                            if (DEBUGMODE)
+                            if (DEBUGMODE) {
                                 Log.i(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
+                            }
                         } else if (entry.getValue() instanceof List) {
                             List valueList = (List) entry.getValue();
                             for (Object value : valueList) {
                                 if (value instanceof File) {
                                     File file = (File) value;
                                     multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
-                                    if (DEBUGMODE)
+                                    if (DEBUGMODE) {
                                         Log.i(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
+                                    }
                                 } else {
                                     multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
                                 }
@@ -383,20 +396,29 @@ public class HttpRequest {
             }
             
             //请求头处理
-            if (DEBUGMODE) Log.i(">>>", "添加请求头:");
+            if (DEBUGMODE) {
+                Log.i(">>>", "添加请求头:");
+            }
             if (overallHeader != null && !overallHeader.entrySet().isEmpty()) {
                 for (Map.Entry<String, Object> entry : overallHeader.entrySet()) {
                     builder.addHeader(entry.getKey(), entry.getValue() + "");
-                    if (DEBUGMODE) Log.i(">>>>>>", entry.getKey() + "=" + entry.getValue());
+                    if (DEBUGMODE) {
+                        Log.i(">>>>>>", entry.getKey() + "=" + entry.getValue());
+                    }
                 }
             }
             if (headers != null && !headers.entrySet().isEmpty()) {
                 for (Map.Entry<String, Object> entry : headers.entrySet()) {
                     builder.addHeader(entry.getKey(), entry.getValue() + "");
-                    if (DEBUGMODE) Log.i(">>>>>>", entry.getKey() + "=" + entry.getValue());
+                    if (DEBUGMODE) {
+                        Log.i(">>>>>>", entry.getKey() + "=" + entry.getValue());
+                    }
                 }
             }
             
+            if (!isNull(cookieStr)) {
+                builder.addHeader("Cookie", cookieStr);
+            }
             request = builder.build();
             
             if (DEBUGMODE) {
@@ -421,7 +443,9 @@ public class HttpRequest {
             httpCall.enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, final IOException e) {
-                    if (!isSending) return;
+                    if (!isSending) {
+                        return;
+                    }
                     isSending = false;
                     if (DEBUGMODE) {
                         Log.e(">>>", "请求失败:" + url);
@@ -444,16 +468,20 @@ public class HttpRequest {
                         public void run() {
                             if (responseInterceptListener != null) {
                                 if (responseInterceptListener.onResponse(context, url, null, e)) {
-                                    if (responseListener != null)
+                                    if (responseListener != null) {
                                         responseListener.onResponse(null, e);
-                                    if (jsonResponseListener != null)
+                                    }
+                                    if (jsonResponseListener != null) {
                                         jsonResponseListener.onResponse(null, e);
+                                    }
                                 }
                             } else {
-                                if (responseListener != null)
+                                if (responseListener != null) {
                                     responseListener.onResponse(null, e);
-                                if (jsonResponseListener != null)
+                                }
+                                if (jsonResponseListener != null) {
                                     jsonResponseListener.onResponse(null, e);
+                                }
                             }
                         }
                     });
@@ -461,7 +489,9 @@ public class HttpRequest {
                 
                 @Override
                 public void onResponse(Call call, baseokhttp3.Response response) throws IOException {
-                    if (!isSending) return;
+                    if (!isSending) {
+                        return;
+                    }
                     isSending = false;
                     final String strResponse = response.body().string();
                     if (DEBUGMODE) {
@@ -489,8 +519,9 @@ public class HttpRequest {
                         public void run() {
                             if (responseInterceptListener != null) {
                                 if (responseInterceptListener.onResponse(context, url, strResponse, null)) {
-                                    if (responseListener != null)
+                                    if (responseListener != null) {
                                         responseListener.onResponse(strResponse, null);
+                                    }
                                     if (jsonResponseListener != null) {
                                         JsonMap data = JsonUtil.deCodeJsonObject(strResponse);
                                         if (data != null) {
@@ -501,8 +532,9 @@ public class HttpRequest {
                                     }
                                 }
                             } else {
-                                if (responseListener != null)
+                                if (responseListener != null) {
                                     responseListener.onResponse(strResponse, null);
+                                }
                                 if (jsonResponseListener != null) {
                                     JsonMap data = JsonUtil.deCodeJsonObject(strResponse);
                                     if (data != null) {
@@ -527,7 +559,9 @@ public class HttpRequest {
                         Log.i(">>>>>>", stringParameter);
                     }
                 } else {
-                    if (parameter != null) parameter.toPrintString(1);
+                    if (parameter != null) {
+                        parameter.toPrintString(1);
+                    }
                 }
                 Log.e(">>>", "错误:" + e.toString());
                 e.printStackTrace();
@@ -538,19 +572,19 @@ public class HttpRequest {
     
     private void download() {
         try {
-            if (!url.startsWith("http")) {
-                url = serviceUrl + url;
-            }
             if (isNull(url)) {
                 Log.e(">>>", "-------------------------------------");
                 Log.e(">>>", "创建请求失败: 请求地址不能为空");
                 Log.e(">>>", "=====================================");
             }
+            if (!url.startsWith("http")) {
+                url = serviceUrl + url;
+            }
             
             if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
                 okHttpClient = getOkHttpClient(context, context.getAssets().open(SSLInAssetsFileName));
             } else {
-                okHttpClient = new OkHttpClient.Builder()
+                OkHttpClient.Builder builder = new OkHttpClient.Builder()
                         .retryOnConnectionFailure(false)
                         .connectTimeout(30, TimeUnit.SECONDS)
                         .hostnameVerifier(new HostnameVerifier() {
@@ -558,8 +592,29 @@ public class HttpRequest {
                             public boolean verify(String hostname, SSLSession session) {
                                 return true;
                             }
-                        })
-                        .build();
+                        });
+                
+                if (autoSaveCookies) {
+                    builder.cookieJar(new CookieJar() {
+                        @Override
+                        public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+                            cookieStore.put(url, cookies);
+                            if (DEBUGMODE) {
+                                for (Cookie cookie : cookies) {
+                                    Log.i("<<<", "saveCookie: " + cookie.name() + " path:" + cookie.path());
+                                }
+                            }
+                        }
+                        
+                        @Override
+                        public List<Cookie> loadForRequest(HttpUrl url) {
+                            List<Cookie> cookies = cookieStore.get(url.host());
+                            return cookies != null ? cookies : new ArrayList<Cookie>();
+                        }
+                    });
+                }
+                
+                okHttpClient = builder.build();
             }
             
             //创建请求
@@ -675,7 +730,9 @@ public class HttpRequest {
     private Timer timer;
     
     private void checkTimeOut() {
-        if (timer != null) timer.cancel();
+        if (timer != null) {
+            timer.cancel();
+        }
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -687,10 +744,12 @@ public class HttpRequest {
                     runOnMain(new Runnable() {
                         @Override
                         public void run() {
-                            if (responseListener != null)
+                            if (responseListener != null) {
                                 responseListener.onResponse(null, new TimeOutException());
-                            if (jsonResponseListener != null)
+                            }
+                            if (jsonResponseListener != null) {
                                 jsonResponseListener.onResponse(null, new TimeOutException());
+                            }
                         }
                     });
                 }
@@ -710,8 +769,9 @@ public class HttpRequest {
                     .hostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(String hostname, SSLSession session) {
-                            if (DEBUGMODE)
+                            if (DEBUGMODE) {
                                 Log.i("<<<", "hostnameVerifier: " + hostname);
+                            }
                             if (httpsVerifyServiceUrl) {
                                 if (serviceUrl.contains(hostname)) {
                                     return true;
@@ -726,6 +786,25 @@ public class HttpRequest {
                     .cache(new Cache(sdcache.getAbsoluteFile(), cacheSize));
             if (certificates != null) {
                 builder.sslSocketFactory(getSSLSocketFactory(certificates));
+            }
+            if (autoSaveCookies) {
+                builder.cookieJar(new CookieJar() {
+                    @Override
+                    public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+                        cookieStore.put(url, cookies);
+                        if (DEBUGMODE) {
+                            for (Cookie cookie : cookies) {
+                                Log.i("<<<", "saveCookie: " + cookie.name() + " path:" + cookie.path());
+                            }
+                        }
+                    }
+                    
+                    @Override
+                    public List<Cookie> loadForRequest(HttpUrl url) {
+                        List<Cookie> cookies = cookieStore.get(url.host());
+                        return cookies != null ? cookies : new ArrayList<Cookie>();
+                    }
+                });
             }
             okHttpClient = builder.build();
         }
@@ -743,8 +822,9 @@ public class HttpRequest {
                 keyStore.setCertificateEntry(certificateAlias, certificateFactory.generateCertificate(certificate));
                 
                 try {
-                    if (certificate != null)
+                    if (certificate != null) {
                         certificate.close();
+                    }
                 } catch (IOException e) {
                 }
             }
@@ -760,7 +840,7 @@ public class HttpRequest {
     }
     
     private boolean isNull(String s) {
-        if (s == null || s.trim().isEmpty() || s.equals("null") || s.equals("(null)")) {
+        if (s == null || s.trim().isEmpty() || "null".equals(s) || "(null)".equals(s)) {
             return true;
         }
         return false;
@@ -780,7 +860,9 @@ public class HttpRequest {
     }
     
     public HttpRequest addParameter(String key, Object value) {
-        if (parameter == null) parameter = new Parameter();
+        if (parameter == null) {
+            parameter = new Parameter();
+        }
         parameter.add(key, value);
         this.jsonParameter = null;
         this.stringParameter = null;
@@ -811,13 +893,24 @@ public class HttpRequest {
     }
     
     public HttpRequest addHeaders(String key, String value) {
-        if (headers == null) headers = new Parameter();
+        if (headers == null) {
+            headers = new Parameter();
+        }
         headers.add(key, value);
         return this;
     }
     
     public HttpRequest setHeaders(Parameter headers) {
         this.headers = headers;
+        return this;
+    }
+    
+    public HashMap<HttpUrl, List<Cookie>> getCookies() {
+        return cookieStore;
+    }
+    
+    public HttpRequest cleanCookies() {
+        this.cookieStore = new HashMap<>();
         return this;
     }
     
@@ -866,6 +959,15 @@ public class HttpRequest {
         download();
     }
     
+    public String getCookie() {
+        return cookieStr;
+    }
+    
+    public HttpRequest setCookie(String cookie) {
+        this.cookieStr = cookieStr;
+        return this;
+    }
+    
     public HttpRequest setMediaType(MediaType mediaType) {
         MEDIA_TYPE = mediaType;
         return this;
@@ -881,7 +983,9 @@ public class HttpRequest {
     }
     
     public void stop() {
-        if (httpCall != null) httpCall.cancel();
+        if (httpCall != null) {
+            httpCall.cancel();
+        }
     }
     
     private void runOnMain(Runnable runnable) {

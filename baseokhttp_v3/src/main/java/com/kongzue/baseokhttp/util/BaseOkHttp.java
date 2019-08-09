@@ -52,4 +52,6 @@ public class BaseOkHttp {
     //WebSocket最大重连间隔（单位：秒）
     public static int websocketReconnectTime = 120;
     
+    //自动缓存 Cookies
+    public static boolean autoSaveCookies;
 }
