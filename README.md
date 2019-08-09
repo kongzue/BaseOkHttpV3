@@ -408,7 +408,43 @@ baseWebSocket.reConnect();
 
 从 3.1.0 版本起提供直接解析返回值为 jsonMap 对象，详见 <a href="#一般请求">一般请求</a>
 
-### 对于未知文本
+### 请求后自动返回 JsonMap
+
+使用 JsonResponseListener 即可在返回时直接处理 json 对象：
+```
+HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new JsonResponseListener() {
+    @Override
+    public void onResponse(JsonMap main, Exception error) {
+        progressDialog.dismiss();
+        if (error == null) {
+            resultHttp.setText(main.toString());
+        } else {
+            resultHttp.setText("请求失败");
+            Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+});
+```
+
+也可以这样写：
+```
+HttpRequest.build(context, "/femaleNameApi")
+        .addParameter("page", "1")
+        .setJsonResponseListener(new JsonResponseListener() {
+            @Override
+            public void onResponse(JsonMap main, Exception error) {
+                progressDialog.dismiss();
+                if (error == null) {
+                    resultHttp.setText(main.toString());
+                } else {
+                    resultHttp.setText("请求失败");
+                    Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+```
+
+### 对于未知 Json 文本
 
 ```
 Object obj = JsonUtil.deCodeJson(JsonStr);
@@ -426,13 +462,13 @@ if(obj != null){
 ```
 请注意对 obj 进行判空处理，若解析失败，则会返回 null。
 
-### 对于已知JsonObject文本
+### 对于已知 JsonObject 文本
 ```
 JsonMap map = JsonUtil.deCodeJsonObject(JsonStr);        //直接解析为Map对象，JsonMap继承自LinkedHashMap，按照入栈顺序存储键值对集合
 ```
 请注意对 map 进行判空处理，若解析失败，则会返回 null。
 
-### 对于已知JsonArray文本
+### 对于已知 JsonArray 文本
 ```
 JsonList list = JsonUtil.deCodeJsonArray(JsonStr);        //直接解析为List对象，JsonList继承自ArrayList
 ```
