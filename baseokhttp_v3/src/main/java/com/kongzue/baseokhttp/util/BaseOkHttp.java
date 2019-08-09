@@ -3,6 +3,12 @@ package com.kongzue.baseokhttp.util;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 
+import java.util.HashMap;
+import java.util.List;
+
+import baseokhttp3.Cookie;
+import baseokhttp3.HttpUrl;
+
 /**
  * Author: @Kongzue
  * Github: https://github.com/kongzue/
@@ -54,4 +60,7 @@ public class BaseOkHttp {
     
     //自动缓存 Cookies
     public static boolean autoSaveCookies;
+    
+    //已存储的 Cookie 队列
+    protected HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
 }

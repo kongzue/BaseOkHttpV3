@@ -606,6 +606,11 @@ httpRequest.setCookie(String);
 BaseOkHttp.autoSaveCookies = true;
 ```
 
+获取已保存 Cookie 队列：
+```
+httpRequest.getCookies();
+```
+
 ## 开源协议
 ```
 Copyright Kongzue BaseOkHttp

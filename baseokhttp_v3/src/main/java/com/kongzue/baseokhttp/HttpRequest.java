@@ -49,8 +49,6 @@ import baseokhttp3.OkHttpClient;
 import baseokhttp3.RequestBody;
 import baseokhttp3.Response;
 
-import static com.kongzue.baseokhttp.util.BaseOkHttp.*;
-
 /**
  * @author: Kongzue
  * @github: https://github.com/kongzue/
@@ -58,7 +56,7 @@ import static com.kongzue.baseokhttp.util.BaseOkHttp.*;
  * @mail: myzcxhh@live.cn
  * @createTime: 2018/12/5 17:25
  */
-public class HttpRequest {
+public class HttpRequest extends BaseOkHttp {
     
     private OkHttpClient okHttpClient;
     private Call httpCall;
@@ -75,7 +73,6 @@ public class HttpRequest {
     private String stringParameter;
     
     private String cookieStr;
-    private HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
     
     private int requestType;
     
