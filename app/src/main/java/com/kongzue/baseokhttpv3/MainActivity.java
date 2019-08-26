@@ -37,7 +37,6 @@ import baseokio.ByteString;
 
 public class MainActivity extends AppCompatActivity {
     
-    private Context context;
     private ProgressDialog progressDialog;
     
     private Button btnHttp;
@@ -60,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        context = this;
-    
         btnHttp = findViewById(R.id.btn_http);
         listView = findViewById(R.id.listView);
         resultHttp = findViewById(R.id.result_http);
@@ -75,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         psgDownload = findViewById(R.id.psg_download);
         
         BaseOkHttp.DEBUGMODE = true;
-        BaseOkHttp.serviceUrl = "https://www.apiopen.top";
+        BaseOkHttp.serviceUrl = "https://api.apiopen.top";
         BaseOkHttp.overallHeader = new Parameter()
                 .add("Charset", "UTF-8")
                 .add("Content-Type", "application/json")
@@ -96,39 +93,42 @@ public class MainActivity extends AppCompatActivity {
         btnHttp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
-                HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new JsonResponseListener() {
-                    @Override
-                    public void onResponse(JsonMap main, Exception error) {
-                        progressDialog.dismiss();
-                        if (error == null) {
-                            //resultHttp.setText(main.toString());
-                            JsonList dataList = main.getList("data");
-                            
-                            BaseAdapter<ViewHolder,JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
-                                    MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
-                                @Override
-                                public ViewHolder setViewHolder(View convertView) {
-                                    ViewHolder viewHolder = new ViewHolder();
-                                    viewHolder.txtList = convertView.findViewById(R.id.txt_list);
-    
-                                    return viewHolder;
+                progressDialog = ProgressDialog.show(MainActivity.this, "请稍候", "请求中...");
+                HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
+                                .add("page", "1")
+                                .add("count", 5)
+                        , new JsonResponseListener() {
+                            @Override
+                            public void onResponse(JsonMap main, Exception error) {
+                                progressDialog.dismiss();
+                                if (error == null) {
+                                    resultHttp.setText(main.toString());
+                                    JsonList dataList = main.getList("result");
+                                    
+                                    BaseAdapter<ViewHolder, JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
+                                            MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
+                                        @Override
+                                        public ViewHolder setViewHolder(View convertView) {
+                                            ViewHolder viewHolder = new ViewHolder();
+                                            viewHolder.txtList = convertView.findViewById(R.id.txt_list);
+                                            
+                                            return viewHolder;
+                                        }
+                                        
+                                        @Override
+                                        public void setData(ViewHolder viewHolder, JsonMap data, int index) {
+                                            viewHolder.txtList.setText(data.getString("title"));
+                                        }
+                                    });
+                                    
+                                    listView.setAdapter(baseAdapter);
+                                    
+                                } else {
+                                    resultHttp.setText("请求失败");
+                                    Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
                                 }
-    
-                                @Override
-                                public void setData(ViewHolder viewHolder, JsonMap data, int index) {
-                                    viewHolder.txtList.setText(data.getString("femalename"));
-                                }
-                            });
-    
-                            listView.setAdapter(baseAdapter);
-                            
-                        } else {
-                            resultHttp.setText("请求失败");
-                            Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                            }
+                        });
 
 //                HttpRequest.build(context,"/femaleNameApi")
 //                        .addHeaders("Charset", "UTF-8")
@@ -303,11 +303,11 @@ public class MainActivity extends AppCompatActivity {
                 btnDownloadCancel.setEnabled(true);
                 httpRequest = HttpRequest.build(MainActivity.this, "http://cdn.to-future.net/apk/tofuture.apk");
                 httpRequest.doDownload(
-                        new File(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "BaseOkHttpV3"), "to-future.apk"),
+                        new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "to-future.apk"),
                         new OnDownloadListener() {
                             @Override
                             public void onDownloadSuccess(File file) {
-                                Toast.makeText(context, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
+                                Toast.makeText(MainActivity.this, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
                             }
                             
                             @Override
@@ -317,32 +317,32 @@ public class MainActivity extends AppCompatActivity {
                             
                             @Override
                             public void onDownloadFailed(Exception e) {
-                                Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT);
+                                Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT);
                             }
                         }
                 );
-    
-                HttpRequest.DOWNLOAD(
-                        MainActivity.this,
-                        "http://cdn.to-future.net/apk/tofuture.apk",
-                        new File(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "BaseOkHttpV3"), "to-future.apk"),
-                        new OnDownloadListener() {
-                            @Override
-                            public void onDownloadSuccess(File file) {
-                                Toast.makeText(context, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
-                            }
-    
-                            @Override
-                            public void onDownloading(int progress) {
-                                psgDownload.setProgress(progress);
-                            }
-    
-                            @Override
-                            public void onDownloadFailed(Exception e) {
-                                Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT);
-                            }
-                        }
-                );
+                
+//                HttpRequest.DOWNLOAD(
+//                        MainActivity.this,
+//                        "http://cdn.to-future.net/apk/tofuture.apk",
+//                        new File(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "BaseOkHttpV3"), "to-future.apk"),
+//                        new OnDownloadListener() {
+//                            @Override
+//                            public void onDownloadSuccess(File file) {
+//                                Toast.makeText(MainActivity.this, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
+//                            }
+//
+//                            @Override
+//                            public void onDownloading(int progress) {
+//                                psgDownload.setProgress(progress);
+//                            }
+//
+//                            @Override
+//                            public void onDownloadFailed(Exception e) {
+//                                Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT);
+//                            }
+//                        }
+//                );
             }
         });
         
@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
         if (baseWebSocket != null) baseWebSocket.disConnect();
     }
     
-    class ViewHolder{
+    class ViewHolder {
         TextView txtList;
     }
 }

@@ -1,9 +1,17 @@
 package com.kongzue.baseokhttp.listener;
 
+import com.kongzue.baseokhttp.util.JsonMap;
+
 /**
  * Created by myzcx on 2017/12/27.
  */
 
-public interface ResponseListener extends BaseResponseListener {
-    void onResponse(String response, Exception error);
+public abstract class ResponseListener implements BaseResponseListener {
+    
+    @Override
+    public void onResponse(Object response, Exception error) {
+        onResponse(response.toString(), error);
+    }
+    
+    public abstract void onResponse(String main, Exception error);
 }

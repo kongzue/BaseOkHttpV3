@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
@@ -64,10 +65,11 @@ public class HttpRequest extends BaseOkHttp {
     
     private Parameter parameter;
     private Parameter headers;
-    private Context context;
+    private WeakReference<Context> context;
     private HttpRequest httpRequest;
-    private ResponseListener responseListener;
-    private JsonResponseListener jsonResponseListener;
+//    private ResponseListener responseListener;
+//    private JsonResponseListener jsonResponseListener;
+    private BaseResponseListener responseListener;
     private String url;
     private String jsonParameter;
     private String stringParameter;
@@ -87,14 +89,9 @@ public class HttpRequest extends BaseOkHttp {
     public static void POST(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.headers = headers;
-            if (listener instanceof ResponseListener) {
-                httpRequest.responseListener = (ResponseListener) listener;
-            }
-            if (listener instanceof JsonResponseListener) {
-                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
-            }
+            httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
@@ -112,14 +109,9 @@ public class HttpRequest extends BaseOkHttp {
     public static void JSONPOST(Context context, String url, Parameter headers, String jsonParameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.headers = headers;
-            if (listener instanceof ResponseListener) {
-                httpRequest.responseListener = (ResponseListener) listener;
-            }
-            if (listener instanceof JsonResponseListener) {
-                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
-            }
+            httpRequest.responseListener = listener;
             httpRequest.jsonParameter = jsonParameter;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
@@ -137,14 +129,9 @@ public class HttpRequest extends BaseOkHttp {
     public static void StringPOST(Context context, String url, Parameter headers, String stringParameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.headers = headers;
-            if (listener instanceof ResponseListener) {
-                httpRequest.responseListener = (ResponseListener) listener;
-            }
-            if (listener instanceof JsonResponseListener) {
-                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
-            }
+            httpRequest.responseListener = listener;
             httpRequest.stringParameter = stringParameter;
             httpRequest.url = url;
             httpRequest.requestType = POST_REQUEST;
@@ -162,14 +149,9 @@ public class HttpRequest extends BaseOkHttp {
     public static void GET(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.headers = headers;
-            if (listener instanceof ResponseListener) {
-                httpRequest.responseListener = (ResponseListener) listener;
-            }
-            if (listener instanceof JsonResponseListener) {
-                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
-            }
+            httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = GET_REQUEST;
@@ -187,14 +169,9 @@ public class HttpRequest extends BaseOkHttp {
     public static void PUT(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.headers = headers;
-            if (listener instanceof ResponseListener) {
-                httpRequest.responseListener = (ResponseListener) listener;
-            }
-            if (listener instanceof JsonResponseListener) {
-                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
-            }
+            httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = PUT_REQUEST;
@@ -212,14 +189,9 @@ public class HttpRequest extends BaseOkHttp {
     public static void DELETE(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.headers = headers;
-            if (listener instanceof ResponseListener) {
-                httpRequest.responseListener = (ResponseListener) listener;
-            }
-            if (listener instanceof JsonResponseListener) {
-                httpRequest.jsonResponseListener = (JsonResponseListener) listener;
-            }
+            httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
             httpRequest.url = url;
             httpRequest.requestType = DELETE_REQUEST;
@@ -232,7 +204,7 @@ public class HttpRequest extends BaseOkHttp {
     public static void DOWNLOAD(Context context, String url, File downloadFile, OnDownloadListener onDownloadListener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.url = url;
             httpRequest.doDownload(downloadFile, onDownloadListener);
         }
@@ -292,7 +264,7 @@ public class HttpRequest extends BaseOkHttp {
             }
             
             if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
-                okHttpClient = getOkHttpClient(context, context.getAssets().open(SSLInAssetsFileName));
+                okHttpClient = getOkHttpClient(context.get(), context.get().getAssets().open(SSLInAssetsFileName));
             } else {
                 okHttpClient = new OkHttpClient.Builder()
                         .retryOnConnectionFailure(false)
@@ -464,20 +436,14 @@ public class HttpRequest extends BaseOkHttp {
                         @Override
                         public void run() {
                             if (responseInterceptListener != null) {
-                                if (responseInterceptListener.onResponse(context, url, null, e)) {
+                                if (responseInterceptListener.onResponse(context.get(), url, null, e)) {
                                     if (responseListener != null) {
                                         responseListener.onResponse(null, e);
-                                    }
-                                    if (jsonResponseListener != null) {
-                                        jsonResponseListener.onResponse(null, e);
                                     }
                                 }
                             } else {
                                 if (responseListener != null) {
                                     responseListener.onResponse(null, e);
-                                }
-                                if (jsonResponseListener != null) {
-                                    jsonResponseListener.onResponse(null, e);
                                 }
                             }
                         }
@@ -515,30 +481,14 @@ public class HttpRequest extends BaseOkHttp {
                         @Override
                         public void run() {
                             if (responseInterceptListener != null) {
-                                if (responseInterceptListener.onResponse(context, url, strResponse, null)) {
+                                if (responseInterceptListener.onResponse(context.get(), url, strResponse, null)) {
                                     if (responseListener != null) {
                                         responseListener.onResponse(strResponse, null);
-                                    }
-                                    if (jsonResponseListener != null) {
-                                        JsonMap data = JsonUtil.deCodeJsonObject(strResponse);
-                                        if (data != null) {
-                                            jsonResponseListener.onResponse(data, null);
-                                        } else {
-                                            jsonResponseListener.onResponse(null, new DecodeJsonException(strResponse));
-                                        }
                                     }
                                 }
                             } else {
                                 if (responseListener != null) {
                                     responseListener.onResponse(strResponse, null);
-                                }
-                                if (jsonResponseListener != null) {
-                                    JsonMap data = JsonUtil.deCodeJsonObject(strResponse);
-                                    if (data != null) {
-                                        jsonResponseListener.onResponse(data, null);
-                                    } else {
-                                        jsonResponseListener.onResponse(null, new DecodeJsonException(strResponse));
-                                    }
                                 }
                             }
                         }
@@ -579,7 +529,7 @@ public class HttpRequest extends BaseOkHttp {
             }
             
             if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
-                okHttpClient = getOkHttpClient(context, context.getAssets().open(SSLInAssetsFileName));
+                okHttpClient = getOkHttpClient(context.get(), context.get().getAssets().open(SSLInAssetsFileName));
             } else {
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
                         .retryOnConnectionFailure(false)
@@ -744,9 +694,6 @@ public class HttpRequest extends BaseOkHttp {
                             if (responseListener != null) {
                                 responseListener.onResponse(null, new TimeOutException());
                             }
-                            if (jsonResponseListener != null) {
-                                jsonResponseListener.onResponse(null, new TimeOutException());
-                            }
                         }
                     });
                 }
@@ -849,7 +796,7 @@ public class HttpRequest extends BaseOkHttp {
     public static HttpRequest build(Context context, String url) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
-            httpRequest.context = context;
+            httpRequest.context = new WeakReference<Context>(context);
             httpRequest.url = url;
             httpRequest.httpRequest = httpRequest;
             return httpRequest;
@@ -922,7 +869,7 @@ public class HttpRequest extends BaseOkHttp {
     }
     
     public HttpRequest setJsonResponseListener(JsonResponseListener jsonResponseListener) {
-        this.jsonResponseListener = jsonResponseListener;
+        this.responseListener = jsonResponseListener;
         return this;
     }
     
@@ -986,13 +933,17 @@ public class HttpRequest extends BaseOkHttp {
     }
     
     private void runOnMain(Runnable runnable) {
-        if (context instanceof Activity) {
-            ((Activity) context).runOnUiThread(runnable);
+        if (context.get() instanceof Activity) {
+            ((Activity) context.get()).runOnUiThread(runnable);
         } else {
             if (DEBUGMODE) {
                 Log.e(">>>", "context 不是 Activity，本次请求在异步线程返回 >>>");
             }
             runnable.run();
         }
+    }
+    
+    public void onDetach(){
+        context.clear();
     }
 }

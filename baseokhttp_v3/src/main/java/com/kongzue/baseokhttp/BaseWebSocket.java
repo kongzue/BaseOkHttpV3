@@ -10,6 +10,8 @@ import android.util.Log;
 
 import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
 
+import java.lang.ref.WeakReference;
+
 import baseokhttp3.OkHttpClient;
 import baseokhttp3.Request;
 import baseokhttp3.Response;
@@ -38,7 +40,7 @@ public class BaseWebSocket {
     public final static int BREAK_NORMAL = 0;                       //正常断开
     public final static int BREAK_ABNORMAL = 1;                     //异常断开
     
-    private Context context;
+    private WeakReference<Context> context;
     private String url;
     private WebSocket webSocket;
     private OkHttpClient okHttpClient;
@@ -54,7 +56,7 @@ public class BaseWebSocket {
     public static BaseWebSocket BUILD(Context context, String url) {
         synchronized (BaseWebSocket.class) {
             BaseWebSocket baseWebSocket = new BaseWebSocket();
-            baseWebSocket.context = context;
+            baseWebSocket.context = new WeakReference<Context>(context);
             baseWebSocket.url = url;
             return baseWebSocket;
         }
@@ -64,7 +66,7 @@ public class BaseWebSocket {
     public static BaseWebSocket BUILD(Context context, String url, OkHttpClient okHttpClient) {
         synchronized (BaseWebSocket.class) {
             BaseWebSocket baseWebSocket = new BaseWebSocket();
-            baseWebSocket.context = context;
+            baseWebSocket.context = new WeakReference<Context>(context);
             baseWebSocket.url = url;
             baseWebSocket.okHttpClient = okHttpClient;
             return baseWebSocket;
@@ -94,7 +96,7 @@ public class BaseWebSocket {
     }
     
     private void buildConnect() {
-        if (!isNetworkConnected(context)) {
+        if (!isNetworkConnected(context.get())) {
             status = DISCONNECTED;
         }
         if (status != CONNECTED && status != CONNECTING) {
@@ -112,7 +114,7 @@ public class BaseWebSocket {
         if (DEBUGMODE) {
             loge("重连次数：" + reconnectCount);
         }
-        if (!isNetworkConnected(context)) {
+        if (!isNetworkConnected(context.get())) {
             status = DISCONNECTED;
             loge("网络错误");
         }
@@ -345,4 +347,7 @@ public class BaseWebSocket {
         if (DEBUGMODE)Log.e(">>>", s);
     }
     
+    public void onDetach(){
+        context.clear();
+    }
 }
