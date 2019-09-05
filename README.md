@@ -410,7 +410,7 @@ baseWebSocket.reConnect();
 
 从 3.1.0 版本起提供直接解析返回值为 jsonMap 对象，详见 <a href="#一般请求">一般请求</a>
 
-JsonMap 和 JsonList 用有构造方法 `parse(String json)` 用以直接根据 json 文本创建 JsonMap 和 JsonList 对象，可以通过该方法创建 JsonMap 或 JsonList 对象：
+JsonMap 和 JsonList 用有构建方法 `parse(String json)` 用以直接根据 json 文本创建 JsonMap 和 JsonList 对象，可以通过该方法创建 JsonMap 或 JsonList 对象：
 ```
 //通过 json 文本创建 JsonMap
 JsonMap data = JsonMap.parse("{\"key\":\"DFG1H56EH5JN3DFA\",\"token\":\"124ASFD53SDF65aSF47fgT211\"}");
@@ -657,7 +657,7 @@ limitations under the License.
 
 ## 更新日志
 v3.1.4:
-- JsonMap 和 JsonList 新增构造方法 parse(String json) 用以直接根据 json 文本创建 JsonMap 和 JsonList 对象；
+- JsonMap 和 JsonList 新增构建方法 parse(String json) 用以直接根据 json 文本创建 JsonMap 和 JsonList 对象；
 - 新增临时方法 set/getTimeoutDuration(int second) 可独立设置当前接口超时时长；
 - 参数拦截器 ParameterInterceptListener 新增参数 context 和 url；
 - 修改请求创建逻辑顺序，现在创建请求时，全局 serviceUrl 会优先和当前请求的子接口 url 合并后判断请求地址是否为空，以解决无法向服务器地址请求的问题；
