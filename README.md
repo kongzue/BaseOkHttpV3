@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.3-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.4-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.3/link">
-<img src="https://img.shields.io/badge/Maven-3.1.3-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.4/link">
+<img src="https://img.shields.io/badge/Maven-3.1.4-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.3</version>
+  <version>3.1.4</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.3'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.4'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -410,9 +410,18 @@ baseWebSocket.reConnect();
 
 从 3.1.0 版本起提供直接解析返回值为 jsonMap 对象，详见 <a href="#一般请求">一般请求</a>
 
+JsonMap 和 JsonList 用有构造方法 `parse(String json)` 用以直接根据 json 文本创建 JsonMap 和 JsonList 对象，可以通过该方法创建 JsonMap 或 JsonList 对象：
+```
+//通过 json 文本创建 JsonMap
+JsonMap data = JsonMap.parse("{\"key\":\"DFG1H56EH5JN3DFA\",\"token\":\"124ASFD53SDF65aSF47fgT211\"}");
+
+//通过 json 文本创建 JsonList
+JsonList list = JsonList.parse("[{\"answerId\":\"98\",\"questionDesc\":\"否\"},{\"answerId\":\"99\",\"questionDesc\":\"是\"}]");
+```
+
 ### 请求后自动返回 JsonMap
 
-使用 JsonResponseListener 即可在返回时直接处理 json 对象：
+使用 `JsonResponseListener` 作为返回监听器，即可在返回时直接处理 JsonMap 对象：
 ```
 HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), new JsonResponseListener() {
     @Override
@@ -570,7 +579,7 @@ BaseOkHttp.SSLInAssetsFileName = "ssl.crt";
 ```
 BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener() {
     @Override
-    public Parameter onIntercept(Parameter parameter) {
+    public Parameter onIntercept(Context context, String url, Parameter parameter) {
         parameter.add("key", "DFG1H56EH5JN3DFA");
         parameter.add("sign", makeSign(parameter.toParameterString()));
         return parameter;
@@ -582,6 +591,7 @@ private String makeSign(String parameterString){
     ...
 }
 ```
+onIntercept 返回值中，context 为当前请求的上下文索引，url 为当前请求地址，parameter 为请求参数，在处理完后，请注意需要 return 处理后的 parameter。
 
 ### 请求超时
 使用以下代码设置请求超时时间（单位：秒）
@@ -646,6 +656,16 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.4:
+- JsonMap 和 JsonList 新增构造方法 parse(String json) 用以直接根据 json 文本创建 JsonMap 和 JsonList 对象；
+- 新增临时方法 set/getTimeoutDuration(int second) 可独立设置当前接口超时时长；
+- 参数拦截器 ParameterInterceptListener 新增参数 context 和 url；
+- 修改请求创建逻辑顺序，现在创建请求时，全局 serviceUrl 会优先和当前请求的子接口 url 合并后判断请求地址是否为空，以解决无法向服务器地址请求的问题；
+- 修改请求创建逻辑顺序，现在创建请求时，全局参数会在拦截器前优先添加至参数列表，以便于可以在拦截器中处理全局参数；
+- 新增 setJsonParameter(JsonList) 方法；
+- 修复了请求超时的日志未遵循 DEBUGMODE 的 bug；
+- 修复了 JsonUtil 当字符串存在中括号文本时存在的解析异常问题；
+
 v3.1.3:
 - 修改 Context 为 WeakReference 弱引用，以便解决内存泄漏问题，并提供了 onDetach() 方法用于清空 Context 引用。
 - 修改 BaseResponseListener 结构，以便于后续更多回调扩展；

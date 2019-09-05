@@ -30,9 +30,11 @@ public class JsonUtil {
                     String key = keys.next() + "";
                     String value = jsonObject.optString(key);
                     if (value.startsWith("{")) {
-                        result.put(key, deCodeJson(value));
+                        JsonMap object = deCodeJsonObject(value);
+                        result.put(key, object == null ? value : object);
                     } else if (value.startsWith("[")) {
-                        result.put(key, deCodeJsonArray(value));
+                        JsonList array = deCodeJsonArray(value);
+                        result.put(key, array == null ? value : array);
                     } else {
                         result.put(key, value);
                     }
@@ -42,17 +44,18 @@ public class JsonUtil {
                 return deCodeJsonArray(jsonStr);
             } else {
                 loge("参数不是一个合法的json：" + jsonStr);
+                return jsonStr;
             }
         } catch (Exception e) {
             loge("参数不是一个合法的json：" + jsonStr);
+            return jsonStr;
         }
-        return null;
     }
     
     public static JsonMap deCodeJsonObject(String jsonStr) {
-        try{
+        try {
             return (JsonMap) deCodeJson(jsonStr);
-        }catch (Exception e){
+        } catch (Exception e) {
             loge("参数不是一个合法的jsonObject：" + jsonStr);
             return null;
         }
@@ -73,15 +76,15 @@ public class JsonUtil {
             return result;
         } catch (Exception e) {
             loge("不是一个合法的json：" + jsonStr);
+            return null;
         }
-        return null;
     }
     
     private static void loge(String s) {
         Log.e(">>>", s);
     }
-
-    private JsonUtil(){
-
+    
+    private JsonUtil() {
+    
     }
 }

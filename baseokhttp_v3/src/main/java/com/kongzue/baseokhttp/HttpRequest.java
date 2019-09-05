@@ -12,6 +12,7 @@ import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.JsonFormat;
+import com.kongzue.baseokhttp.util.JsonList;
 import com.kongzue.baseokhttp.util.JsonMap;
 import com.kongzue.baseokhttp.util.JsonUtil;
 import com.kongzue.baseokhttp.util.Parameter;
@@ -50,6 +51,8 @@ import baseokhttp3.OkHttpClient;
 import baseokhttp3.RequestBody;
 import baseokhttp3.Response;
 
+//待办：单独设置某一次请求超时时间
+
 /**
  * @author: Kongzue
  * @github: https://github.com/kongzue/
@@ -67,12 +70,11 @@ public class HttpRequest extends BaseOkHttp {
     private Parameter headers;
     private WeakReference<Context> context;
     private HttpRequest httpRequest;
-//    private ResponseListener responseListener;
-//    private JsonResponseListener jsonResponseListener;
     private BaseResponseListener responseListener;
     private String url;
     private String jsonParameter;
     private String stringParameter;
+    private int timeoutDuration = TIME_OUT_DURATION;
     
     private String cookieStr;
     
@@ -241,10 +243,15 @@ public class HttpRequest extends BaseOkHttp {
             if (parameter == null) {
                 parameter = new Parameter();
             }
-            
-            //全局参数拦截处理
-            if (parameterInterceptListener != null) {
-                parameter = parameterInterceptListener.onIntercept(parameter);
+    
+            if (!url.startsWith("http")) {
+                url = serviceUrl + url;
+            }
+            if (isNull(url)) {
+                Log.e(">>>", "-------------------------------------");
+                Log.e(">>>", "创建请求失败: 请求地址不能为空");
+                Log.e(">>>", "=====================================");
+                return;
             }
             
             //全局参数
@@ -254,13 +261,9 @@ public class HttpRequest extends BaseOkHttp {
                 }
             }
             
-            if (isNull(url)) {
-                Log.e(">>>", "-------------------------------------");
-                Log.e(">>>", "创建请求失败: 请求地址不能为空");
-                Log.e(">>>", "=====================================");
-            }
-            if (!url.startsWith("http")) {
-                url = serviceUrl + url;
+            //全局参数拦截处理
+            if (parameterInterceptListener != null) {
+                parameter = parameterInterceptListener.onIntercept(context.get(), url, parameter);
             }
             
             if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
@@ -268,7 +271,7 @@ public class HttpRequest extends BaseOkHttp {
             } else {
                 okHttpClient = new OkHttpClient.Builder()
                         .retryOnConnectionFailure(false)
-                        .connectTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
+                        .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
                         .hostnameVerifier(new HostnameVerifier() {
                             @Override
                             public boolean verify(String hostname, SSLSession session) {
@@ -428,7 +431,11 @@ public class HttpRequest extends BaseOkHttp {
                         } else {
                             parameter.toPrintString(1);
                         }
-                        Log.e(">>>", "错误:" + e.toString());
+                        if (e!=null) {
+                            Log.e(">>>", "错误:" + e.toString());
+                        }else{
+                            Log.e(">>>", "请求发生错误: httpCall.onFailure & Exception is Null" );
+                        }
                         Log.e(">>>", "=====================================");
                     }
                     //回到主线程处理
@@ -686,8 +693,10 @@ public class HttpRequest extends BaseOkHttp {
             public void run() {
                 if (isSending) {
                     isSending = false;
-                    Log.e(">>>", "请求超时 ×");
-                    Log.e(">>>", "=====================================");
+                    if (DEBUGMODE) {
+                        Log.e(">>>", "请求超时 ×");
+                        Log.e(">>>", "=====================================");
+                    }
                     runOnMain(new Runnable() {
                         @Override
                         public void run() {
@@ -698,7 +707,7 @@ public class HttpRequest extends BaseOkHttp {
                     });
                 }
             }
-        }, TIME_OUT_DURATION * 1000);
+        }, timeoutDuration * 1000);
     }
     
     private OkHttpClient getOkHttpClient(Context context, InputStream... certificates) {
@@ -707,9 +716,9 @@ public class HttpRequest extends BaseOkHttp {
             int cacheSize = 10 * 1024 * 1024;
             OkHttpClient.Builder builder = new OkHttpClient.Builder()
                     .retryOnConnectionFailure(false)
-                    .connectTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
-                    .writeTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
-                    .readTimeout(BaseOkHttp.TIME_OUT_DURATION, TimeUnit.SECONDS)
+                    .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
+                    .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
+                    .readTimeout(timeoutDuration, TimeUnit.SECONDS)
                     .hostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(String hostname, SSLSession session) {
@@ -832,7 +841,20 @@ public class HttpRequest extends BaseOkHttp {
     }
     
     public HttpRequest setJsonParameter(JsonMap jsonParameter) {
-        this.jsonParameter = jsonParameter.toString();
+        if (jsonParameter==null){
+            this.jsonParameter = null;
+        }else{
+            this.jsonParameter = jsonParameter.toString();
+        }
+        return this;
+    }
+    
+    public HttpRequest setJsonParameter(JsonList jsonParameter) {
+        if (jsonParameter==null){
+            this.jsonParameter = null;
+        }else{
+            this.jsonParameter = jsonParameter.toString();
+        }
         return this;
     }
     
@@ -943,7 +965,16 @@ public class HttpRequest extends BaseOkHttp {
         }
     }
     
-    public void onDetach(){
+    public void onDetach() {
         context.clear();
+    }
+    
+    public int getTimeoutDuration() {
+        return timeoutDuration;
+    }
+    
+    public HttpRequest setTimeoutDuration(int timeoutDuration) {
+        this.timeoutDuration = timeoutDuration;
+        return this;
     }
 }

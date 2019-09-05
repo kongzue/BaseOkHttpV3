@@ -20,6 +20,10 @@ public class JsonList extends ArrayList {
     
     }
     
+    public static JsonList parse(String jsonObjString) {
+        return JsonUtil.deCodeJsonArray(jsonObjString);
+    }
+    
     public String getString(int index) {
         Object value = get(index);
         return value == null ? "" : value + "";

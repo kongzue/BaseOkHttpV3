@@ -1,5 +1,7 @@
 package com.kongzue.baseokhttp.listener;
 
+import android.content.Context;
+
 import com.kongzue.baseokhttp.util.Parameter;
 
 /**
@@ -10,5 +12,5 @@ import com.kongzue.baseokhttp.util.Parameter;
  * CreateTime: 2018/11/22 17:27
  */
 public interface ParameterInterceptListener {
-    Parameter onIntercept(Parameter parameter);
+    Parameter onIntercept(Context context, String url, Parameter parameter);
 }

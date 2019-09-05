@@ -19,6 +19,10 @@ public class JsonMap extends LinkedHashMap<String, Object> {
     
     }
     
+    public static JsonMap parse(String jsonObjString) {
+        return JsonUtil.deCodeJsonObject(jsonObjString);
+    }
+    
     public String getString(String key) {
         Object value = get(key);
         return value == null ? "" : value + "";
