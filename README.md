@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.4-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.5-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.4/link">
-<img src="https://img.shields.io/badge/Maven-3.1.4-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.5/link">
+<img src="https://img.shields.io/badge/Maven-3.1.5-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -26,7 +26,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.4</version>
+  <version>3.1.5</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.4'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.5'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -575,14 +575,17 @@ BaseOkHttp.SSLInAssetsFileName = "ssl.crt";
 ### 全局参数拦截器
 使用如下代码可以设置全局参数监听拦截器，此参数拦截器可以拦截并修改、新增所有请求携带的参数。
 
+对于一个项目，拦截器 parameterInterceptListener 是 static 的，即唯一的，目前不支持单项目内多种类型（例如表单参数、Json参数、String参数）请求参数同时存在的拦截需求。
+
+#### 对于一般表单形式参数的请求
 此方法亦适用于需要对参数进行加密的场景：
 ```
-BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener() {
+BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener<Parameter>() {
     @Override
     public Parameter onIntercept(Context context, String url, Parameter parameter) {
         parameter.add("key", "DFG1H56EH5JN3DFA");
         parameter.add("sign", makeSign(parameter.toParameterString()));
-        return parameter;
+        return parameter;           //请注意将处理后的参数回传
     }
 };
 
@@ -593,11 +596,49 @@ private String makeSign(String parameterString){
 ```
 onIntercept 返回值中，context 为当前请求的上下文索引，url 为当前请求地址，parameter 为请求参数，在处理完后，请注意需要 return 处理后的 parameter。
 
+#### 对于Json形式的参数请求
+使用泛型约束为 JsonMap 参数：
+```
+BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener<JsonMap>() {
+    @Override
+    public Parameter onIntercept(Context context, String url, JsonMap parameter) {
+        parameter.set("key", "DFG1H56EH5JN3DFA");
+        return parameter;           //请注意将处理后的参数回传
+    }
+};
+```
+
+若为 JsonArray，则可约束为 JsonList 类型：
+```
+BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener<JsonList>() {
+    @Override
+    public Parameter onIntercept(Context context, String url, JsonList parameter) {
+        parameter.set("img1");
+        parameter.set("img2");
+        return parameter;           //请注意将处理后的参数回传
+    }
+};
+```
+
+#### 对于其他类型参数，包含String、XML等
+统一约束泛型为 String 处理：
+```
+BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener<String>() {
+    @Override
+    public Parameter onIntercept(Context context, String url, String parameter) {
+        //对 parameter 进行处理
+        return parameter;           //请注意将处理后的参数回传
+    }
+};
+```
+
 ### 请求超时
 使用以下代码设置请求超时时间（单位：秒）
 ```
 BaseOkHttp.TIME_OUT_DURATION = 10;
 ```
+
+一旦发生请求超时，将会停止本次请求，并在请求返回的 error 参数中回传 TimeOutException()。
 
 ### 停止请求
 可使用以下方法停止请求过程：
@@ -656,6 +697,10 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.5:
+- 修复返回数据 ResponseListener 和 JsonResponseListener 可能存在崩溃的问题；
+- 全局参数拦截器 ParameterInterceptListener 现在支持多种参数的拦截处理，详见 <a href="#全局参数拦截器">全局参数拦截器</a>；
+
 v3.1.4:
 - JsonMap 和 JsonList 新增构建方法 parse(String json) 用以直接根据 json 文本创建 JsonMap 和 JsonList 对象；
 - 新增临时方法 set/getTimeoutDuration(int second) 可独立设置当前接口超时时长；

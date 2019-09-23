@@ -11,6 +11,6 @@ import com.kongzue.baseokhttp.util.Parameter;
  * Mail: myzcxhh@live.cn
  * CreateTime: 2018/11/22 17:27
  */
-public interface ParameterInterceptListener {
+public interface ParameterInterceptListener<Parameter> {
     Parameter onIntercept(Context context, String url, Parameter parameter);
 }

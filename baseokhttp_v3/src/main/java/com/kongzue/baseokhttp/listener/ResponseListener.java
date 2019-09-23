@@ -10,7 +10,7 @@ public abstract class ResponseListener implements BaseResponseListener {
     
     @Override
     public void onResponse(Object response, Exception error) {
-        onResponse(response.toString(), error);
+        onResponse(response == null ? null : response.toString(), error);
     }
     
     public abstract void onResponse(String main, Exception error);

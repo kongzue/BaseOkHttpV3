@@ -17,10 +17,10 @@ public abstract class JsonResponseListener implements BaseResponseListener {
     public void onResponse(Object response, Exception error) {
         if (error == null) {
             JsonMap data = JsonUtil.deCodeJsonObject(response.toString());
-            if (!data.isEmpty()) {
+            if (data!=null && !data.isEmpty()) {
                 onResponse(data, error);
             } else {
-                onResponse(data, new DecodeJsonException(response.toString()));
+                onResponse(null, new DecodeJsonException(response.toString()));
             }
         } else {
             onResponse(null, error);

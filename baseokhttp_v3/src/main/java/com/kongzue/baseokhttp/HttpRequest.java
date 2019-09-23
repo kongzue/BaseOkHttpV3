@@ -243,7 +243,7 @@ public class HttpRequest extends BaseOkHttp {
             if (parameter == null) {
                 parameter = new Parameter();
             }
-    
+            
             if (!url.startsWith("http")) {
                 url = serviceUrl + url;
             }
@@ -259,11 +259,6 @@ public class HttpRequest extends BaseOkHttp {
                 for (Map.Entry<String, Object> entry : overallParameter.entrySet()) {
                     parameter.add(entry.getKey(), entry.getValue());
                 }
-            }
-            
-            //全局参数拦截处理
-            if (parameterInterceptListener != null) {
-                parameter = parameterInterceptListener.onIntercept(context.get(), url, parameter);
             }
             
             if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
@@ -288,6 +283,13 @@ public class HttpRequest extends BaseOkHttp {
             RequestBody requestBody = null;
             
             if (isFileRequest) {
+                if (parameterInterceptListener != null) {
+                    try {
+                        parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
+                    } catch (Exception e) {
+                    }
+                }
+                
                 MultipartBody.Builder multipartBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
                 
                 if (parameter != null && !parameter.entrySet().isEmpty()) {
@@ -325,6 +327,18 @@ public class HttpRequest extends BaseOkHttp {
                 }
                 requestBody = multipartBuilder.build();
             } else if (isJsonRequest) {
+                if (parameterInterceptListener != null) {
+                    try {
+                        if (jsonParameter.startsWith("[")) {
+                            jsonParameter = parameterInterceptListener.onIntercept(context.get(), url, JsonList.parse(jsonParameter)).toString();
+                        } else if (jsonParameter.startsWith("{")) {
+                            jsonParameter = parameterInterceptListener.onIntercept(context.get(), url, JsonMap.parse(jsonParameter)).toString();
+                        } else {
+                            jsonParameter = (String) parameterInterceptListener.onIntercept(context.get(), url, jsonParameter);
+                        }
+                    } catch (Exception e) {
+                    }
+                }
                 if (isNull(jsonParameter)) {
                     if (DEBUGMODE) {
                         Log.e(">>>", "-------------------------------------");
@@ -335,6 +349,12 @@ public class HttpRequest extends BaseOkHttp {
                 }
                 requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter);
             } else if (isStringRequest) {
+                if (parameterInterceptListener != null) {
+                    try {
+                        stringParameter = (String) parameterInterceptListener.onIntercept(context.get(), url, stringParameter);
+                    } catch (Exception e) {
+                    }
+                }
                 if (isNull(stringParameter)) {
                     if (DEBUGMODE) {
                         Log.e(">>>", "-------------------------------------");
@@ -345,6 +365,12 @@ public class HttpRequest extends BaseOkHttp {
                 }
                 requestBody = RequestBody.create(MediaType.parse("text/plain; charset=utf-8"), stringParameter);
             } else {
+                if (parameterInterceptListener != null) {
+                    try {
+                        parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
+                    } catch (Exception e) {
+                    }
+                }
                 requestBody = parameter.toOkHttpParameter();
             }
             
@@ -431,10 +457,10 @@ public class HttpRequest extends BaseOkHttp {
                         } else {
                             parameter.toPrintString(1);
                         }
-                        if (e!=null) {
+                        if (e != null) {
                             Log.e(">>>", "错误:" + e.toString());
-                        }else{
-                            Log.e(">>>", "请求发生错误: httpCall.onFailure & Exception is Null" );
+                        } else {
+                            Log.e(">>>", "请求发生错误: httpCall.onFailure & Exception is Null");
                         }
                         Log.e(">>>", "=====================================");
                     }
@@ -841,18 +867,18 @@ public class HttpRequest extends BaseOkHttp {
     }
     
     public HttpRequest setJsonParameter(JsonMap jsonParameter) {
-        if (jsonParameter==null){
+        if (jsonParameter == null) {
             this.jsonParameter = null;
-        }else{
+        } else {
             this.jsonParameter = jsonParameter.toString();
         }
         return this;
     }
     
     public HttpRequest setJsonParameter(JsonList jsonParameter) {
-        if (jsonParameter==null){
+        if (jsonParameter == null) {
             this.jsonParameter = null;
-        }else{
+        } else {
             this.jsonParameter = jsonParameter.toString();
         }
         return this;
@@ -959,7 +985,7 @@ public class HttpRequest extends BaseOkHttp {
             ((Activity) context.get()).runOnUiThread(runnable);
         } else {
             if (DEBUGMODE) {
-                Log.e(">>>", "context 不是 Activity，本次请求在异步线程返回 >>>");
+                Log.i(">>>", "context 不是 Activity，本次请求在异步线程返回 >>>");
             }
             runnable.run();
         }

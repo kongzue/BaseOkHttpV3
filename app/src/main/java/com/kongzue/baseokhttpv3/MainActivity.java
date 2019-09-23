@@ -20,6 +20,7 @@ import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
+import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
@@ -78,6 +79,12 @@ public class MainActivity extends AppCompatActivity {
                 .add("Content-Type", "application/json")
                 .add("Accept-Encoding", "gzip,deflate")
         ;
+        BaseOkHttp.parameterInterceptListener = new ParameterInterceptListener<JsonMap>() {
+            @Override
+            public JsonMap onIntercept(Context context, String url, JsonMap o) {
+                return null;
+            }
+        };
         BaseOkHttp.responseInterceptListener = new ResponseInterceptListener() {
             @Override
             public boolean onResponse(Context context, String url, String response, Exception error) {
