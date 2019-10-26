@@ -81,7 +81,9 @@ public class JsonUtil {
     }
     
     private static void loge(String s) {
-        Log.e(">>>", s);
+        if (BaseOkHttp.DEBUGMODE) {
+            Log.e(">>>", s);
+        }
     }
     
     private JsonUtil() {

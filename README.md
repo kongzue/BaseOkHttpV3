@@ -14,11 +14,12 @@
 </a>
 
 ## 简介
-- BaseOkHttp V3是基于BaseOkHttp V2( <https://github.com/kongzue/BaseOkHttp> )的升级版本，基于能够快速创建常用请求链接而封装的库。
+- 无需操心线程问题，请求在异步线程执行，回调会自动回到主线程；
 - 本库中自带 OkHttp 库，并对其关联的 okio 库进行了包名的修改和封装，因此不会影响到您项目中的其他版本的 okHttp 库，亦不会产生冲突。
-- 若请求来自于一个 Activity，结束请求后自动回归主线程操作，不需要再做额外处理。
-- 提供统一返回监听器ResponseListener处理返回数据，避免代码反复臃肿。
+- 提供统一返回监听器 ResponseListener 处理一切返回数据，无论是错误还是成功，都可以一起处理，对于相同操作代码不再需要重复，避免代码反复臃肿。
+- 提供基于 Map 对象和 List 对象的 Json 解析库及数据类型，直接与适配器配合，抛弃编写 JavaBean 的麻烦；
 - 强大的全局方法和事件让您的请求得心应手。
+- BaseOkHttp V3是基于BaseOkHttp V2( <https://github.com/kongzue/BaseOkHttp> )的升级版本，基于能够快速创建常用请求链接而封装的库。
 
 ## Maven仓库或Gradle的引用方式
 Maven仓库：
