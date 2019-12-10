@@ -63,4 +63,8 @@ public class BaseOkHttp {
     
     //已存储的 Cookie 队列
     protected HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
+    
+    //容灾地址
+    public static String[] reserveServiceUrls;
+    
 }

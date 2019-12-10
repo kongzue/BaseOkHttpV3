@@ -74,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
         
         BaseOkHttp.DEBUGMODE = true;
         BaseOkHttp.serviceUrl = "https://api.apiopen.top";
+//        BaseOkHttp.reserveServiceUrls = new String[]{
+//                "https://www.google.com",
+//                "https://www.twitter.com",
+//                "https://api.apiopen.top"
+//        };
         BaseOkHttp.overallHeader = new Parameter()
                 .add("Charset", "UTF-8")
                 .add("Content-Type", "application/json")

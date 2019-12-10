@@ -71,7 +71,7 @@ public class HttpRequest extends BaseOkHttp {
     private WeakReference<Context> context;
     private HttpRequest httpRequest;
     private BaseResponseListener responseListener;
-    private String url;
+    private String requestUrl;
     private String jsonParameter;
     private String stringParameter;
     private int timeoutDuration = TIME_OUT_DURATION;
@@ -95,7 +95,7 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.headers = headers;
             httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.requestType = POST_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
@@ -115,7 +115,7 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.headers = headers;
             httpRequest.responseListener = listener;
             httpRequest.jsonParameter = jsonParameter;
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.requestType = POST_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
@@ -135,7 +135,7 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.headers = headers;
             httpRequest.responseListener = listener;
             httpRequest.stringParameter = stringParameter;
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.requestType = POST_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
@@ -155,7 +155,7 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.headers = headers;
             httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.requestType = GET_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
@@ -175,7 +175,7 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.headers = headers;
             httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.requestType = PUT_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
@@ -195,7 +195,7 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.headers = headers;
             httpRequest.responseListener = listener;
             httpRequest.parameter = parameter;
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.requestType = DELETE_REQUEST;
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
@@ -207,7 +207,7 @@ public class HttpRequest extends BaseOkHttp {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = new WeakReference<Context>(context);
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.doDownload(downloadFile, onDownloadListener);
         }
     }
@@ -216,6 +216,8 @@ public class HttpRequest extends BaseOkHttp {
     private boolean isJsonRequest = false;
     private boolean isStringRequest = false;
     private boolean skipSSLCheck = false;
+    
+    private String url;
     
     private void send() {
         isFileRequest = false;
@@ -244,8 +246,10 @@ public class HttpRequest extends BaseOkHttp {
                 parameter = new Parameter();
             }
             
-            if (!url.startsWith("http")) {
-                url = serviceUrl + url;
+            if (!requestUrl.startsWith("http")) {
+                url = getRealRequestUrl(requestUrl);
+            } else {
+                url = requestUrl;
             }
             if (isNull(url)) {
                 Log.e(">>>", "-------------------------------------");
@@ -377,7 +381,7 @@ public class HttpRequest extends BaseOkHttp {
             //请求类型处理
             switch (requestType) {
                 case GET_REQUEST:               //GET
-                    builder.url(url + "?" + parameter.toParameterString());
+                    builder.url(url.contains("?") ? url + "&" + parameter.toParameterString() : url + "?" + parameter.toParameterString());
                     break;
                 case PUT_REQUEST:               //PUT
                     builder.url(url);
@@ -445,42 +449,57 @@ public class HttpRequest extends BaseOkHttp {
                         return;
                     }
                     isSending = false;
-                    if (DEBUGMODE) {
-                        Log.e(">>>", "请求失败:" + url);
-                        Log.e(">>>", "参数:");
-                        if (isJsonRequest) {
-                            if (!JsonFormat.formatJson(jsonParameter, 1)) {
-                                Log.e(">>>>>>", jsonParameter);
+                    if (BaseOkHttp.reserveServiceUrls != null && BaseOkHttp.reserveServiceUrls.length != 0) {
+                        if (DEBUGMODE) {
+                            Log.e(">>>", "服务器：" + BaseOkHttp.serviceUrl + "请求失败 ×");
+                            if (reserveUrlIndex != BaseOkHttp.reserveServiceUrls.length) {
+                                BaseOkHttp.serviceUrl = BaseOkHttp.reserveServiceUrls[reserveUrlIndex];
+                                reserveUrlIndex++;
+                                Log.e(">>>", "尝试更换为备用地址后重试：" + BaseOkHttp.serviceUrl);
+                                send();
+                            } else {
+                                Log.e(">>>", "所有备用地址全部尝试完毕。请求失败 ×");
                             }
-                        } else if (isStringRequest) {
-                            Log.i(">>>>>>", stringParameter);
-                        } else {
-                            parameter.toPrintString(1);
+                            Log.e(">>>", "=====================================");
                         }
-                        if (e != null) {
-                            Log.e(">>>", "错误:" + e.toString());
-                        } else {
-                            Log.e(">>>", "请求发生错误: httpCall.onFailure & Exception is Null");
+                    } else {
+                        if (DEBUGMODE) {
+                            Log.e(">>>", "请求失败:" + url);
+                            Log.e(">>>", "参数:");
+                            if (isJsonRequest) {
+                                if (!JsonFormat.formatJson(jsonParameter, 1)) {
+                                    Log.e(">>>>>>", jsonParameter);
+                                }
+                            } else if (isStringRequest) {
+                                Log.i(">>>>>>", stringParameter);
+                            } else {
+                                parameter.toPrintString(1);
+                            }
+                            if (e != null) {
+                                Log.e(">>>", "错误:" + e.toString());
+                            } else {
+                                Log.e(">>>", "请求发生错误: httpCall.onFailure & Exception is Null");
+                            }
+                            Log.e(">>>", "=====================================");
                         }
-                        Log.e(">>>", "=====================================");
-                    }
-                    //回到主线程处理
-                    runOnMain(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (responseInterceptListener != null) {
-                                if (responseInterceptListener.onResponse(context.get(), url, null, e)) {
+                        //回到主线程处理
+                        runOnMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (responseInterceptListener != null) {
+                                    if (responseInterceptListener.onResponse(context.get(), url, null, e)) {
+                                        if (responseListener != null) {
+                                            responseListener.onResponse(null, e);
+                                        }
+                                    }
+                                } else {
                                     if (responseListener != null) {
                                         responseListener.onResponse(null, e);
                                     }
                                 }
-                            } else {
-                                if (responseListener != null) {
-                                    responseListener.onResponse(null, e);
-                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
                 
                 @Override
@@ -550,15 +569,28 @@ public class HttpRequest extends BaseOkHttp {
         }
     }
     
+    private String getRealRequestUrl(String url) {
+        String serviceUrl = BaseOkHttp.serviceUrl;
+        if (serviceUrl.endsWith("/") && url.startsWith("/")) {
+            return serviceUrl + url.substring(1);
+        }
+        if (!serviceUrl.endsWith("/") && !url.startsWith("/")) {
+            return serviceUrl + "/" + url;
+        }
+        return serviceUrl + url;
+    }
+    
     private void download() {
         try {
-            if (isNull(url)) {
+            if (isNull(requestUrl)) {
                 Log.e(">>>", "-------------------------------------");
                 Log.e(">>>", "创建请求失败: 请求地址不能为空");
                 Log.e(">>>", "=====================================");
             }
-            if (!url.startsWith("http")) {
-                url = serviceUrl + url;
+            if (!requestUrl.startsWith("http")) {
+                url = getRealRequestUrl(requestUrl);
+            } else {
+                url = requestUrl;
             }
             
             if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
@@ -708,6 +740,7 @@ public class HttpRequest extends BaseOkHttp {
     }
     
     private Timer timer;
+    private static int reserveUrlIndex;
     
     private void checkTimeOut() {
         if (timer != null) {
@@ -719,18 +752,33 @@ public class HttpRequest extends BaseOkHttp {
             public void run() {
                 if (isSending) {
                     isSending = false;
-                    if (DEBUGMODE) {
-                        Log.e(">>>", "请求超时 ×");
-                        Log.e(">>>", "=====================================");
-                    }
-                    runOnMain(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (responseListener != null) {
-                                responseListener.onResponse(null, new TimeOutException());
+                    if (BaseOkHttp.reserveServiceUrls != null && BaseOkHttp.reserveServiceUrls.length != 0) {
+                        if (DEBUGMODE) {
+                            Log.e(">>>", "服务器：" + BaseOkHttp.serviceUrl + "请求超时 ×");
+                            if (reserveUrlIndex != BaseOkHttp.reserveServiceUrls.length) {
+                                BaseOkHttp.serviceUrl = BaseOkHttp.reserveServiceUrls[reserveUrlIndex];
+                                reserveUrlIndex++;
+                                Log.e(">>>", "尝试更换为备用地址后重试：" + BaseOkHttp.serviceUrl);
+                                send();
+                            } else {
+                                Log.e(">>>", "所有备用地址全部尝试完毕。请求超时 ×");
                             }
+                            Log.e(">>>", "=====================================");
                         }
-                    });
+                    } else {
+                        if (DEBUGMODE) {
+                            Log.e(">>>", "请求超时 ×");
+                            Log.e(">>>", "=====================================");
+                        }
+                        runOnMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (responseListener != null) {
+                                    responseListener.onResponse(null, new TimeOutException());
+                                }
+                            }
+                        });
+                    }
                 }
             }
         }, timeoutDuration * 1000);
@@ -832,7 +880,7 @@ public class HttpRequest extends BaseOkHttp {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.context = new WeakReference<Context>(context);
-            httpRequest.url = url;
+            httpRequest.requestUrl = url;
             httpRequest.httpRequest = httpRequest;
             return httpRequest;
         }
@@ -907,7 +955,7 @@ public class HttpRequest extends BaseOkHttp {
     }
     
     public HttpRequest setUrl(String url) {
-        this.url = url;
+        this.requestUrl = url;
         return this;
     }
     

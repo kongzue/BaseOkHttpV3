@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.5-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.6-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.5/link">
-<img src="https://img.shields.io/badge/Maven-3.1.5-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.6/link">
+<img src="https://img.shields.io/badge/Maven-3.1.6-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -27,7 +27,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.5</version>
+  <version>3.1.6</version>
   <type>pom</type>
 </dependency>
 ```
@@ -35,7 +35,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.5'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.6'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -76,6 +76,8 @@ implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.5'
 ···· <a href="#请求超时">请求超时</a>
 
 ···· <a href="#停止请求">停止请求</a>
+
+···· <a href="#容灾地址">容灾地址</a>
 
 ···· <a href="#Cookie">Cookie</a>
 
@@ -647,6 +649,21 @@ BaseOkHttp.TIME_OUT_DURATION = 10;
 httpRequest。stop();     //停止请求
 ```
 
+### 容灾地址
+
+使用 BaseOkHttp.reserveServiceUrls 设置容灾地址。
+
+该属性类型为 StringArray，设置案例如下：
+```
+BaseOkHttp.reserveServiceUrls = new String[]{
+        "https://www.testB.com",
+        "https://www.testC.com",
+        "https://api.testD.com"
+};
+```
+
+当主服务器地址 BaseOkHttp.serviceUrl 请求不通后，会依次尝试 BaseOkHttp.reserveServiceUrls 配置的地址，若全部失败，则会执行回调函数，若其中一个能够请求成功，则主服务器地址 BaseOkHttp.serviceUrl 会被替换为该地址，完成接下来的请求。
+
 ### Cookie
 设置 Cookie 请求头：
 ```
@@ -698,6 +715,10 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.6:
+- BaseOkHttp 新增容灾地址设置 reserveServiceUrls，具体请参考文档 <a href="#容灾地址">容灾地址</a>；
+- 修复了 GET 请求存在的可能出现 url 中已经存在“?”的情况下加入参数，最终请求 url 出现多个“?” 的bug；
+
 v3.1.5:
 - 修复返回数据 ResponseListener 和 JsonResponseListener 可能存在崩溃的问题；
 - 全局参数拦截器 ParameterInterceptListener 现在支持多种参数的拦截处理，详见 <a href="#全局参数拦截器">全局参数拦截器</a>；
