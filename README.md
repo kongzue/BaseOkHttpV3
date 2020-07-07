@@ -717,7 +717,7 @@ limitations under the License.
 ## 更新日志
 v3.1.7:
 - 新增 BaseOkHttp.DETAILSLOGS 设置用以判断是否显示详细的下载部分日志；
-- Json 解析库独立（https://github.com/kongzue/BaseJson），当前版本使用 BaseJson 库 1.0.3 版本；
+- Json 解析库独立（ https://github.com/kongzue/BaseJson ），当前版本使用 BaseJson 库 1.0.3 版本；
 - 修复可能由 context 引发的空指针问题；
 
 v3.1.6:
