@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.6-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.7-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.6/link">
-<img src="https://img.shields.io/badge/Maven-3.1.6-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.7/link">
+<img src="https://img.shields.io/badge/Maven-3.1.7-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -27,7 +27,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.6</version>
+  <version>3.1.7</version>
   <type>pom</type>
 </dependency>
 ```
@@ -35,7 +35,7 @@ Gradle：
 
 在dependencies{}中添加引用：
 ```
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.6'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.7'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -715,6 +715,11 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.7:
+- 新增 BaseOkHttp.DETAILSLOGS 设置用以判断是否显示详细的下载部分日志；
+- Json 解析库独立（https://github.com/kongzue/BaseJson），当前版本使用 BaseJson 库 1.0.3 版本；
+- 修复可能由 context 引发的空指针问题；
+
 v3.1.6:
 - BaseOkHttp 新增容灾地址设置 reserveServiceUrls，具体请参考文档 <a href="#容灾地址">容灾地址</a>；
 - 修复了 GET 请求存在的可能出现 url 中已经存在“?”的情况下加入参数，最终请求 url 出现多个“?” 的bug；

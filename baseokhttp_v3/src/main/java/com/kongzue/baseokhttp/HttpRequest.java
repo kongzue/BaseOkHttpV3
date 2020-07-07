@@ -220,6 +220,7 @@ public class HttpRequest extends BaseOkHttp {
     private String url;
     
     private void send() {
+        timeoutDuration = TIME_OUT_DURATION;
         isFileRequest = false;
         isJsonRequest = false;
         isStringRequest = false;
@@ -598,7 +599,9 @@ public class HttpRequest extends BaseOkHttp {
             } else {
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
                         .retryOnConnectionFailure(false)
-                        .connectTimeout(30, TimeUnit.SECONDS)
+                        .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .readTimeout(timeoutDuration, TimeUnit.SECONDS)
                         .hostnameVerifier(new HostnameVerifier() {
                             @Override
                             public boolean verify(String hostname, SSLSession session) {
@@ -683,7 +686,7 @@ public class HttpRequest extends BaseOkHttp {
                             fos.write(buf, 0, len);
                             sum += len;
                             final int progress = (int) (sum * 1.0f / total * 100);
-                            if (DEBUGMODE) {
+                            if (DEBUGMODE && DETAILSLOGS) {
                                 Log.i(">>>", "下载中:" + progress);
                             }
                             runOnMain(new Runnable() {
@@ -1029,10 +1032,18 @@ public class HttpRequest extends BaseOkHttp {
     }
     
     private void runOnMain(Runnable runnable) {
+        if (context == null || context.get() == null) {
+            stop();
+            return;
+        }
         if (context.get() instanceof Activity) {
+            if (((Activity) context.get()).isFinishing()) {
+                stop();
+                return;
+            }
             ((Activity) context.get()).runOnUiThread(runnable);
         } else {
-            if (DEBUGMODE) {
+            if (DEBUGMODE && DETAILSLOGS) {
                 Log.i(">>>", "context 不是 Activity，本次请求在异步线程返回 >>>");
             }
             runnable.run();

@@ -67,4 +67,7 @@ public class BaseOkHttp {
     //容灾地址
     public static String[] reserveServiceUrls;
     
+    //是否开启详细日志信息（下载、线程提升信息）
+    public static boolean DETAILSLOGS = false;
+    
 }

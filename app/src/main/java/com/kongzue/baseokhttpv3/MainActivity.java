@@ -333,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 );
-                
+
 //                HttpRequest.DOWNLOAD(
 //                        MainActivity.this,
 //                        "http://cdn.to-future.net/apk/tofuture.apk",
