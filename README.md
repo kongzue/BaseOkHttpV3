@@ -406,7 +406,7 @@ baseWebSocket.reConnect();
 ```
 
 ## JSON解析
-从 3.1.7 版本起,Json 解析库独立为一个单独的仓库，详情请参阅 https://bintray.com/myzchh/maven/BaseJson
+从 3.1.7 版本起,Json 解析库独立为一个单独的仓库，详情请参阅 https://github.com/kongzue/BaseJson
 
 从 3.0.7 版本起，新增 Json 解析功能，此功能基于 `org.json` 库二次实现，基本实现了无惧空指针异常的特性。
 
