@@ -2,7 +2,6 @@ package com.kongzue.baseokhttp.listener;
 
 import com.kongzue.baseokhttp.exceptions.DecodeJsonException;
 import com.kongzue.baseokhttp.util.JsonMap;
-import com.kongzue.baseokhttp.util.JsonUtil;
 
 /**
  * Author: @Kongzue
@@ -16,7 +15,7 @@ public abstract class JsonResponseListener implements BaseResponseListener {
     @Override
     public void onResponse(Object response, Exception error) {
         if (error == null) {
-            JsonMap data = JsonUtil.deCodeJsonObject(response.toString());
+            JsonMap data = new JsonMap(response.toString());
             if (data!=null && !data.isEmpty()) {
                 onResponse(data, error);
             } else {

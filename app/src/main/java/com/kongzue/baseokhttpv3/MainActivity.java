@@ -28,7 +28,6 @@ import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.JsonFormat;
 import com.kongzue.baseokhttp.util.JsonList;
 import com.kongzue.baseokhttp.util.JsonMap;
-import com.kongzue.baseokhttp.util.JsonUtil;
 import com.kongzue.baseokhttp.util.Parameter;
 
 import java.io.File;
