@@ -406,6 +406,8 @@ baseWebSocket.reConnect();
 ```
 
 ## JSON解析
+从 3.1.7 版本起,Json 解析库独立为一个单独的仓库，详情请参阅 https://bintray.com/myzchh/maven/BaseJson
+
 从 3.0.7 版本起，新增 Json 解析功能，此功能基于 `org.json` 库二次实现，基本实现了无惧空指针异常的特性。
 
 因原始 `org.json` 库提供的 JsonObject 和 JsonArray 框架使用起来相对麻烦，我们对其进行了二次封装和完善，且因 BaseOkHttpV3提供的 Json 解析框架底层使用的是 Map 和 List，与适配器具有更好的兼容性。
