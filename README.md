@@ -38,7 +38,7 @@ Gradle：
 //BaseOkHttp V3 网络请求库
 implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.7'
 //BaseJson 解析库
-implementation 'com.kongzue.basejson:basejson:1.0.3'
+implementation 'com.kongzue.basejson:basejson:1.0.4'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
