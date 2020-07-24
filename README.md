@@ -36,7 +36,7 @@ Gradle：
 在dependencies{}中添加引用：
 ```
 //BaseOkHttp V3 网络请求库
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.7'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.7.3'
 //BaseJson 解析库
 implementation 'com.kongzue.basejson:basejson:1.0.4'
 ```
