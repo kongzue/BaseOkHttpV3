@@ -15,5 +15,5 @@ public interface BaseResponseListener {
      * @param response
      * @param error
      */
-    void onResponse(Object response, Exception error);
+    void response(Object response, Exception error);
 }

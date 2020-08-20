@@ -9,7 +9,7 @@ import com.kongzue.baseokhttp.util.JsonMap;
 public abstract class ResponseListener implements BaseResponseListener {
     
     @Override
-    public void onResponse(Object response, Exception error) {
+    public void response(Object response, Exception error) {
         onResponse(response == null ? null : response.toString(), error);
     }
     

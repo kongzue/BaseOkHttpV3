@@ -13,7 +13,7 @@ import com.kongzue.baseokhttp.util.JsonMap;
 public abstract class JsonResponseListener implements BaseResponseListener {
     
     @Override
-    public void onResponse(Object response, Exception error) {
+    public void response(Object response, Exception error) {
         if (error == null) {
             JsonMap data = new JsonMap(response.toString());
             if (data!=null && !data.isEmpty()) {

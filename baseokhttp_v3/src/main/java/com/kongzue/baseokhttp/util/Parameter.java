@@ -44,10 +44,12 @@ public class Parameter extends TreeMap<String, Object> {
         return result;
     }
     
+    @Deprecated
     public void toPrintString() {
         toPrintString(0);
     }
     
+    @Deprecated
     public void toPrintString(int e) {
         if (!entrySet().isEmpty()) {
             for (Entry<String, Object> entry : entrySet()) {

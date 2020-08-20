@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.7-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.8-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.7/link">
-<img src="https://img.shields.io/badge/Maven-3.1.7-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.8/link">
+<img src="https://img.shields.io/badge/Maven-3.1.8-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -27,7 +27,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.7</version>
+  <version>3.1.8</version>
   <type>pom</type>
 </dependency>
 ```
@@ -36,9 +36,9 @@ Gradle：
 在dependencies{}中添加引用：
 ```
 //BaseOkHttp V3 网络请求库
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.7'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.8'
 //BaseJson 解析库
-implementation 'com.kongzue.basejson:basejson:1.0.3'
+implementation 'com.kongzue.basejson:basejson:1.0.5'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -61,6 +61,8 @@ implementation 'com.kongzue.basejson:basejson:1.0.3'
 · <a href="#websocket">WebSocket</a>
 
 · <a href="#json解析">JSON解析</a>
+
+· <a href="#javabean解析">JavaBean解析</a>
 
 · <a href="#额外功能">额外功能</a>
 
@@ -427,6 +429,33 @@ JsonMap data = JsonMap.parse("{\"key\":\"DFG1H56EH5JN3DFA\",\"token\":\"124ASFD5
 JsonList list = JsonList.parse("[{\"answerId\":\"98\",\"questionDesc\":\"否\"},{\"answerId\":\"99\",\"questionDesc\":\"是\"}]");
 ```
 
+# JavaBean解析
+从 3.1.8 版本起，新增回调直接解析 json 为 JavaBean 的功能：
+
+在设置回调时，请使用 BeanResponseListener，并在其泛型中传入要解析的 JavaBean，在回调中即可获取已经实例化并设置好数据的 JavaBean 对象：
+```
+HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
+                .add("page", "1")
+                .add("count", 5)
+           , new BeanResponseListener<DataBean>() {
+               @Override
+               public void onResponse(DataBean main, Exception error) {
+                   if (error == null) {
+                       Log.e(">>>", "onResponse: " + main);
+                   } else {
+                       error.printStackTrace();
+                   }
+               }
+           }
+);
+```
+
+JavaBean 对象中必须包含每个属性的对应 get、set 方法，且必须使用驼峰命名规则。
+
+支持 boolean 类型的数据获取方法以“is”开头的命名方式，例如“boolean isVIP()”或者“boolean getVIP()”都可以。
+
+此外，JsonMap 与 JavaBean 之间的互相转换请查阅 [《BaseJson - JsonMap 与 JavaBean 的互相转换》](https://github.com/kongzue/BaseJson#jsonmap-%E4%B8%8E-javabean-%E7%9A%84%E4%BA%92%E7%9B%B8%E8%BD%AC%E6%8D%A2)
+
 ### 请求后自动返回 JsonMap
 
 使用 `JsonResponseListener` 作为返回监听器，即可在返回时直接处理 JsonMap 对象：
@@ -720,6 +749,12 @@ limitations under the License.
 ```
 
 ## 更新日志
+v3.1.8:
+- 新增 BeanResponseListener 回调，可直接解析 json 返回数据为 JavaBean；
+- 日志输出统一化，打印更加清晰明了；
+- 新增外部接口 setProxy(...) 可设置代理，及全局代理设置 BaseOkHttp.proxy；
+- 修复了一些 bug；
+
 v3.1.7:
 - 新增 BaseOkHttp.DETAILSLOGS 设置用以判断是否显示详细的下载部分日志；
 - Json 解析库独立（ https://github.com/kongzue/BaseJson ），当前版本使用 BaseJson 库 1.0.3 版本；

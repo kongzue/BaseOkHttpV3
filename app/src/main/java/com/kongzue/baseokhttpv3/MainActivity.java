@@ -18,6 +18,8 @@ import com.kongzue.baseframework.BaseAdapter;
 import com.kongzue.baseframework.interfaces.SimpleAdapterSettings;
 import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
+import com.kongzue.baseokhttp.exceptions.CanNotBuildBeanException;
+import com.kongzue.baseokhttp.listener.BeanResponseListener;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
@@ -31,6 +33,14 @@ import com.kongzue.baseokhttp.util.JsonMap;
 import com.kongzue.baseokhttp.util.Parameter;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 import baseokhttp3.Response;
 import baseokio.ByteString;
@@ -100,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+        JsonMap.preParsing = true;
         
         btnHttp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,7 +150,19 @@ public class MainActivity extends AppCompatActivity {
                                     Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
                                 }
                             }
-                        });
+                        }
+//                        , new BeanResponseListener<DataBean>() {
+//                            @Override
+//                            public void onResponse(DataBean main, Exception error) {
+//                                if (error == null) {
+//                                    Log.e(">>>", "onResponse: " + main);
+//                                } else {
+//                                    error.printStackTrace();
+//                                }
+//                            }
+//                        }
+                
+                );
 
 //                HttpRequest.build(context,"/femaleNameApi")
 //                        .addHeaders("Charset", "UTF-8")
@@ -365,6 +388,27 @@ public class MainActivity extends AppCompatActivity {
                 httpRequest.stop();
             }
         });
+    }
+    
+    public static String readAssetsTxt(Context context, String fileName) {
+        try {
+            //Return an AssetManager instance for your application's package
+            InputStream is = context.getAssets().open(fileName + ".txt");
+            int size = is.available();
+            // Read the entire asset into a local byte buffer.
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            // Convert the buffer into a string.
+            String text = new String(buffer, "utf-8");
+            // Finally stick the string into the text view.
+            return text;
+        } catch (IOException e) {
+            // Should never happen!
+//            throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+        return "读取错误，请检查文件名";
     }
     
     private HttpRequest httpRequest;

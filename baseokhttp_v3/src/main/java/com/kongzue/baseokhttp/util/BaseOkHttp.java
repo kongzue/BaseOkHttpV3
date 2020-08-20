@@ -3,6 +3,7 @@ package com.kongzue.baseokhttp.util;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 
+import java.net.Proxy;
 import java.util.HashMap;
 import java.util.List;
 
@@ -70,4 +71,6 @@ public class BaseOkHttp {
     //是否开启详细日志信息（下载、线程提升信息）
     public static boolean DETAILSLOGS = false;
     
+    //全局代理设置
+    public static Proxy proxy;
 }
