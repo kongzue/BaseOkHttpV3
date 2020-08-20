@@ -429,33 +429,6 @@ JsonMap data = JsonMap.parse("{\"key\":\"DFG1H56EH5JN3DFA\",\"token\":\"124ASFD5
 JsonList list = JsonList.parse("[{\"answerId\":\"98\",\"questionDesc\":\"否\"},{\"answerId\":\"99\",\"questionDesc\":\"是\"}]");
 ```
 
-# JavaBean解析
-从 3.1.8 版本起，新增回调直接解析 json 为 JavaBean 的功能：
-
-在设置回调时，请使用 BeanResponseListener，并在其泛型中传入要解析的 JavaBean，在回调中即可获取已经实例化并设置好数据的 JavaBean 对象：
-```
-HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
-                .add("page", "1")
-                .add("count", 5)
-           , new BeanResponseListener<DataBean>() {
-               @Override
-               public void onResponse(DataBean main, Exception error) {
-                   if (error == null) {
-                       Log.e(">>>", "onResponse: " + main);
-                   } else {
-                       error.printStackTrace();
-                   }
-               }
-           }
-);
-```
-
-JavaBean 对象中必须包含每个属性的对应 get、set 方法，且必须使用驼峰命名规则。
-
-支持 boolean 类型的数据获取方法以“is”开头的命名方式，例如“boolean isVIP()”或者“boolean getVIP()”都可以。
-
-此外，JsonMap 与 JavaBean 之间的互相转换请查阅 [《BaseJson - JsonMap 与 JavaBean 的互相转换》](https://github.com/kongzue/BaseJson#jsonmap-%E4%B8%8E-javabean-%E7%9A%84%E4%BA%92%E7%9B%B8%E8%BD%AC%E6%8D%A2)
-
 ### 请求后自动返回 JsonMap
 
 使用 `JsonResponseListener` 作为返回监听器，即可在返回时直接处理 JsonMap 对象：
@@ -541,6 +514,33 @@ getJsonMap(...)
 若您需要空值判断，可以通过例如 `getInt(String key, int emptyValue)` 来进行，若为空值会返回您提供的 emptyValue。
 
 这确实不够严谨，但更多的是为了提升开发效率，适应快速开发的生产要求。
+
+# JavaBean解析
+从 3.1.8 版本起，新增回调直接解析 json 为 JavaBean 的功能：
+
+在设置回调时，请使用 BeanResponseListener，并在其泛型中传入要解析的 JavaBean，在回调中即可获取已经实例化并设置好数据的 JavaBean 对象：
+```
+HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
+                .add("page", "1")
+                .add("count", 5)
+           , new BeanResponseListener<DataBean>() {
+               @Override
+               public void onResponse(DataBean main, Exception error) {
+                   if (error == null) {
+                       Log.e(">>>", "onResponse: " + main);
+                   } else {
+                       error.printStackTrace();
+                   }
+               }
+           }
+);
+```
+
+JavaBean 对象中必须包含每个属性的对应 get、set 方法，且必须使用驼峰命名规则。
+
+支持 boolean 类型的数据获取方法以“is”开头的命名方式，例如“boolean isVIP()”或者“boolean getVIP()”都可以。
+
+此外，JsonMap 与 JavaBean 之间的互相转换请查阅 [《BaseJson - JsonMap 与 JavaBean 的互相转换》](https://github.com/kongzue/BaseJson#jsonmap-%E4%B8%8E-javabean-%E7%9A%84%E4%BA%92%E7%9B%B8%E8%BD%AC%E6%8D%A2)
 
 ## 额外功能
 
