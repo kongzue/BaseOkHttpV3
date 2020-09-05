@@ -1,7 +1,8 @@
 package com.kongzue.baseokhttp.util;
 
+import com.kongzue.baseokhttp.listener.BaseResponseInterceptListener;
+import com.kongzue.baseokhttp.listener.HeaderInterceptListener;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
-import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 
 import java.net.Proxy;
 import java.util.HashMap;
@@ -42,10 +43,13 @@ public class BaseOkHttp {
     public static boolean httpsVerifyServiceUrl = false;
     
     //全局拦截器
-    public static ResponseInterceptListener responseInterceptListener;
+    public static BaseResponseInterceptListener responseInterceptListener;
     
     //全局参数拦截器
     public static ParameterInterceptListener parameterInterceptListener;
+    
+    //全局Header拦截器
+    public static HeaderInterceptListener headerInterceptListener;
     
     //全局请求头
     public static Parameter overallHeader;

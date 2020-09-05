@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.8-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.1.9-green.svg" alt="BaseOkHttp">
 </a>
-<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.8/link">
-<img src="https://img.shields.io/badge/Maven-3.1.8-blue.svg" alt="Maven">
+<a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.9/link">
+<img src="https://img.shields.io/badge/Maven-3.1.9-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -27,7 +27,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.8</version>
+  <version>3.1.9</version>
   <type>pom</type>
 </dependency>
 ```
@@ -36,7 +36,7 @@ Gradle：
 在dependencies{}中添加引用：
 ```
 //BaseOkHttp V3 网络请求库
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.8'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.9'
 //BaseJson 解析库
 implementation 'com.kongzue.basejson:basejson:1.0.5'
 ```
@@ -109,6 +109,9 @@ HttpRequest.POST(context, "http://你的接口地址", new Parameter().add("page
     }
 });
 ```
+
+Parameter 对象是一个 Map 的封装对象，可以通过 `.toParameterString()` 方法获得按 key 首字母排序、以“&”符号连接的文本串，或者使用 `.toParameterJson()` 方法将其转为 JSONObject。
+
 一般请求中，使用 HttpRequest.POST(...) 方法可直接创建 POST 请求，相应的，`HttpRequest.GET(...)` 可创建 GET 请求，另外可选额外的方法增加 header 请求头：
 ```
 HttpRequest.POST(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener);
@@ -174,6 +177,31 @@ HttpRequest.JSONPOST(context, "http://你的接口地址", "{\"key\":\"DFG1H56EH
     }
 });
 ```
+
+也可以使用 JsonMap 构建请求参数：
+```
+progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
+
+JsonMap jsonMap = new JsonMap();
+jsonMap.set("key", "DFG1H56EH5JN3DFA");
+jsonMap.set("token", "124ASFD53SDF65aSF47fgT211");
+
+HttpRequest.JSONPOST(context, "http://你的接口地址", jsonMap, new ResponseListener() {
+    @Override
+    public void onResponse(String response, Exception error) {
+        progressDialog.dismiss();
+        if (error == null) {
+            resultHttp.setText(response);
+        } else {
+            resultHttp.setText("请求失败");
+            Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+});
+```
+
+另外参数也可以是 JSONObject 类型（来自 org.json 框架）。
+
 Json请求中，可使用 `HttpRequest.JSONPOST(...)` 快速创建 Json 请求，另外可选额外的方法增加 header 请求头：
 ```
 HttpRequest.JSONPOST(Context context, String url, Parameter headers, String jsonParameter, ResponseListener listener)
@@ -248,29 +276,51 @@ HttpRequest.build(context,"http://你的接口地址")
         .doPost();
 ```
 
-默认上传文件使用的 mediaType 为 "image/png"，可使用以下代码进行修改：
+上传文件的 MIME 类型将自动根据上传文件的后缀名自动生成。
+
+另外，对于单参数（key）多文件（value）的情况，可使用以下方法进行上传：
 ```
-.setMediaType(MediaType.parse("application/pdf"))       //设置为pdf类型
+List<File> fileList = new ArrayList<File>();
+fileList.add(file1);
+fileList.add(file2);
+HttpRequest.build(context,"http://你的接口地址")
+        .addHeaders("Charset", "UTF-8")
+        .addParameter("page", "1")
+        .addParameter("file", fileList)
+        .setResponseListener(new ResponseListener() {
+            @Override
+            public void onResponse(String response, Exception error) {
+                progressDialog.dismiss();
+                if (error == null) {
+                    resultHttp.setText(response);
+                } else {
+                    resultHttp.setText("请求失败");
+                    Toast.makeText(context, "请求失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+        })
+        .doPost();
 ```
 
-类型参考如下：
-
-内容 | 含义
----|---
-text/html | HTML格式
-text/plain | 纯文本格式
-text/xml |  XML格式
-image/gif | gif图片格式
-image/jpeg | jpg图片格式
-image/png | png图片格式
-application/xhtml+xml | XHTML格式
-application/xml     |  XML数据格式
-application/atom+xml  | Atom XML聚合格式
-application/json    |  JSON数据格式
-application/pdf       | pdf格式
-application/msword  |  Word文档格式
-application/octet-stream | 二进制流数据
-multipart/form-data | 表单数据
+要监控上传进度，可以使用方法 setUploadProgressListener(...) 进行：
+```
+HttpRequest.build(context,"http://你的接口地址")
+        .addHeaders("Charset", "UTF-8")
+        .addParameter("page", "1")
+        .addParameter("file", fileList)
+        .setUploadProgressListener(new UploadProgressListener() {
+            @Override
+            public void onUpload(float percentage, long current, long total, boolean done) {
+                Log.e(">>>", "上传进度: 百分比（float）="+percentage +" "+
+                        "已上传字节数="+current +" "+
+                        "总字节数="+total +" "+
+                        "是否已完成="+done +" "
+                );
+            }
+        })
+        .setResponseListener(...)
+        .doPost();
+```
 
 ## 文件下载
 首先请确保您的 APP 已经在 AndroidManifest.xml 声明读写权限：
@@ -464,6 +514,9 @@ HttpRequest.build(context, "/femaleNameApi")
             }
         });
 ```
+请注意，为杜绝空指针异常，即使请求失败，error!=null 时，返回的 main 依然不会是空指针，而是一个空的 JsonMap 对象，可通过 .isEmpty() 方法判空。
+
+具体请参考我们是如何杜绝空指针引发 APP 崩溃的：[《当 Json 存在问题》](https://github.com/kongzue/BaseJson#%E5%BD%93-json-%E5%AD%98%E5%9C%A8%E9%97%AE%E9%A2%98)
 
 ### 对于未知 Json 文本
 
@@ -573,13 +626,25 @@ HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), ne
 注意，设置全局请求地址后，若 HttpRequest 的请求参数地址为“http”开头，则不会拼接全局请求地址。
 
 ### 全局 Header 请求头
-使用如下代码设置全局 Header 请求头：
+使用如下代码预设置全局 Header 请求头：
 ```
 BaseOkHttp.overallHeader = new Parameter()
         .add("Charset", "UTF-8")
         .add("Content-Type", "application/json")
         .add("Accept-Encoding", "gzip,deflate")
 ;
+```
+
+需要对请求 Header 进行实时处理，则可实现处理接口，例如下边的代码，对 Header 请求头进行了签名操作：
+```
+BaseOkHttp.headerInterceptListener = new HeaderInterceptListener() {
+    @Override
+    public Parameter onIntercept(Context context, String url, Parameter header) {
+        String signStr = sign(header.toParameterString());
+        header.add("sign", signStr);
+        return header;
+    }
+};
 ```
 
 ### 全局请求返回拦截器
@@ -597,6 +662,8 @@ BaseOkHttp.responseInterceptListener = new ResponseInterceptListener() {
     }
 };
 ```
+
+请求返回拦截器另外还有 JsonResponseInterceptListener 实现和 BeanResponseInterceptListener 实现，以便于直接对特定返回数据形式进行处理，使用方法与 ResponseInterceptListener 一致。
 
 ### HTTPS 支持
 1) 请将SSL证书文件放在assets目录中，例如“ssl.crt”；
@@ -748,7 +815,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
+另外感谢
+
 ## 更新日志
+v3.1.9:
+- 整合回调拦截器，并提供新的回调拦截器 BeanResponseInterceptListener 和 JsonResponseInterceptListener；
+- 回调接口 ResponseListener、JsonResponseListener 和 BeanResponseListener 不再返回空指针数据，即当 error 非空时，直接get主数据依然不会是空指针，但 BeanResponseListener 构造 Bean 失败的情况除外；
+- 提供新的 BaseOkHttp.headerInterceptListener 用于实时对请求头进行拦截和处理操作。
+- HttpRequest 新增 setUploadProgressListener(...) 可实时监听上传进度回调，具体参数含义请参考接口注释。
+- 上传所使用的方法 setMediaType(...) 被废弃，现在会根据文件后缀自动判断并设置 MIME 类型；
+- HttpRequest 新增 JsonMap 直接作为参数类型的请求方法；
+- 修复请求回调拦截器对 TimeOutException 请求超时错误无法拦截的 bug； 
+
 v3.1.8:
 - 新增 BeanResponseListener 回调，可直接解析 json 返回数据为 JavaBean；
 - 日志输出统一化，打印更加清晰明了；

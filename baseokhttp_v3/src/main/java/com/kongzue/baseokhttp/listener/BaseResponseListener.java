@@ -10,7 +10,7 @@ package com.kongzue.baseokhttp.listener;
 public interface BaseResponseListener {
     
     /**
-     * 此方法用于内测传递未处理的返回值，请使用 BaseResponseListener 的具体实现
+     * 此方法用于内部传递未处理的返回值，请使用 ResponseListener 的具体实现
      * @hide
      * @param response
      * @param error

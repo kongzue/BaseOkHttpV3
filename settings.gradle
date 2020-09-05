@@ -1,1 +1,1 @@
-include ':app' ,':baseokhttp_v3',':basejson'
+include ':app' ,':baseokhttp_v3'

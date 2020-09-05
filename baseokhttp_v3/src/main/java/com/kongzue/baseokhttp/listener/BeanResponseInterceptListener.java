@@ -1,5 +1,7 @@
 package com.kongzue.baseokhttp.listener;
 
+import android.content.Context;
+
 import com.kongzue.baseokhttp.exceptions.NewInstanceBeanException;
 import com.kongzue.baseokhttp.exceptions.DecodeJsonException;
 import com.kongzue.baseokhttp.util.JsonBean;
@@ -12,12 +14,11 @@ import java.lang.reflect.ParameterizedType;
  * @github: https://github.com/kongzue/
  * @homepage: http://kongzue.com/
  * @mail: myzcxhh@live.cn
- * @createTime: 2020/7/31 17:37
+ * @createTime: 2020/8/28 15:22
  */
-public abstract class BeanResponseListener<T> implements BaseResponseListener {
-    
+public abstract class BeanResponseInterceptListener<T> implements BaseResponseInterceptListener {
     @Override
-    public void response(Object response, Exception error) {
+    public boolean response(Context context, String url, String response, Exception error) {
         T tInstance = null;
         Class<T> tClass;
         try {
@@ -26,21 +27,20 @@ public abstract class BeanResponseListener<T> implements BaseResponseListener {
             tInstance = tClass.newInstance();
         } catch (Exception e) {
             //这种情况下没办法实例化泛型对象
-            onResponse(null, new NewInstanceBeanException("请检查该 Bean 是否为 public 且其构造方法为 public"));
-            return;
+            return onResponse(context, url, null, new NewInstanceBeanException("请检查该 Bean 是否为 public 且其构造方法为 public"));
         }
         if (error == null) {
             JsonMap data = new JsonMap(response.toString());
             if (data.isEmpty()) {
-                onResponse(tInstance, new DecodeJsonException(response.toString()));
+                return onResponse(context, url, tInstance, new DecodeJsonException(response.toString()));
             }
             tInstance = JsonBean.getBean(data, tClass);
             
-            onResponse(tInstance, null);
+            return onResponse(context, url, tInstance, null);
         } else {
-            onResponse(tInstance, error);
+            return onResponse(context, url, tInstance, error);
         }
     }
     
-    public abstract void onResponse(T main, Exception error);
+    public abstract boolean onResponse(Context context, String url, T response, Exception error);
 }

@@ -3,6 +3,7 @@ package com.kongzue.baseokhttp;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.kongzue.baseokhttp.exceptions.DecodeJsonException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
@@ -10,12 +11,16 @@ import com.kongzue.baseokhttp.listener.BaseResponseListener;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
+import com.kongzue.baseokhttp.listener.UploadProgressListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.JsonFormat;
 import com.kongzue.baseokhttp.util.JsonList;
 import com.kongzue.baseokhttp.util.JsonMap;
 import com.kongzue.baseokhttp.util.LockLog;
 import com.kongzue.baseokhttp.util.Parameter;
+import com.kongzue.baseokhttp.util.RequestBodyImpl;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,6 +34,7 @@ import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -65,6 +71,8 @@ public class HttpRequest extends BaseOkHttp {
     
     private OkHttpClient okHttpClient;
     private Call httpCall;
+    
+    @Deprecated
     private MediaType MEDIA_TYPE = MediaType.parse("image/png");
     
     private Parameter parameter;
@@ -77,6 +85,7 @@ public class HttpRequest extends BaseOkHttp {
     private String stringParameter;
     private int timeoutDuration = TIME_OUT_DURATION;
     private Proxy proxy;
+    private UploadProgressListener uploadProgressListener;
     
     private String cookieStr;
     
@@ -109,6 +118,14 @@ public class HttpRequest extends BaseOkHttp {
         JSONPOST(context, url, null, jsonParameter, listener);
     }
     
+    public static void JSONPOST(Context context, String url, JsonMap jsonMap, BaseResponseListener listener) {
+        JSONPOST(context, url, null, jsonMap.toString(), listener);
+    }
+    
+    public static void JSONPOST(Context context, String url, JSONObject jsonObject, BaseResponseListener listener) {
+        JSONPOST(context, url, null, jsonObject.toString(), listener);
+    }
+    
     //JSON格式POST一步创建总方法
     public static void JSONPOST(Context context, String url, Parameter headers, String jsonParameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
@@ -122,6 +139,14 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.httpRequest = httpRequest;
             httpRequest.send();
         }
+    }
+    
+    public static void JSONPOST(Context context, String url, Parameter headers, JsonMap jsonMap, BaseResponseListener listener) {
+        JSONPOST(context, url, headers, jsonMap.toString(), listener);
+    }
+    
+    public static void JSONPOST(Context context, String url, Parameter headers, JSONObject jsonObject, BaseResponseListener listener) {
+        JSONPOST(context, url, headers, jsonObject.toString(), listener);
     }
     
     //String文本POST一步创建方法
@@ -295,7 +320,7 @@ public class HttpRequest extends BaseOkHttp {
             baseokhttp3.Request request;
             baseokhttp3.Request.Builder builder = new baseokhttp3.Request.Builder();
             
-            RequestBody requestBody = null;
+            RequestBodyImpl requestBody = null;
             
             if (isFileRequest) {
                 if (parameterInterceptListener != null) {
@@ -311,7 +336,7 @@ public class HttpRequest extends BaseOkHttp {
                     for (Map.Entry<String, Object> entry : parameter.entrySet()) {
                         if (entry.getValue() instanceof File) {
                             File file = (File) entry.getValue();
-                            multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
+                            multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
                             if (DEBUGMODE) {
                                 LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
                             }
@@ -320,7 +345,7 @@ public class HttpRequest extends BaseOkHttp {
                             for (Object value : valueList) {
                                 if (value instanceof File) {
                                     File file = (File) value;
-                                    multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MEDIA_TYPE, file));
+                                    multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
                                     if (DEBUGMODE) {
                                         LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
                                     }
@@ -342,7 +367,12 @@ public class HttpRequest extends BaseOkHttp {
                     }
                     return;
                 }
-                requestBody = multipartBuilder.build();
+                requestBody = new RequestBodyImpl(multipartBuilder.build()) {
+                    @Override
+                    public void loading(long current, long total, boolean done) {
+                        uploadProgressCallback(current, total, done);
+                    }
+                };
             } else if (isJsonRequest) {
                 if (parameterInterceptListener != null) {
                     try {
@@ -366,7 +396,12 @@ public class HttpRequest extends BaseOkHttp {
                     }
                     return;
                 }
-                requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter);
+                requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter)) {
+                    @Override
+                    public void loading(long current, long total, boolean done) {
+                        uploadProgressCallback(current, total, done);
+                    }
+                };
             } else if (isStringRequest) {
                 if (parameterInterceptListener != null) {
                     try {
@@ -384,7 +419,12 @@ public class HttpRequest extends BaseOkHttp {
                     }
                     return;
                 }
-                requestBody = RequestBody.create(MediaType.parse("text/plain; charset=utf-8"), stringParameter);
+                requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse("text/plain; charset=utf-8"), stringParameter)) {
+                    @Override
+                    public void loading(long current, long total, boolean done) {
+                        uploadProgressCallback(current, total, done);
+                    }
+                };
             } else {
                 if (parameterInterceptListener != null) {
                     try {
@@ -392,7 +432,12 @@ public class HttpRequest extends BaseOkHttp {
                     } catch (Exception e) {
                     }
                 }
-                requestBody = parameter.toOkHttpParameter();
+                requestBody = new RequestBodyImpl(parameter.toOkHttpParameter()) {
+                    @Override
+                    public void loading(long current, long total, boolean done) {
+                        uploadProgressCallback(current, total, done);
+                    }
+                };
             }
             
             //请求类型处理
@@ -418,23 +463,22 @@ public class HttpRequest extends BaseOkHttp {
             if (DEBUGMODE) {
                 LockLog.logI(">>>", "添加请求头:");
             }
+            Parameter allHeader = new Parameter();
             if (overallHeader != null && !overallHeader.entrySet().isEmpty()) {
-                for (Map.Entry<String, Object> entry : overallHeader.entrySet()) {
-                    builder.addHeader(entry.getKey(), entry.getValue() + "");
-                    if (DEBUGMODE) {
-                        LockLog.logI(">>>>>>", entry.getKey() + "=" + entry.getValue());
-                    }
-                }
+                allHeader.putAll(overallHeader);
             }
             if (headers != null && !headers.entrySet().isEmpty()) {
-                for (Map.Entry<String, Object> entry : headers.entrySet()) {
-                    builder.addHeader(entry.getKey(), entry.getValue() + "");
-                    if (DEBUGMODE) {
-                        LockLog.logI(">>>>>>", entry.getKey() + "=" + entry.getValue());
-                    }
+                allHeader.putAll(headers);
+            }
+            if (headerInterceptListener != null) {
+                allHeader = headerInterceptListener.onIntercept(context.get(), url, allHeader);
+            }
+            for (Map.Entry<String, Object> entry : allHeader.entrySet()) {
+                builder.addHeader(entry.getKey(), entry.getValue() + "");
+                if (DEBUGMODE) {
+                    LockLog.logI(">>>>>>", entry.getKey() + "=" + entry.getValue());
                 }
             }
-            
             if (!isNull(cookieStr)) {
                 builder.addHeader("Cookie", cookieStr);
             }
@@ -518,7 +562,7 @@ public class HttpRequest extends BaseOkHttp {
                             @Override
                             public void run() {
                                 if (responseInterceptListener != null) {
-                                    if (responseInterceptListener.onResponse(context.get(), url, null, e)) {
+                                    if (responseInterceptListener.response(context.get(), url, null, e)) {
                                         if (responseListener != null) {
                                             responseListener.response(null, e);
                                         }
@@ -572,7 +616,7 @@ public class HttpRequest extends BaseOkHttp {
                         @Override
                         public void run() {
                             if (responseInterceptListener != null) {
-                                if (responseInterceptListener.onResponse(context.get(), url, strResponse, null)) {
+                                if (responseInterceptListener.response(context.get(), url, strResponse, null)) {
                                     if (responseListener != null) {
                                         responseListener.response(strResponse, null);
                                     }
@@ -611,6 +655,45 @@ public class HttpRequest extends BaseOkHttp {
                 logBuilder.e(">>>", "=====================================");
                 logBuilder.build();
             }
+        }
+    }
+    
+    private void uploadProgressCallback(final long current, final long total, final boolean done) {
+        runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (uploadProgressListener != null) {
+                    uploadProgressListener.onUpload(total != 0 ? current * 1.0f / total : 0f, current, total, done);
+                }
+            }
+        });
+    }
+    
+    public static String getMimeType(File file) {
+        String suffix = getSuffix(file);
+        if (suffix == null) {
+            return "file/*";
+        }
+        String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+        if (type != null || !type.isEmpty()) {
+            return type;
+        }
+        return "file/*";
+    }
+    
+    private static String getSuffix(File file) {
+        if (file == null || !file.exists() || file.isDirectory()) {
+            return null;
+        }
+        String fileName = file.getName();
+        if (fileName.equals("") || fileName.endsWith(".")) {
+            return null;
+        }
+        int index = fileName.lastIndexOf(".");
+        if (index != -1) {
+            return fileName.substring(index + 1).toLowerCase(Locale.US);
+        } else {
+            return null;
         }
     }
     
@@ -843,8 +926,16 @@ public class HttpRequest extends BaseOkHttp {
                         runOnMain(new Runnable() {
                             @Override
                             public void run() {
-                                if (responseListener != null) {
-                                    responseListener.response(null, new TimeOutException());
+                                if (responseInterceptListener == null) {
+                                    if (responseListener != null) {
+                                        responseListener.response(null, new TimeOutException());
+                                    }
+                                } else {
+                                    if (responseInterceptListener.response(context.get(), url, null, new TimeOutException())) {
+                                        if (responseListener != null) {
+                                            responseListener.response(null, new TimeOutException());
+                                        }
+                                    }
                                 }
                             }
                         });
@@ -1090,6 +1181,7 @@ public class HttpRequest extends BaseOkHttp {
         return this;
     }
     
+    @Deprecated
     public HttpRequest setMediaType(MediaType mediaType) {
         MEDIA_TYPE = mediaType;
         return this;
@@ -1139,6 +1231,15 @@ public class HttpRequest extends BaseOkHttp {
     
     public HttpRequest setTimeoutDuration(int timeoutDuration) {
         this.timeoutDuration = timeoutDuration;
+        return this;
+    }
+    
+    public UploadProgressListener getUploadProgressListener() {
+        return uploadProgressListener;
+    }
+    
+    public HttpRequest setUploadProgressListener(UploadProgressListener uploadProgressListener) {
+        this.uploadProgressListener = uploadProgressListener;
         return this;
     }
 }

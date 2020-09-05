@@ -19,10 +19,10 @@ public abstract class JsonResponseListener implements BaseResponseListener {
             if (data!=null && !data.isEmpty()) {
                 onResponse(data, error);
             } else {
-                onResponse(null, new DecodeJsonException(response.toString()));
+                onResponse(new JsonMap(), new DecodeJsonException(response.toString()));
             }
         } else {
-            onResponse(null, error);
+            onResponse(new JsonMap(), error);
         }
     }
     

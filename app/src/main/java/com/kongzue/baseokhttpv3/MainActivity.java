@@ -18,16 +18,14 @@ import com.kongzue.baseframework.BaseAdapter;
 import com.kongzue.baseframework.interfaces.SimpleAdapterSettings;
 import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
-import com.kongzue.baseokhttp.exceptions.CanNotBuildBeanException;
-import com.kongzue.baseokhttp.listener.BeanResponseListener;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
+import com.kongzue.baseokhttp.listener.UploadProgressListener;
 import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
-import com.kongzue.baseokhttp.util.JsonFormat;
 import com.kongzue.baseokhttp.util.JsonList;
 import com.kongzue.baseokhttp.util.JsonMap;
 import com.kongzue.baseokhttp.util.Parameter;
@@ -35,12 +33,6 @@ import com.kongzue.baseokhttp.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import baseokhttp3.Response;
 import baseokio.ByteString;
@@ -112,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
         };
         JsonMap.preParsing = true;
         
+        final Context context = this;
+        
         btnHttp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -164,9 +158,19 @@ public class MainActivity extends AppCompatActivity {
                 
                 );
 
-//                HttpRequest.build(context,"/femaleNameApi")
-//                        .addHeaders("Charset", "UTF-8")
+//                HttpRequest.build(context,"/getWangYiNews")
+//                        .addHeaders("count", "5")
 //                        .addParameter("page", "1")
+//                        .setUploadProgressListener(new UploadProgressListener() {
+//                            @Override
+//                            public void onUpload(float percentage, long current, long total, boolean done) {
+//                                Log.e(">>>", "onUpload: percentage="+percentage +" "+
+//                                        "current="+current +" "+
+//                                        "total="+total +" "+
+//                                        "done="+done +" "
+//                                );
+//                            }
+//                        })
 //                        .setResponseListener(new ResponseListener() {
 //                            @Override
 //                            public void onResponse(String response, Exception error) {
@@ -180,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
 //                            }
 //                        })
 //                        .doPost();
-
 
 //                progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
 //                HttpRequest.JSONPOST(context, "/femaleNameApi", "{\"key\":\"DFG1H56EH5JN3DFA\",\"token\":\"124ASFD53SDF65aSF47fgT211\"}", new ResponseListener() {

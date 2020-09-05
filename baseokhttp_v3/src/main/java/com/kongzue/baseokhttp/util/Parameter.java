@@ -87,4 +87,18 @@ public class Parameter extends TreeMap<String, Object> {
             return null;
         }
     }
+    
+    public JsonMap toParameterJsonMap() {
+        JsonMap result = new JsonMap();
+        try {
+            if (!entrySet().isEmpty()) {
+                for (Entry<String, Object> entry : entrySet()) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
