@@ -27,7 +27,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.1.9</version>
+  <version>3.2.0</version>
   <type>pom</type>
 </dependency>
 ```
@@ -36,9 +36,9 @@ Gradle：
 在dependencies{}中添加引用：
 ```
 //BaseOkHttp V3 网络请求库
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.9'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.2.0'
 //BaseJson 解析库
-implementation 'com.kongzue.basejson:basejson:1.0.5'
+implementation 'com.kongzue.basejson:basejson:1.0.6'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -781,7 +781,26 @@ BaseOkHttp.autoSaveCookies = true;
 httpRequest.getCookies();
 ```
 
+### 重复请求拦截
+
+开启拦截重复请求：
+
+```
+BaseOkHttp.disallowSameRequest = true;
+```
+
+开启后，同一请求（url、参数都相同）一次只能发出一个，在该请求未完成（成功、失败、超时）前无法发出相同的请求。
+
+若有需要同时发出相同地址和参数的请求，可以选择增加一个时间戳来区分请求。
+
+若有清除重复请求判断队列的需要，可以使用以下代码清除：
+
+```
+BaseOkHttp.cleanSameRequestList();
+```
+
 ## 开源协议
+
 ```
 Copyright Kongzue BaseOkHttp
 
@@ -818,7 +837,13 @@ limitations under the License.
 另外感谢
 
 ## 更新日志
+v3.2.0:
+
+- 新增禁止同时重复请求功能，同一地址、同一参数在同时只能发起一个请求，相同的请求会被拦截处理；
+- 修复参数加入其他类型数据时可能被强制转换 String 的问题；
+
 v3.1.9:
+
 - 整合回调拦截器，并提供新的回调拦截器 BeanResponseInterceptListener 和 JsonResponseInterceptListener；
 - 回调接口 ResponseListener、JsonResponseListener 和 BeanResponseListener 不再返回空指针数据，即当 error 非空时，直接get主数据依然不会是空指针，但 BeanResponseListener 构造 Bean 失败的情况除外；
 - 提供新的 BaseOkHttp.headerInterceptListener 用于实时对请求头进行拦截和处理操作。

@@ -19,6 +19,7 @@ import com.kongzue.baseframework.interfaces.SimpleAdapterSettings;
 import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
+import com.kongzue.baseokhttp.listener.MultipartBuilderInterceptor;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import baseokhttp3.HttpUrl;
+import baseokhttp3.MultipartBody;
 import baseokhttp3.Response;
 import baseokio.ByteString;
 
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         psgDownload = findViewById(R.id.psg_download);
         
         BaseOkHttp.DEBUGMODE = true;
+        BaseOkHttp.disallowSameRequest = true;
         BaseOkHttp.serviceUrl = "https://api.apiopen.top";
 //        BaseOkHttp.reserveServiceUrls = new String[]{
 //                "https://www.google.com",
@@ -145,17 +149,82 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         }
-//                        , new BeanResponseListener<DataBean>() {
-//                            @Override
-//                            public void onResponse(DataBean main, Exception error) {
-//                                if (error == null) {
-//                                    Log.e(">>>", "onResponse: " + main);
-//                                } else {
-//                                    error.printStackTrace();
-//                                }
-//                            }
-//                        }
+                );
                 
+                
+                HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
+                                .add("page", "1")
+                                .add("count", 5)
+                        , new JsonResponseListener() {
+                            @Override
+                            public void onResponse(JsonMap main, Exception error) {
+                                progressDialog.dismiss();
+                                if (error == null) {
+                                    resultHttp.setText(main.toString());
+                                    JsonList dataList = main.getList("result");
+                                    
+                                    BaseAdapter<ViewHolder, JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
+                                            MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
+                                        @Override
+                                        public ViewHolder setViewHolder(View convertView) {
+                                            ViewHolder viewHolder = new ViewHolder();
+                                            viewHolder.txtList = convertView.findViewById(R.id.txt_list);
+                                            
+                                            return viewHolder;
+                                        }
+                                        
+                                        @Override
+                                        public void setData(ViewHolder viewHolder, JsonMap data, int index) {
+                                            viewHolder.txtList.setText(data.getString("title"));
+                                        }
+                                    });
+                                    
+                                    listView.setAdapter(baseAdapter);
+                                    
+                                } else {
+                                    resultHttp.setText("请求失败");
+                                    Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                );
+                
+                
+                HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
+                                .add("page", "1")
+                                .add("count", 5)
+                        , new JsonResponseListener() {
+                            @Override
+                            public void onResponse(JsonMap main, Exception error) {
+                                progressDialog.dismiss();
+                                if (error == null) {
+                                    resultHttp.setText(main.toString());
+                                    JsonList dataList = main.getList("result");
+                                    
+                                    BaseAdapter<ViewHolder, JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
+                                            MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
+                                        @Override
+                                        public ViewHolder setViewHolder(View convertView) {
+                                            ViewHolder viewHolder = new ViewHolder();
+                                            viewHolder.txtList = convertView.findViewById(R.id.txt_list);
+                                            
+                                            return viewHolder;
+                                        }
+                                        
+                                        @Override
+                                        public void setData(ViewHolder viewHolder, JsonMap data, int index) {
+                                            viewHolder.txtList.setText(data.getString("title"));
+                                        }
+                                    });
+                                    
+                                    listView.setAdapter(baseAdapter);
+                                    
+                                } else {
+                                    resultHttp.setText("请求失败");
+                                    Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
                 );
 
 //                HttpRequest.build(context,"/getWangYiNews")
@@ -424,5 +493,32 @@ public class MainActivity extends AppCompatActivity {
     
     class ViewHolder {
         TextView txtList;
+    }
+    
+    
+    private void ready() {
+        request(0);
+    }
+    
+    private void request(final int index) {
+        HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
+                        .add("page", "1")
+                        .add("count", 5)
+                , new JsonResponseListener() {
+                    @Override
+                    public void onResponse(JsonMap main, Exception error) {
+                        progressDialog.dismiss();
+                        if (error == null) {
+                            int nextIndex = index + 1;
+                            if (nextIndex < 10) {       //限制次数
+                                request(nextIndex);
+                            }
+                        } else {
+                            resultHttp.setText("请求失败");
+                            Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+        );
     }
 }

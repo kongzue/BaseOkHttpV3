@@ -1,10 +1,13 @@
 package com.kongzue.baseokhttp.util;
 
+import android.util.Log;
+
 import com.kongzue.baseokhttp.listener.BaseResponseInterceptListener;
 import com.kongzue.baseokhttp.listener.HeaderInterceptListener;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -77,4 +80,51 @@ public class BaseOkHttp {
     
     //全局代理设置
     public static Proxy proxy;
+    
+    //禁止重复请求
+    public static boolean disallowSameRequest;
+    
+    public static void cleanSameRequestList(){
+        requestInfoList = new ArrayList<>();
+    }
+    
+    private static List<RequestInfo> requestInfoList;
+    
+    protected void addRequestInfo(RequestInfo requestInfo) {
+        synchronized (BaseOkHttp.class) {
+            if (requestInfoList == null) {
+                requestInfoList = new ArrayList<>();
+            }
+            if (DEBUGMODE) Log.i(">>>", "addRequestInfo: " + requestInfo);
+            requestInfoList.add(requestInfo);
+        }
+    }
+    
+    protected void deleteRequestInfo(RequestInfo requestInfo) {
+        synchronized (BaseOkHttp.class) {
+            if (requestInfoList == null || requestInfoList.isEmpty() || requestInfo == null) {
+                return;
+            }
+            requestInfoList.remove(requestInfo);
+        }
+    }
+    
+    protected boolean equalsRequestInfo(RequestInfo requestInfo) {
+        synchronized (BaseOkHttp.class) {
+            if (requestInfoList == null || requestInfoList.isEmpty()) {
+                if (DEBUGMODE) Log.d(">>>", "requestInfoList: null");
+                return false;
+            }
+            for (RequestInfo requestInfo1 : requestInfoList) {
+                if (DEBUGMODE) Log.d(">>>", "equalsRequestInfo: " + requestInfo1);
+                if (requestInfo1.equals(requestInfo)) {
+                    if (DEBUGMODE) {
+                        Log.w(">>>", "发生重复请求: " + requestInfo);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

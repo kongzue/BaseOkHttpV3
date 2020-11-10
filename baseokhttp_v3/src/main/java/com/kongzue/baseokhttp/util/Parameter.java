@@ -23,14 +23,6 @@ public class Parameter extends TreeMap<String, Object> {
         return this;
     }
     
-    public Object put(String key, Object value) {
-        if (value instanceof File) {
-            return super.put(key, value);
-        } else {
-            return super.put(key, value + "");
-        }
-    }
-    
     public String toParameterString() {
         String result = "";
         if (!entrySet().isEmpty()) {

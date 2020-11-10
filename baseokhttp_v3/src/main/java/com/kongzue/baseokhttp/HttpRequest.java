@@ -9,6 +9,7 @@ import com.kongzue.baseokhttp.exceptions.DecodeJsonException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
 import com.kongzue.baseokhttp.listener.BaseResponseListener;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
+import com.kongzue.baseokhttp.listener.MultipartBuilderInterceptor;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.listener.UploadProgressListener;
@@ -19,6 +20,7 @@ import com.kongzue.baseokhttp.util.JsonMap;
 import com.kongzue.baseokhttp.util.LockLog;
 import com.kongzue.baseokhttp.util.Parameter;
 import com.kongzue.baseokhttp.util.RequestBodyImpl;
+import com.kongzue.baseokhttp.util.RequestInfo;
 
 import org.json.JSONObject;
 
@@ -246,6 +248,8 @@ public class HttpRequest extends BaseOkHttp {
     
     private String url;
     
+    private RequestInfo requestInfo;
+    
     private void send() {
         timeoutDuration = TIME_OUT_DURATION;
         isFileRequest = false;
@@ -260,6 +264,14 @@ public class HttpRequest extends BaseOkHttp {
                 if (entry.getValue() instanceof File) {
                     isFileRequest = true;
                     break;
+                } else if (entry.getValue() instanceof List) {
+                    List valueList = (List) entry.getValue();
+                    for (Object value : valueList) {
+                        if (value instanceof File) {
+                            isFileRequest = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -323,6 +335,11 @@ public class HttpRequest extends BaseOkHttp {
             RequestBodyImpl requestBody = null;
             
             if (isFileRequest) {
+                requestInfo = new RequestInfo(url, parameter);
+                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                    return;
+                }
+                addRequestInfo(requestInfo);
                 if (parameterInterceptListener != null) {
                     try {
                         parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
@@ -367,6 +384,7 @@ public class HttpRequest extends BaseOkHttp {
                     }
                     return;
                 }
+                multipartBuilder = interceptMultipartBuilder(multipartBuilder);
                 requestBody = new RequestBodyImpl(multipartBuilder.build()) {
                     @Override
                     public void loading(long current, long total, boolean done) {
@@ -374,6 +392,11 @@ public class HttpRequest extends BaseOkHttp {
                     }
                 };
             } else if (isJsonRequest) {
+                requestInfo = new RequestInfo(url, jsonParameter);
+                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                    return;
+                }
+                addRequestInfo(requestInfo);
                 if (parameterInterceptListener != null) {
                     try {
                         if (jsonParameter.startsWith("[")) {
@@ -403,6 +426,11 @@ public class HttpRequest extends BaseOkHttp {
                     }
                 };
             } else if (isStringRequest) {
+                requestInfo = new RequestInfo(url, stringParameter);
+                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                    return;
+                }
+                addRequestInfo(requestInfo);
                 if (parameterInterceptListener != null) {
                     try {
                         stringParameter = (String) parameterInterceptListener.onIntercept(context.get(), url, stringParameter);
@@ -426,6 +454,11 @@ public class HttpRequest extends BaseOkHttp {
                     }
                 };
             } else {
+                requestInfo = new RequestInfo(url, parameter);
+                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                    return;
+                }
+                addRequestInfo(requestInfo);
                 if (parameterInterceptListener != null) {
                     try {
                         parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
@@ -512,6 +545,7 @@ public class HttpRequest extends BaseOkHttp {
             httpCall.enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, final IOException e) {
+                    deleteRequestInfo(requestInfo);
                     if (!isSending) {
                         return;
                     }
@@ -579,6 +613,7 @@ public class HttpRequest extends BaseOkHttp {
                 
                 @Override
                 public void onResponse(Call call, baseokhttp3.Response response) throws IOException {
+                    deleteRequestInfo(requestInfo);
                     if (!isSending) {
                         return;
                     }
@@ -631,6 +666,7 @@ public class HttpRequest extends BaseOkHttp {
                 }
             });
         } catch (Exception e) {
+            deleteRequestInfo(requestInfo);
             if (DEBUGMODE) {
                 LockLog.Builder logBuilder = LockLog.Builder.create()
                         .e(">>>", "请求创建失败:" + url)
@@ -900,6 +936,7 @@ public class HttpRequest extends BaseOkHttp {
             @Override
             public void run() {
                 if (isSending) {
+                    deleteRequestInfo(requestInfo);
                     isSending = false;
                     if (BaseOkHttp.reserveServiceUrls != null && BaseOkHttp.reserveServiceUrls.length != 0) {
                         if (DEBUGMODE) {
@@ -1240,6 +1277,24 @@ public class HttpRequest extends BaseOkHttp {
     
     public HttpRequest setUploadProgressListener(UploadProgressListener uploadProgressListener) {
         this.uploadProgressListener = uploadProgressListener;
+        return this;
+    }
+    
+    private MultipartBuilderInterceptor multipartBuilderInterceptor;
+    
+    protected MultipartBody.Builder interceptMultipartBuilder(MultipartBody.Builder multipartBuilder) {
+        if (multipartBuilderInterceptor != null) {
+            multipartBuilder = multipartBuilderInterceptor.interceptMultipartBuilder(multipartBuilder);
+        }
+        return multipartBuilder;
+    }
+    
+    public MultipartBuilderInterceptor getMultipartBuilderInterceptor() {
+        return multipartBuilderInterceptor;
+    }
+    
+    public HttpRequest setMultipartBuilderInterceptor(MultipartBuilderInterceptor multipartBuilderInterceptor) {
+        this.multipartBuilderInterceptor = multipartBuilderInterceptor;
         return this;
     }
 }
