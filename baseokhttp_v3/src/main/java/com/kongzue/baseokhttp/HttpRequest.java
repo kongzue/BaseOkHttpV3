@@ -8,6 +8,8 @@ import android.webkit.MimeTypeMap;
 import com.kongzue.baseokhttp.exceptions.DecodeJsonException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
 import com.kongzue.baseokhttp.listener.BaseResponseListener;
+import com.kongzue.baseokhttp.listener.CustomOkHttpClient;
+import com.kongzue.baseokhttp.listener.CustomOkHttpClientBuilder;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
 import com.kongzue.baseokhttp.listener.MultipartBuilderInterceptor;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
@@ -88,6 +90,9 @@ public class HttpRequest extends BaseOkHttp {
     private int timeoutDuration = TIME_OUT_DURATION;
     private Proxy proxy;
     private UploadProgressListener uploadProgressListener;
+    
+    private CustomOkHttpClient customOkHttpClient;
+    private CustomOkHttpClientBuilder customOkHttpClientBuilder;
     
     private String cookieStr;
     
@@ -325,7 +330,19 @@ public class HttpRequest extends BaseOkHttp {
                 if (proxy != null) {
                     builder.proxy(proxy);
                 }
+                if (customOkHttpClientBuilder != null) {
+                    builder = customOkHttpClientBuilder.customBuilder(builder);
+                }
+                if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
+                    builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
+                }
                 okHttpClient = builder.build();
+            }
+            if (customOkHttpClient != null) {
+                okHttpClient = customOkHttpClient.customBuilder(okHttpClient);
+            }
+            if (BaseOkHttp.globalCustomOkHttpClient!=null){
+                BaseOkHttp.globalCustomOkHttpClient.customBuilder(this,okHttpClient);
             }
             
             //创建请求
@@ -803,7 +820,19 @@ public class HttpRequest extends BaseOkHttp {
                     });
                 }
                 
+                if (customOkHttpClientBuilder != null) {
+                    builder = customOkHttpClientBuilder.customBuilder(builder);
+                }
+                if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
+                    builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
+                }
                 okHttpClient = builder.build();
+            }
+            if (customOkHttpClient != null) {
+                okHttpClient = customOkHttpClient.customBuilder(okHttpClient);
+            }
+            if (BaseOkHttp.globalCustomOkHttpClient != null) {
+                okHttpClient = BaseOkHttp.globalCustomOkHttpClient.customBuilder(this, okHttpClient);
             }
             
             //创建请求
@@ -1008,7 +1037,7 @@ public class HttpRequest extends BaseOkHttp {
                             }
                         }
                     })
-                    .cache(new Cache(sdcache.getAbsoluteFile(), cacheSize));
+                    .cache(BaseOkHttp.requestCache ? new Cache(sdcache.getAbsoluteFile(), cacheSize) : null);
             if (certificates != null) {
                 builder.sslSocketFactory(getSSLSocketFactory(certificates));
             }
@@ -1033,6 +1062,12 @@ public class HttpRequest extends BaseOkHttp {
                         return cookies != null ? cookies : new ArrayList<Cookie>();
                     }
                 });
+            }
+            if (customOkHttpClientBuilder != null) {
+                builder = customOkHttpClientBuilder.customBuilder(builder);
+            }
+            if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
+                builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
             }
             okHttpClient = builder.build();
         }
@@ -1296,5 +1331,59 @@ public class HttpRequest extends BaseOkHttp {
     public HttpRequest setMultipartBuilderInterceptor(MultipartBuilderInterceptor multipartBuilderInterceptor) {
         this.multipartBuilderInterceptor = multipartBuilderInterceptor;
         return this;
+    }
+    
+    public CustomOkHttpClient getCustomOkHttpClient() {
+        return customOkHttpClient;
+    }
+    
+    /**
+     * 此方法用于请求前修改发出的 OkHttpClient，请将修改后的 OkHttpClient return 到此接口中
+     * 警告：要使此方法生效，请使用 build(...) 方法构建 HttpRequest
+     */
+    public HttpRequest setCustomOkHttpClient(CustomOkHttpClient customOkHttpClient) {
+        this.customOkHttpClient = customOkHttpClient;
+        return this;
+    }
+    
+    public CustomOkHttpClientBuilder getCustomOkHttpClientBuilder() {
+        return customOkHttpClientBuilder;
+    }
+    
+    /**
+     * 此方法用于请求前修改发出的 OkHttpClientBuilder，请将修改后的 OkHttpClientBuilder return 到此接口中
+     * 警告：要使此方法生效，请使用 build(...) 方法构建 HttpRequest
+     */
+    public HttpRequest setCustomOkHttpClientBuilder(CustomOkHttpClientBuilder customOkHttpClientBuilder) {
+        this.customOkHttpClientBuilder = customOkHttpClientBuilder;
+        return this;
+    }
+    
+    public Parameter getParameter() {
+        return parameter;
+    }
+    
+    public String getUrl() {
+        return url;
+    }
+    
+    public String getJsonParameter() {
+        return jsonParameter;
+    }
+    
+    public String getStringParameter() {
+        return stringParameter;
+    }
+    
+    public boolean isFileRequest() {
+        return isFileRequest;
+    }
+    
+    public boolean isJsonRequest() {
+        return isJsonRequest;
+    }
+    
+    public boolean isStringRequest() {
+        return isStringRequest;
     }
 }

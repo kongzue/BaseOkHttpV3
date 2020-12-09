@@ -1,10 +1,10 @@
 # BaseOkHttp V3
 
 <a href="https://github.com/kongzue/BaseOkHttp/">
-<img src="https://img.shields.io/badge/BaseOkHttp-3.1.9-green.svg" alt="BaseOkHttp">
+<img src="https://img.shields.io/badge/BaseOkHttp-3.2.1-green.svg" alt="BaseOkHttp">
 </a>
 <a href="https://bintray.com/myzchh/maven/BaseOkHttp_v3/3.1.9/link">
-<img src="https://img.shields.io/badge/Maven-3.1.9-blue.svg" alt="Maven">
+<img src="https://img.shields.io/badge/Maven-3.2.1-blue.svg" alt="Maven">
 </a>
 <a href="http://www.apache.org/licenses/LICENSE-2.0">
 <img src="https://img.shields.io/badge/License-Apache%202.0-red.svg" alt="License">
@@ -27,7 +27,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.2.0</version>
+  <version>3.2.1</version>
   <type>pom</type>
 </dependency>
 ```
@@ -36,7 +36,7 @@ Gradle：
 在dependencies{}中添加引用：
 ```
 //BaseOkHttp V3 网络请求库
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.2.0'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.2.1'
 //BaseJson 解析库
 implementation 'com.kongzue.basejson:basejson:1.0.6'
 ```
@@ -93,7 +93,8 @@ implementation 'com.kongzue.basejson:basejson:1.0.6'
 ## 一般请求
 BaseOkHttp V3 提供两种请求写法，范例如下：
 
-以参数形式创建请求：
+#### 以参数形式创建请求：
+
 ```
 progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
 HttpRequest.POST(context, "http://你的接口地址", new Parameter().add("page", "1"), new ResponseListener() {
@@ -118,7 +119,8 @@ HttpRequest.POST(Context context, String url, Parameter headers, Parameter param
 HttpRequest.GET(Context context, String url, Parameter headers, Parameter parameter, ResponseListener listener);
 ```
 
-或者也可以以流式代码创建请求：
+#### 以流式代码创建请求：
+
 ```
 progressDialog = ProgressDialog.show(context, "请稍候", "请求中...");
 HttpRequest.build(context,"http://你的接口地址")
@@ -158,7 +160,16 @@ HttpRequest.POST(context, "/femaleNameApi", new Parameter().add("page", "1"), ne
 });
 ```
 
+#### 关于返回线程的说明
+
+BaseOkHttpV3 会智能的判断需要返回线程的场景，一般而言，您无需为此而操心，您可以直接在请求回调中进行 UI 的操作。
+
+BaseOkHttpV3 的请求过程是异步进行的（多线程），而在返回数据后，是根据 context 进行判断的是要在异步线程执行还是在 UI 线程执行，当 context 传入的是 Activity 时，默认会在 UI 线程返回，无需额外处理线程问题，而当 context 为非 Activity，例如 ApplicationContext 或者 Service 时，则会在异步线程返回数据，若需要修改界面上的元素显示，您需要手动切换到主线程刷新 UI 组件。
+
+这是在我们经过大量的使用场景调研后得出的最优设计方案，但如若您的请求返回数据流非常大，可能造成 UI 线程卡顿，建议在传入 context 时，使用 `context.getApplicationContext()` 方法来强制异步线程返回，待数据得到妥善处理后，需要返回 UI 线程刷新界面显示时，使用 `activity.runOnUiThread(...)`切换到主线程进行刷新。
+
 ## JSON请求
+
 有时候我们需要使用已经处理好的json文本作为请求参数，此时可以使用 `HttpRequest.JSONPOST(...)` 方法创建 json 请求。
 
 json 请求中，参数为文本类型，创建请求方式如下：
@@ -799,6 +810,14 @@ BaseOkHttp.disallowSameRequest = true;
 BaseOkHttp.cleanSameRequestList();
 ```
 
+### 自定义 OkHttpClient 或 OkHttpClient.Builder
+
+BaseOkHttpV3 的底层是 OkHttp，我们提供了自动化的默认 OkHttpClient 实现，但您也许会有需要客制化这些组件以实现更多功能。
+
+要定制 OkHttpClient 或 OkHttpClient.Builder，请先使用 `HttpRequest.build(context)`构建请求，然后使用 `setCustomOkHttpClient(CustomOkHttpClient)`和`setCustomOkHttpClientBuilder(CustomOkHttpClientBuilder)`来设置定制接口，在请求发出前对 OkHttpClient.Builder 和 OkHttpClient 进行修改，需要将修改后的组件 return 到接口返回参数中才可生效。
+
+要全局拦截 OkHttpClient 或 OkHttpClient.Builder，您可以设置`BaseOkHttp.globalCustomOkHttpClient`和`BaseOkHttp.globalCustomOkHttpClientBuilder`进行拦截修改，需要将修改后的组件 return 到接口返回参数中才可生效。
+
 ## 开源协议
 
 ```
@@ -837,6 +856,14 @@ limitations under the License.
 另外感谢
 
 ## 更新日志
+v3.2.1:
+
+- 新增 CustomOkHttpClient 和 CustomOkHttpClientBuilder 支持自定义 OkHttpClient 和 Builder;
+
+- BaseOkHttp 新增全局的 GlobalCustomOkHttpClientBuilder 和 GlobalCustomOkHttpClient 接口;
+- BaseOkHttp 新增 requestCache 选项，默认开启，关闭后将不启用缓存实现；
+- HttpRequest 新增 `getParameter()`、`getUrl()`、`getJsonParameter()`和`getStringParameter()`等方法；
+
 v3.2.0:
 
 - 新增禁止同时重复请求功能，同一地址、同一参数在同时只能发起一个请求，相同的请求会被拦截处理；

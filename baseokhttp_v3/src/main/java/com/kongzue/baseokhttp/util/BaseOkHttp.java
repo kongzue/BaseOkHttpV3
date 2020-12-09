@@ -3,6 +3,10 @@ package com.kongzue.baseokhttp.util;
 import android.util.Log;
 
 import com.kongzue.baseokhttp.listener.BaseResponseInterceptListener;
+import com.kongzue.baseokhttp.listener.CustomOkHttpClient;
+import com.kongzue.baseokhttp.listener.CustomOkHttpClientBuilder;
+import com.kongzue.baseokhttp.listener.GlobalCustomOkHttpClient;
+import com.kongzue.baseokhttp.listener.GlobalCustomOkHttpClientBuilder;
 import com.kongzue.baseokhttp.listener.HeaderInterceptListener;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 
@@ -83,6 +87,15 @@ public class BaseOkHttp {
     
     //禁止重复请求
     public static boolean disallowSameRequest;
+    
+    //缓存请求
+    public static boolean requestCache = true;
+    
+    //全局自定义 OkHttpClient
+    public static GlobalCustomOkHttpClient globalCustomOkHttpClient;
+    
+    //全局自定义 OkHttpClientBuilder
+    public static GlobalCustomOkHttpClientBuilder globalCustomOkHttpClientBuilder;
     
     public static void cleanSameRequestList(){
         requestInfoList = new ArrayList<>();
