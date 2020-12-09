@@ -859,7 +859,6 @@ limitations under the License.
 v3.2.1:
 
 - 新增 CustomOkHttpClient 和 CustomOkHttpClientBuilder 支持自定义 OkHttpClient 和 Builder;
-
 - BaseOkHttp 新增全局的 GlobalCustomOkHttpClientBuilder 和 GlobalCustomOkHttpClient 接口;
 - BaseOkHttp 新增 requestCache 选项，默认开启，关闭后将不启用缓存实现；
 - HttpRequest 新增 `getParameter()`、`getUrl()`、`getJsonParameter()`和`getStringParameter()`等方法；
