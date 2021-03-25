@@ -12,12 +12,12 @@ import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
 
 import java.lang.ref.WeakReference;
 
-import baseokhttp3.OkHttpClient;
-import baseokhttp3.Request;
-import baseokhttp3.Response;
-import baseokhttp3.WebSocket;
-import baseokhttp3.WebSocketListener;
-import baseokio.ByteString;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.ByteString;
 
 import static com.kongzue.baseokhttp.util.BaseOkHttp.*;
 

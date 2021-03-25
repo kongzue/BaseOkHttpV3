@@ -50,17 +50,18 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-import baseokhttp3.Cache;
-import baseokhttp3.Call;
-import baseokhttp3.Callback;
-import baseokhttp3.Cookie;
-import baseokhttp3.CookieJar;
-import baseokhttp3.HttpUrl;
-import baseokhttp3.MediaType;
-import baseokhttp3.MultipartBody;
-import baseokhttp3.OkHttpClient;
-import baseokhttp3.RequestBody;
-import baseokhttp3.Response;
+import okhttp3.Cache;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 //待办：单独设置某一次请求超时时间
 
@@ -77,7 +78,7 @@ public class HttpRequest extends BaseOkHttp {
     private Call httpCall;
     
     @Deprecated
-    private MediaType MEDIA_TYPE = MediaType.parse("image/png");
+    private MediaType MEDIA_TYPE;
     
     private Parameter parameter;
     private Parameter headers;
@@ -346,8 +347,8 @@ public class HttpRequest extends BaseOkHttp {
             }
             
             //创建请求
-            baseokhttp3.Request request;
-            baseokhttp3.Request.Builder builder = new baseokhttp3.Request.Builder();
+            Request request;
+            Request.Builder builder = new Request.Builder();
             
             RequestBodyImpl requestBody = null;
             
@@ -629,7 +630,7 @@ public class HttpRequest extends BaseOkHttp {
                 }
                 
                 @Override
-                public void onResponse(Call call, baseokhttp3.Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     deleteRequestInfo(requestInfo);
                     if (!isSending) {
                         return;
@@ -836,8 +837,8 @@ public class HttpRequest extends BaseOkHttp {
             }
             
             //创建请求
-            baseokhttp3.Request request;
-            baseokhttp3.Request.Builder builder = new baseokhttp3.Request.Builder();
+            Request request;
+            Request.Builder builder = new Request.Builder();
             builder.url(url);
             builder.addHeader("Connection", "close");
             request = builder.build();

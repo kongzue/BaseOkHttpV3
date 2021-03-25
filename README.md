@@ -27,7 +27,7 @@ Maven仓库：
 <dependency>
   <groupId>com.kongzue.baseokhttp_v3</groupId>
   <artifactId>baseokhttp_v3</artifactId>
-  <version>3.2.1</version>
+  <version>3.2.2</version>
   <type>pom</type>
 </dependency>
 ```
@@ -36,9 +36,9 @@ Gradle：
 在dependencies{}中添加引用：
 ```
 //BaseOkHttp V3 网络请求库
-implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.2.1'
+implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.2.2'
 //BaseJson 解析库
-implementation 'com.kongzue.basejson:basejson:1.0.6'
+implementation 'com.kongzue.basejson:basejson:1.0.7'
 ```
 
 新版本系统（API>=27）中，使用非 HTTPS 请求地址可能出现 java.net.UnknownServiceException 错误，解决方案请参考：<https://www.jianshu.com/p/528a3def1cf4>
@@ -856,6 +856,9 @@ limitations under the License.
 另外感谢
 
 ## 更新日志
+v3.2.2:
+- 升级 okHttp 底层到最新版本 4.9.0；
+
 v3.2.1:
 
 - 新增 CustomOkHttpClient 和 CustomOkHttpClientBuilder 支持自定义 OkHttpClient 和 Builder;

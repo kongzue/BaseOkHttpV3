@@ -3,8 +3,6 @@ package com.kongzue.baseokhttp.util;
 import android.util.Log;
 
 import com.kongzue.baseokhttp.listener.BaseResponseInterceptListener;
-import com.kongzue.baseokhttp.listener.CustomOkHttpClient;
-import com.kongzue.baseokhttp.listener.CustomOkHttpClientBuilder;
 import com.kongzue.baseokhttp.listener.GlobalCustomOkHttpClient;
 import com.kongzue.baseokhttp.listener.GlobalCustomOkHttpClientBuilder;
 import com.kongzue.baseokhttp.listener.HeaderInterceptListener;
@@ -15,8 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import baseokhttp3.Cookie;
-import baseokhttp3.HttpUrl;
+import okhttp3.Cookie;
+import okhttp3.HttpUrl;
 
 /**
  * Author: @Kongzue

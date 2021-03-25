@@ -1,6 +1,6 @@
 package com.kongzue.baseokhttp.listener;
 
-import baseokhttp3.MultipartBody;
+import okhttp3.MultipartBody;
 
 /**
  * @author: Kongzue

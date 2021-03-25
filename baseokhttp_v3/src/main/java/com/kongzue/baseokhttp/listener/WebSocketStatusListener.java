@@ -1,7 +1,7 @@
 package com.kongzue.baseokhttp.listener;
 
-import baseokhttp3.Response;
-import baseokio.ByteString;
+import okhttp3.Response;
+import okio.ByteString;
 
 /**
  * Author: @Kongzue

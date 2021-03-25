@@ -2,13 +2,12 @@ package com.kongzue.baseokhttp.util;
 
 import java.io.IOException;
 
-import baseokhttp3.MediaType;
-import baseokhttp3.RequestBody;
-import baseokio.Buffer;
-import baseokio.BufferedSink;
-import baseokio.ForwardingSink;
-import baseokio.Okio;
-import baseokio.Sink;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okio.BufferedSink;
+import okio.ForwardingSink;
+import okio.Okio;
+import okio.Sink;
 
 public abstract class RequestBodyImpl extends RequestBody {
     
@@ -46,7 +45,7 @@ public abstract class RequestBodyImpl extends RequestBody {
             private long last = 0;
             
             @Override
-            public void write(Buffer source, long byteCount) throws IOException {
+            public void write(okio.Buffer source, long byteCount) throws IOException {
                 super.write(source, byteCount);
                 if (total == 0) {
                     total = contentLength();

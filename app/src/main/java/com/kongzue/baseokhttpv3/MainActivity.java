@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,12 +18,9 @@ import com.kongzue.baseframework.interfaces.SimpleAdapterSettings;
 import com.kongzue.baseokhttp.BaseWebSocket;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.JsonResponseListener;
-import com.kongzue.baseokhttp.listener.MultipartBuilderInterceptor;
 import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ParameterInterceptListener;
 import com.kongzue.baseokhttp.listener.ResponseInterceptListener;
-import com.kongzue.baseokhttp.listener.ResponseListener;
-import com.kongzue.baseokhttp.listener.UploadProgressListener;
 import com.kongzue.baseokhttp.listener.WebSocketStatusListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.JsonList;
@@ -35,10 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import baseokhttp3.HttpUrl;
-import baseokhttp3.MultipartBody;
-import baseokhttp3.Response;
-import baseokio.ByteString;
+import okhttp3.Response;
+import okio.ByteString;
 
 public class MainActivity extends AppCompatActivity {
     

@@ -5,16 +5,11 @@ package com.kongzue.baseokhttp.util;
  */
 
 import android.util.Log;
-
 import org.json.JSONObject;
-
-import java.io.File;
 import java.util.TreeMap;
 
-import baseokhttp3.FormBody;
-import baseokhttp3.RequestBody;
-
-import static com.kongzue.baseokhttp.util.BaseOkHttp.DEBUGMODE;
+import okhttp3.FormBody;
+import okhttp3.RequestBody;
 
 public class Parameter extends TreeMap<String, Object> {
     
