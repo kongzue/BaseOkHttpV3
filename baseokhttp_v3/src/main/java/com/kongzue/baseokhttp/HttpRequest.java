@@ -77,8 +77,7 @@ public class HttpRequest extends BaseOkHttp {
     private OkHttpClient okHttpClient;
     private Call httpCall;
     
-    @Deprecated
-    private MediaType MEDIA_TYPE;
+    private String customMimeType;
     
     private Parameter parameter;
     private Parameter headers;
@@ -726,13 +725,16 @@ public class HttpRequest extends BaseOkHttp {
         });
     }
     
-    public static String getMimeType(File file) {
+    public String getMimeType(File file) {
+        if (!isNull(customMimeType)) {
+            return customMimeType;
+        }
         String suffix = getSuffix(file);
         if (suffix == null) {
             return "file/*";
         }
         String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
-        if (type != null || !type.isEmpty()) {
+        if (!isNull(type)) {
             return type;
         }
         return "file/*";
@@ -1259,8 +1261,16 @@ public class HttpRequest extends BaseOkHttp {
     
     @Deprecated
     public HttpRequest setMediaType(MediaType mediaType) {
-        MEDIA_TYPE = mediaType;
         return this;
+    }
+    
+    public HttpRequest setCustomMimeType(String customMimeType) {
+        this.customMimeType = customMimeType;
+        return this;
+    }
+    
+    public String getCustomMimeType() {
+        return customMimeType;
     }
     
     public HttpRequest skipSSLCheck() {
