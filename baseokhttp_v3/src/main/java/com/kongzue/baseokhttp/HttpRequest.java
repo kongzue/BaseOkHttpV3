@@ -314,228 +314,16 @@ public class HttpRequest extends BaseOkHttp {
                     parameter.add(entry.getKey(), entry.getValue());
                 }
             }
-    
-            if (BaseOkHttp.globalCustomOkHttpClient!=null){
-                BaseOkHttp.globalCustomOkHttpClient.customBuilder(this,okHttpClient);
-            }
-            if (customOkHttpClient != null) {
-                okHttpClient = customOkHttpClient.customBuilder(okHttpClient);
-            }else{
-                if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
-                    okHttpClient = getOkHttpClient(context.get(), context.get().getAssets().open(SSLInAssetsFileName));
-                } else {
-                    OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                            .retryOnConnectionFailure(false)
-                            .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
-                            .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
-                            .readTimeout(timeoutDuration, TimeUnit.SECONDS)
-                            .hostnameVerifier(new HostnameVerifier() {
-                                @Override
-                                public boolean verify(String hostname, SSLSession session) {
-                                    return true;
-                                }
-                            });
-                    if (proxy != null) {
-                        builder.proxy(proxy);
-                    }
-                    if (customOkHttpClientBuilder != null) {
-                        builder = customOkHttpClientBuilder.customBuilder(builder);
-                    }
-                    if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
-                        builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
-                    }
-                    okHttpClient = builder.build();
-                }
+            
+            okHttpClient = createClient();
+            if (okHttpClient == null) {
+                return;
             }
             
-            //创建请求
-            Request request;
-            Request.Builder builder = new Request.Builder();
-            
-            RequestBodyImpl requestBody = null;
-            
-            if (isFileRequest) {
-                requestInfo = new RequestInfo(url, parameter);
-                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
-                    return;
-                }
-                addRequestInfo(requestInfo);
-                if (parameterInterceptListener != null) {
-                    try {
-                        parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
-                    } catch (Exception e) {
-                    }
-                }
-                
-                MultipartBody.Builder multipartBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-                
-                if (parameter != null && !parameter.entrySet().isEmpty()) {
-                    for (Map.Entry<String, Object> entry : parameter.entrySet()) {
-                        if (entry.getValue() instanceof File) {
-                            File file = (File) entry.getValue();
-                            multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
-                            if (DEBUGMODE) {
-                                LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
-                            }
-                        } else if (entry.getValue() instanceof List) {
-                            List valueList = (List) entry.getValue();
-                            for (Object value : valueList) {
-                                if (value instanceof File) {
-                                    File file = (File) value;
-                                    multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
-                                    if (DEBUGMODE) {
-                                        LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
-                                    }
-                                } else {
-                                    multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
-                                }
-                            }
-                        } else {
-                            multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
-                        }
-                    }
-                } else {
-                    if (DEBUGMODE) {
-                        LockLog.Builder.create()
-                                .e(">>>", "-------------------------------------")
-                                .e(">>>", "创建请求失败:无上传的文件")
-                                .e(">>>", "=====================================")
-                                .build();
-                    }
-                    return;
-                }
-                multipartBuilder = interceptMultipartBuilder(multipartBuilder);
-                requestBody = new RequestBodyImpl(multipartBuilder.build()) {
-                    @Override
-                    public void loading(long current, long total, boolean done) {
-                        uploadProgressCallback(current, total, done);
-                    }
-                };
-            } else if (isJsonRequest) {
-                requestInfo = new RequestInfo(url, jsonParameter);
-                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
-                    return;
-                }
-                addRequestInfo(requestInfo);
-                if (parameterInterceptListener != null) {
-                    try {
-                        if (jsonParameter.startsWith("[")) {
-                            jsonParameter = parameterInterceptListener.onIntercept(context.get(), url, JsonList.parse(jsonParameter)).toString();
-                        } else if (jsonParameter.startsWith("{")) {
-                            jsonParameter = parameterInterceptListener.onIntercept(context.get(), url, JsonMap.parse(jsonParameter)).toString();
-                        } else {
-                            jsonParameter = (String) parameterInterceptListener.onIntercept(context.get(), url, jsonParameter);
-                        }
-                    } catch (Exception e) {
-                    }
-                }
-                if (isNull(jsonParameter)) {
-                    if (DEBUGMODE) {
-                        LockLog.Builder.create()
-                                .e(">>>", "-------------------------------------")
-                                .e(">>>", "创建请求失败:" + jsonParameter + " 不是正确的json格式参数")
-                                .e(">>>", "=====================================")
-                                .build();
-                    }
-                    return;
-                }
-                requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter)) {
-                    @Override
-                    public void loading(long current, long total, boolean done) {
-                        uploadProgressCallback(current, total, done);
-                    }
-                };
-            } else if (isStringRequest) {
-                requestInfo = new RequestInfo(url, stringParameter);
-                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
-                    return;
-                }
-                addRequestInfo(requestInfo);
-                if (parameterInterceptListener != null) {
-                    try {
-                        stringParameter = (String) parameterInterceptListener.onIntercept(context.get(), url, stringParameter);
-                    } catch (Exception e) {
-                    }
-                }
-                if (isNull(stringParameter)) {
-                    if (DEBUGMODE) {
-                        LockLog.Builder.create()
-                                .e(">>>", "-------------------------------------")
-                                .e(">>>", "创建请求失败:" + stringParameter)
-                                .e(">>>", "=====================================")
-                                .build();
-                    }
-                    return;
-                }
-                requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse("text/plain; charset=utf-8"), stringParameter)) {
-                    @Override
-                    public void loading(long current, long total, boolean done) {
-                        uploadProgressCallback(current, total, done);
-                    }
-                };
-            } else {
-                requestInfo = new RequestInfo(url, parameter);
-                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
-                    return;
-                }
-                addRequestInfo(requestInfo);
-                if (parameterInterceptListener != null) {
-                    try {
-                        parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
-                    } catch (Exception e) {
-                    }
-                }
-                requestBody = new RequestBodyImpl(parameter.toOkHttpParameter()) {
-                    @Override
-                    public void loading(long current, long total, boolean done) {
-                        uploadProgressCallback(current, total, done);
-                    }
-                };
+            Request request = createRequest();
+            if (request == null) {
+                return;
             }
-            
-            //请求类型处理
-            switch (requestType) {
-                case GET_REQUEST:               //GET
-                    builder.url(url.contains("?") ? url + "&" + parameter.toParameterString() : url + "?" + parameter.toParameterString());
-                    break;
-                case PUT_REQUEST:               //PUT
-                    builder.url(url);
-                    builder.put(requestBody);
-                    break;
-                case DELETE_REQUEST:            //DELETE
-                    builder.url(url);
-                    builder.delete(requestBody);
-                    break;
-                default:                        //POST
-                    builder.url(url);
-                    builder.post(requestBody);
-                    break;
-            }
-            
-            //请求头处理
-            if (DEBUGMODE) {
-                LockLog.logI(">>>", "添加请求头:");
-            }
-            Parameter allHeader = new Parameter();
-            if (overallHeader != null && !overallHeader.entrySet().isEmpty()) {
-                allHeader.putAll(overallHeader);
-            }
-            if (headers != null && !headers.entrySet().isEmpty()) {
-                allHeader.putAll(headers);
-            }
-            if (headerInterceptListener != null) {
-                allHeader = headerInterceptListener.onIntercept(context.get(), url, allHeader);
-            }
-            for (Map.Entry<String, Object> entry : allHeader.entrySet()) {
-                builder.addHeader(entry.getKey(), entry.getValue() + "");
-                if (DEBUGMODE) {
-                    LockLog.logI(">>>>>>", entry.getKey() + "=" + entry.getValue());
-                }
-            }
-            if (!isNull(cookieStr)) {
-                builder.addHeader("Cookie", cookieStr);
-            }
-            request = builder.build();
             
             if (DEBUGMODE) {
                 LockLog.Builder logBuilder = LockLog.Builder.create()
@@ -714,6 +502,296 @@ public class HttpRequest extends BaseOkHttp {
         }
     }
     
+    private OkHttpClient createClient() {
+        if (BaseOkHttp.globalCustomOkHttpClient != null) {
+            return BaseOkHttp.globalCustomOkHttpClient.customBuilder(this, okHttpClient);
+        }
+        if (customOkHttpClient != null) {
+            return customOkHttpClient.customBuilder(okHttpClient);
+        } else {
+            if (!skipSSLCheck && !isNull(SSLInAssetsFileName)) {
+                File sdCache = context.get().getExternalCacheDir();
+                InputStream certificates = null;
+                try {
+                    certificates = context.get().getAssets().open(SSLInAssetsFileName);
+                } catch (IOException e) {
+                    LockLog.Builder logBuilder = LockLog.Builder.create();
+                    logBuilder.e(">>>", "读取SSL证书错误:" + LockLog.getExceptionInfo(e));
+                    logBuilder.e(">>>", "=====================================");
+                    logBuilder.build();
+                    return null;
+                }
+                int cacheSize = 10 * 1024 * 1024;
+                OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                        .retryOnConnectionFailure(false)
+                        .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .readTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .hostnameVerifier(new HostnameVerifier() {
+                            @Override
+                            public boolean verify(String hostname, SSLSession session) {
+                                if (DEBUGMODE) {
+                                    LockLog.logI("<<<", "hostnameVerifier: " + hostname);
+                                }
+                                if (httpsVerifyServiceUrl) {
+                                    if (serviceUrl.contains(hostname)) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                } else {
+                                    return true;
+                                }
+                            }
+                        })
+                        .cache(BaseOkHttp.requestCache ? new Cache(sdCache.getAbsoluteFile(), cacheSize) : null);
+                if (certificates != null) {
+                    builder.sslSocketFactory(getSSLSocketFactory(certificates));
+                }
+                if (proxy != null) {
+                    builder.proxy(proxy);
+                }
+                if (autoSaveCookies) {
+                    builder.cookieJar(new CookieJar() {
+                        @Override
+                        public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+                            cookieStore.put(url, cookies);
+                            if (DEBUGMODE) {
+                                for (Cookie cookie : cookies) {
+                                    LockLog.logI("<<<", "saveCookie: " + cookie.name() + " path:" + cookie.path());
+                                }
+                            }
+                        }
+                        
+                        @Override
+                        public List<Cookie> loadForRequest(HttpUrl url) {
+                            List<Cookie> cookies = cookieStore.get(url.host());
+                            return cookies != null ? cookies : new ArrayList<Cookie>();
+                        }
+                    });
+                }
+                return builder.build();
+            } else {
+                OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                        .retryOnConnectionFailure(false)
+                        .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .readTimeout(timeoutDuration, TimeUnit.SECONDS)
+                        .hostnameVerifier(new HostnameVerifier() {
+                            @Override
+                            public boolean verify(String hostname, SSLSession session) {
+                                return true;
+                            }
+                        });
+                if (proxy != null) {
+                    builder.proxy(proxy);
+                }
+                if (customOkHttpClientBuilder != null) {
+                    builder = customOkHttpClientBuilder.customBuilder(builder);
+                }
+                if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
+                    builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this, builder);
+                }
+                return builder.build();
+            }
+        }
+    }
+    
+    private Request createRequest() {
+        Request.Builder builder = new Request.Builder();
+        
+        RequestBodyImpl requestBody = null;
+        
+        if (isFileRequest) {
+            requestInfo = new RequestInfo(url, parameter);
+            if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                return null;
+            }
+            addRequestInfo(requestInfo);
+            if (parameterInterceptListener != null) {
+                try {
+                    parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
+                } catch (Exception e) {
+                }
+            }
+            
+            MultipartBody.Builder multipartBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+            
+            if (parameter != null && !parameter.entrySet().isEmpty()) {
+                for (Map.Entry<String, Object> entry : parameter.entrySet()) {
+                    if (entry.getValue() instanceof File) {
+                        File file = (File) entry.getValue();
+                        multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
+                        if (DEBUGMODE) {
+                            LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
+                        }
+                    } else if (entry.getValue() instanceof List) {
+                        List valueList = (List) entry.getValue();
+                        for (Object value : valueList) {
+                            if (value instanceof File) {
+                                File file = (File) value;
+                                multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
+                                if (DEBUGMODE) {
+                                    LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
+                                }
+                            } else {
+                                multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
+                            }
+                        }
+                    } else {
+                        multipartBuilder.addFormDataPart(entry.getKey(), entry.getValue() + "");
+                    }
+                }
+            } else {
+                if (DEBUGMODE) {
+                    LockLog.Builder.create()
+                            .e(">>>", "-------------------------------------")
+                            .e(">>>", "创建请求失败:无上传的文件")
+                            .e(">>>", "=====================================")
+                            .build();
+                }
+                return null;
+            }
+            multipartBuilder = interceptMultipartBuilder(multipartBuilder);
+            requestBody = new RequestBodyImpl(multipartBuilder.build()) {
+                @Override
+                public void loading(long current, long total, boolean done) {
+                    uploadProgressCallback(current, total, done);
+                }
+            };
+        } else if (isJsonRequest) {
+            requestInfo = new RequestInfo(url, jsonParameter);
+            if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                return null;
+            }
+            addRequestInfo(requestInfo);
+            if (parameterInterceptListener != null) {
+                try {
+                    if (jsonParameter.startsWith("[")) {
+                        jsonParameter = parameterInterceptListener.onIntercept(context.get(), url, JsonList.parse(jsonParameter)).toString();
+                    } else if (jsonParameter.startsWith("{")) {
+                        jsonParameter = parameterInterceptListener.onIntercept(context.get(), url, JsonMap.parse(jsonParameter)).toString();
+                    } else {
+                        jsonParameter = (String) parameterInterceptListener.onIntercept(context.get(), url, jsonParameter);
+                    }
+                } catch (Exception e) {
+                }
+            }
+            if (isNull(jsonParameter)) {
+                if (DEBUGMODE) {
+                    LockLog.Builder.create()
+                            .e(">>>", "-------------------------------------")
+                            .e(">>>", "创建请求失败:" + jsonParameter + " 不是正确的json格式参数")
+                            .e(">>>", "=====================================")
+                            .build();
+                }
+                return null;
+            }
+            requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonParameter)) {
+                @Override
+                public void loading(long current, long total, boolean done) {
+                    uploadProgressCallback(current, total, done);
+                }
+            };
+        } else if (isStringRequest) {
+            requestInfo = new RequestInfo(url, stringParameter);
+            if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                return null;
+            }
+            addRequestInfo(requestInfo);
+            if (parameterInterceptListener != null) {
+                try {
+                    stringParameter = (String) parameterInterceptListener.onIntercept(context.get(), url, stringParameter);
+                } catch (Exception e) {
+                }
+            }
+            if (isNull(stringParameter)) {
+                if (DEBUGMODE) {
+                    LockLog.Builder.create()
+                            .e(">>>", "-------------------------------------")
+                            .e(">>>", "创建请求失败:" + stringParameter)
+                            .e(">>>", "=====================================")
+                            .build();
+                }
+                return null;
+            }
+            requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse("text/plain; charset=utf-8"), stringParameter)) {
+                @Override
+                public void loading(long current, long total, boolean done) {
+                    uploadProgressCallback(current, total, done);
+                }
+            };
+        } else {
+            if (parameter != null) {
+                requestInfo = new RequestInfo(url, parameter);
+                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                    return null;
+                }
+                addRequestInfo(requestInfo);
+                if (parameterInterceptListener != null) {
+                    try {
+                        parameter = (Parameter) parameterInterceptListener.onIntercept(context.get(), url, parameter);
+                    } catch (Exception e) {
+                    }
+                }
+                requestBody = new RequestBodyImpl(parameter.toOkHttpParameter()) {
+                    @Override
+                    public void loading(long current, long total, boolean done) {
+                        uploadProgressCallback(current, total, done);
+                    }
+                };
+            }
+        }
+        
+        //请求类型处理
+        switch (requestType) {
+            case GET_REQUEST:               //GET
+                if (parameter != null) {
+                    builder.url(url.contains("?") ? url + "&" + parameter.toParameterString() : url + "?" + parameter.toParameterString());
+                } else {
+                    builder.url(url);
+                }
+                break;
+            case PUT_REQUEST:               //PUT
+                builder.url(url);
+                if (requestBody != null) builder.put(requestBody);
+                break;
+            case DELETE_REQUEST:            //DELETE
+                builder.url(url);
+                if (requestBody != null) builder.delete(requestBody);
+                break;
+            default:                        //POST
+                builder.url(url);
+                if (requestBody != null) builder.post(requestBody);
+                break;
+        }
+        
+        //请求头处理
+        if (DEBUGMODE) {
+            LockLog.logI(">>>", "添加请求头:");
+        }
+        Parameter allHeader = new Parameter();
+        if (overallHeader != null && !overallHeader.entrySet().isEmpty()) {
+            allHeader.putAll(overallHeader);
+        }
+        if (headers != null && !headers.entrySet().isEmpty()) {
+            allHeader.putAll(headers);
+        }
+        if (headerInterceptListener != null) {
+            allHeader = headerInterceptListener.onIntercept(context.get(), url, allHeader);
+        }
+        for (Map.Entry<String, Object> entry : allHeader.entrySet()) {
+            builder.addHeader(entry.getKey(), entry.getValue() + "");
+            if (DEBUGMODE) {
+                LockLog.logI(">>>>>>", entry.getKey() + "=" + entry.getValue());
+            }
+        }
+        if (!isNull(cookieStr)) {
+            builder.addHeader("Cookie", cookieStr);
+        }
+        return builder.build();
+    }
+    
     private void uploadProgressCallback(final long current, final long total, final boolean done) {
         runOnMain(new Runnable() {
             @Override
@@ -788,65 +866,15 @@ public class HttpRequest extends BaseOkHttp {
                 url = requestUrl;
             }
             
-            if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
-                okHttpClient = getOkHttpClient(context.get(), context.get().getAssets().open(SSLInAssetsFileName));
-            } else {
-                OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                        .retryOnConnectionFailure(false)
-                        .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
-                        .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
-                        .readTimeout(timeoutDuration, TimeUnit.SECONDS)
-                        .hostnameVerifier(new HostnameVerifier() {
-                            @Override
-                            public boolean verify(String hostname, SSLSession session) {
-                                return true;
-                            }
-                        });
-                
-                if (proxy != null) {
-                    builder.proxy(proxy);
-                }
-                if (autoSaveCookies) {
-                    builder.cookieJar(new CookieJar() {
-                        @Override
-                        public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-                            cookieStore.put(url, cookies);
-                            if (DEBUGMODE) {
-                                for (Cookie cookie : cookies) {
-                                    LockLog.logI("<<<", "saveCookie: " + cookie.name() + " path:" + cookie.path());
-                                }
-                            }
-                        }
-                        
-                        @Override
-                        public List<Cookie> loadForRequest(HttpUrl url) {
-                            List<Cookie> cookies = cookieStore.get(url.host());
-                            return cookies != null ? cookies : new ArrayList<Cookie>();
-                        }
-                    });
-                }
-                
-                if (customOkHttpClientBuilder != null) {
-                    builder = customOkHttpClientBuilder.customBuilder(builder);
-                }
-                if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
-                    builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
-                }
-                okHttpClient = builder.build();
-            }
-            if (customOkHttpClient != null) {
-                okHttpClient = customOkHttpClient.customBuilder(okHttpClient);
-            }
-            if (BaseOkHttp.globalCustomOkHttpClient != null) {
-                okHttpClient = BaseOkHttp.globalCustomOkHttpClient.customBuilder(this, okHttpClient);
+            okHttpClient = createClient();
+            if (okHttpClient == null) {
+                return;
             }
             
-            //创建请求
-            Request request;
-            Request.Builder builder = new Request.Builder();
-            builder.url(url);
-            builder.addHeader("Connection", "close");
-            request = builder.build();
+            Request request = createRequest();
+            if (request == null) {
+                return;
+            }
             
             if (DEBUGMODE) {
                 LockLog.Builder.create()
@@ -1015,69 +1043,6 @@ public class HttpRequest extends BaseOkHttp {
                 }
             }
         }, timeoutDuration * 1000);
-    }
-    
-    private OkHttpClient getOkHttpClient(Context context, InputStream... certificates) {
-        if (okHttpClient == null) {
-            File sdcache = context.getExternalCacheDir();
-            int cacheSize = 10 * 1024 * 1024;
-            OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                    .retryOnConnectionFailure(false)
-                    .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
-                    .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
-                    .readTimeout(timeoutDuration, TimeUnit.SECONDS)
-                    .hostnameVerifier(new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String hostname, SSLSession session) {
-                            if (DEBUGMODE) {
-                                LockLog.logI("<<<", "hostnameVerifier: " + hostname);
-                            }
-                            if (httpsVerifyServiceUrl) {
-                                if (serviceUrl.contains(hostname)) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
-                            } else {
-                                return true;
-                            }
-                        }
-                    })
-                    .cache(BaseOkHttp.requestCache ? new Cache(sdcache.getAbsoluteFile(), cacheSize) : null);
-            if (certificates != null) {
-                builder.sslSocketFactory(getSSLSocketFactory(certificates));
-            }
-            if (proxy != null) {
-                builder.proxy(proxy);
-            }
-            if (autoSaveCookies) {
-                builder.cookieJar(new CookieJar() {
-                    @Override
-                    public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-                        cookieStore.put(url, cookies);
-                        if (DEBUGMODE) {
-                            for (Cookie cookie : cookies) {
-                                LockLog.logI("<<<", "saveCookie: " + cookie.name() + " path:" + cookie.path());
-                            }
-                        }
-                    }
-                    
-                    @Override
-                    public List<Cookie> loadForRequest(HttpUrl url) {
-                        List<Cookie> cookies = cookieStore.get(url.host());
-                        return cookies != null ? cookies : new ArrayList<Cookie>();
-                    }
-                });
-            }
-            if (customOkHttpClientBuilder != null) {
-                builder = customOkHttpClientBuilder.customBuilder(builder);
-            }
-            if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
-                builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
-            }
-            okHttpClient = builder.build();
-        }
-        return okHttpClient;
     }
     
     private static SSLSocketFactory getSSLSocketFactory(InputStream... certificates) {

@@ -22,7 +22,7 @@ public class RequestInfo {
     
     public RequestInfo(String url, Parameter parameter) {
         this.url = url;
-        this.parameter = parameter.toParameterString();
+        this.parameter = parameter == null ? "" : parameter.toParameterString();
     }
     
     public String getUrl() {
