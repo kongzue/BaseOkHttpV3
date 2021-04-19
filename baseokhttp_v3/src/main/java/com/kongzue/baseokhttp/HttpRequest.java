@@ -315,35 +315,38 @@ public class HttpRequest extends BaseOkHttp {
                     parameter.add(entry.getKey(), entry.getValue());
                 }
             }
-            
-            if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
-                okHttpClient = getOkHttpClient(context.get(), context.get().getAssets().open(SSLInAssetsFileName));
-            } else {
-                OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                        .retryOnConnectionFailure(false)
-                        .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
-                        .hostnameVerifier(new HostnameVerifier() {
-                            @Override
-                            public boolean verify(String hostname, SSLSession session) {
-                                return true;
-                            }
-                        });
-                if (proxy != null) {
-                    builder.proxy(proxy);
-                }
-                if (customOkHttpClientBuilder != null) {
-                    builder = customOkHttpClientBuilder.customBuilder(builder);
-                }
-                if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
-                    builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
-                }
-                okHttpClient = builder.build();
+    
+            if (BaseOkHttp.globalCustomOkHttpClient!=null){
+                BaseOkHttp.globalCustomOkHttpClient.customBuilder(this,okHttpClient);
             }
             if (customOkHttpClient != null) {
                 okHttpClient = customOkHttpClient.customBuilder(okHttpClient);
-            }
-            if (BaseOkHttp.globalCustomOkHttpClient!=null){
-                BaseOkHttp.globalCustomOkHttpClient.customBuilder(this,okHttpClient);
+            }else{
+                if (!skipSSLCheck && SSLInAssetsFileName != null && !SSLInAssetsFileName.isEmpty()) {
+                    okHttpClient = getOkHttpClient(context.get(), context.get().getAssets().open(SSLInAssetsFileName));
+                } else {
+                    OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                            .retryOnConnectionFailure(false)
+                            .connectTimeout(timeoutDuration, TimeUnit.SECONDS)
+                            .writeTimeout(timeoutDuration, TimeUnit.SECONDS)
+                            .readTimeout(timeoutDuration, TimeUnit.SECONDS)
+                            .hostnameVerifier(new HostnameVerifier() {
+                                @Override
+                                public boolean verify(String hostname, SSLSession session) {
+                                    return true;
+                                }
+                            });
+                    if (proxy != null) {
+                        builder.proxy(proxy);
+                    }
+                    if (customOkHttpClientBuilder != null) {
+                        builder = customOkHttpClientBuilder.customBuilder(builder);
+                    }
+                    if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
+                        builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this,builder);
+                    }
+                    okHttpClient = builder.build();
+                }
             }
             
             //创建请求

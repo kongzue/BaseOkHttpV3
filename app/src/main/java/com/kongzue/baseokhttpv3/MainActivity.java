@@ -403,11 +403,13 @@ public class MainActivity extends AppCompatActivity {
                 btnDownloadCancel.setEnabled(true);
                 httpRequest = HttpRequest.build(MainActivity.this, "http://cdn.to-future.net/apk/tofuture.apk");
                 httpRequest.doDownload(
-                        new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "to-future.apk"),
+                        new File(getCacheDir(), "to-future.apk"),
                         new OnDownloadListener() {
                             @Override
                             public void onDownloadSuccess(File file) {
-                                Toast.makeText(MainActivity.this, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG);
+                                btnDownload.setEnabled(true);
+                                btnDownloadCancel.setEnabled(false);
+                                Toast.makeText(MainActivity.this, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
                             }
                             
                             @Override
@@ -417,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
                             
                             @Override
                             public void onDownloadFailed(Exception e) {
-                                Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT);
+                                Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
                             }
                         }
                 );
