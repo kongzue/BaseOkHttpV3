@@ -22,6 +22,40 @@
 - BaseOkHttp V3是基于BaseOkHttp V2( <https://github.com/kongzue/BaseOkHttp> )的升级版本，基于能够快速创建常用请求链接而封装的库。
 
 ## Maven仓库或Gradle的引用方式
+
+### jitPack 方式
+
+请先在 'build.gradle(project)' 中添加如下代码：
+```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+在 'build.gradle(app)' 中引入：
+```
+dependencies {
+    //BaseOkHttp V3 网络请求库
+    implementation 'com.github.kongzue:BaseOkHttpV3:3.2.3.beta4'
+    //BaseJson 解析库
+    implementation 'com.kongzue.basejson:basejson:1.0.7'
+}
+``` 
+
+额外的，如果您的项目未引入 okHttp，还需要添加 okHttp 最新版本依赖：
+```
+dependencies {
+    implementation "com.squareup.okhttp3:okhttp:4.9.1" 
+}
+```
+
+### jCenter 方式
+
+因 jCenter 停止维护，不再推荐使用。
+
 Maven仓库：
 ```
 <dependency>
