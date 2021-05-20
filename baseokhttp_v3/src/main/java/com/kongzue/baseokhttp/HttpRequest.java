@@ -236,6 +236,24 @@ public class HttpRequest extends BaseOkHttp {
         }
     }
     
+    public static void PATCH(Context context, String url, Parameter parameter, BaseResponseListener listener) {
+        PATCH(context, url, null, parameter, listener);
+    }
+    
+    public static void PATCH(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
+        synchronized (HttpRequest.class) {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.context = new WeakReference<Context>(context);
+            httpRequest.headers = headers;
+            httpRequest.responseListener = listener;
+            httpRequest.parameter = parameter;
+            httpRequest.requestUrl = url;
+            httpRequest.requestType = PATCH_REQUEST;
+            httpRequest.httpRequest = httpRequest;
+            httpRequest.send();
+        }
+    }
+    
     //DOWNLOAD一步创建
     public static void DOWNLOAD(Context context, String url, File downloadFile, OnDownloadListener onDownloadListener) {
         synchronized (HttpRequest.class) {
@@ -760,6 +778,10 @@ public class HttpRequest extends BaseOkHttp {
                 builder.url(url);
                 if (requestBody != null) builder.delete(requestBody);
                 break;
+            case PATCH_REQUEST:             //PATCH
+                builder.url(url);
+                if (requestBody != null) builder.patch(requestBody);
+                break;
             default:                        //POST
                 builder.url(url);
                 if (requestBody != null) builder.post(requestBody);
@@ -1187,6 +1209,11 @@ public class HttpRequest extends BaseOkHttp {
     
     public void doPost() {
         requestType = POST_REQUEST;
+        send();
+    }
+    
+    public void doPatch() {
+        requestType = PATCH_REQUEST;
         send();
     }
     

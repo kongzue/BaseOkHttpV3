@@ -31,6 +31,7 @@ public class BaseOkHttp {
     public static final int PUT_REQUEST = 2;
     public static final int DELETE_REQUEST = 3;
     public static final int DOWNLOAD = 4;
+    public static final int PATCH_REQUEST = 5;
     
     //是否开启调试模式
     public static boolean DEBUGMODE = false;
@@ -95,7 +96,7 @@ public class BaseOkHttp {
     //全局自定义 OkHttpClientBuilder
     public static GlobalCustomOkHttpClientBuilder globalCustomOkHttpClientBuilder;
     
-    public static void cleanSameRequestList(){
+    public static void cleanSameRequestList() {
         requestInfoList = new ArrayList<>();
     }
     

@@ -82,6 +82,6 @@ bintray {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api 'org.conscrypt:conscrypt-openjdk:1.1.3:'
-    api 'com.kongzue.basejson:basejson:1.0.5+'
+    api 'com.github.kongzue:BaseJson:1.0.7.1+'
     api 'com.squareup.okhttp3:okhttp:4.9.0+'
 }
