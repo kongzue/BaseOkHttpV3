@@ -96,6 +96,9 @@ public class BaseOkHttp {
     //全局自定义 OkHttpClientBuilder
     public static GlobalCustomOkHttpClientBuilder globalCustomOkHttpClientBuilder;
     
+    //禁用原始拦截器
+    public static boolean disableOriginInterceptors = false;
+    
     public static void cleanSameRequestList() {
         requestInfoList = new ArrayList<>();
     }

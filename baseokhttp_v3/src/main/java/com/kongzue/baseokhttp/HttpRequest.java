@@ -588,6 +588,10 @@ public class HttpRequest extends BaseOkHttp {
                         }
                     });
                 }
+                if (BaseOkHttp.disableOriginInterceptors){
+                    builder.interceptors().clear();
+                    builder.networkInterceptors().clear();
+                }
                 return builder.build();
             } else {
                 OkHttpClient.Builder builder = new OkHttpClient.Builder()
@@ -609,6 +613,10 @@ public class HttpRequest extends BaseOkHttp {
                 }
                 if (BaseOkHttp.globalCustomOkHttpClientBuilder != null) {
                     builder = BaseOkHttp.globalCustomOkHttpClientBuilder.customBuilder(this, builder);
+                }
+                if (BaseOkHttp.disableOriginInterceptors){
+                    builder.interceptors().clear();
+                    builder.networkInterceptors().clear();
                 }
                 return builder.build();
             }
