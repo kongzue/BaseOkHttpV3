@@ -39,7 +39,7 @@ allprojects {
 ```
 dependencies {
     //BaseOkHttp V3 网络请求库
-    implementation 'com.github.kongzue:BaseOkHttpV3:3.2.3.beta4'
+    implementation 'com.github.kongzue:BaseOkHttpV3:3.2.4.2'
     //BaseJson 解析库
     implementation 'com.github.kongzue:BaseJson:1.0.7.2'
 }
