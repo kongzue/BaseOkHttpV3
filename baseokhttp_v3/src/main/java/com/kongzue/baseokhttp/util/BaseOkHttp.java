@@ -142,4 +142,7 @@ public class BaseOkHttp {
             return false;
         }
     }
+    
+    //显示时间戳（详细诊断）
+    public static boolean showTimeStamp = false;
 }

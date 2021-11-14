@@ -16,6 +16,7 @@ import com.kongzue.baseokhttp.listener.OnDownloadListener;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.listener.UploadProgressListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
+import com.kongzue.baseokhttp.util.HttpEventListener;
 import com.kongzue.baseokhttp.util.JsonFormat;
 import com.kongzue.baseokhttp.util.JsonList;
 import com.kongzue.baseokhttp.util.JsonMap;
@@ -566,6 +567,9 @@ public class HttpRequest extends BaseOkHttp {
                 if (certificates != null) {
                     builder.sslSocketFactory(getSSLSocketFactory(certificates));
                 }
+                if (showTimeStamp){
+                    builder.eventListenerFactory(HttpEventListener.FACTORY);
+                }
                 if (proxy != null) {
                     builder.proxy(proxy);
                 }
@@ -607,6 +611,9 @@ public class HttpRequest extends BaseOkHttp {
                         });
                 if (proxy != null) {
                     builder.proxy(proxy);
+                }
+                if (showTimeStamp){
+                    builder.eventListenerFactory(HttpEventListener.FACTORY);
                 }
                 if (customOkHttpClientBuilder != null) {
                     builder = customOkHttpClientBuilder.customBuilder(builder);

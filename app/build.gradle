@@ -25,4 +25,6 @@ dependencies {
     implementation project(':baseokhttp_v3')
 //    implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.2.1.3'
     implementation 'com.github.kongzue:BaseJson:1.0.7.1'
+
+    implementation "com.squareup.okhttp3:okhttp:4.9.1"
 }
