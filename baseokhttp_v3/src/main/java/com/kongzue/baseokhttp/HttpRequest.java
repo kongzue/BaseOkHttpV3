@@ -83,6 +83,7 @@ public class HttpRequest extends BaseOkHttp {
     @Deprecated
     private String customMimeType;
     private CustomMimeInterceptor customMimeInterceptor;
+    private Boolean async = null;
     
     private Parameter parameter;
     private Parameter headers;
@@ -374,7 +375,7 @@ public class HttpRequest extends BaseOkHttp {
             checkTimeOut();
             httpCall = okHttpClient.newCall(request);
             
-            if (async) {
+            if (isAsync()) {
                 try {
                     Response response = httpCall.execute();
                     onFinish(response);
@@ -948,7 +949,7 @@ public class HttpRequest extends BaseOkHttp {
                         .build();
             }
             httpCall = okHttpClient.newCall(request);
-            if (async) {
+            if (isAsync()) {
                 try {
                     Response response = httpCall.execute();
                     onDownloadFinish(response);
@@ -1466,5 +1467,15 @@ public class HttpRequest extends BaseOkHttp {
     
     public boolean isStringRequest() {
         return isStringRequest;
+    }
+    
+    public boolean isAsync() {
+        if (async == null) return BaseOkHttp.async;
+        return async || BaseOkHttp.async;
+    }
+    
+    public HttpRequest setAsync(boolean async) {
+        this.async = async;
+        return this;
     }
 }
