@@ -99,6 +99,9 @@ public class BaseOkHttp {
     //禁用原始拦截器
     public static boolean disableOriginInterceptors = false;
     
+    //同步请求，不自动创建异步线程（需要手动处理）
+    public static boolean async = false;
+    
     public static void cleanSameRequestList() {
         requestInfoList = new ArrayList<>();
     }
