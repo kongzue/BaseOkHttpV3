@@ -75,16 +75,16 @@ import okhttp3.Response;
  * @createTime: 2018/12/5 17:25
  */
 public class HttpRequest extends BaseOkHttp {
-    
+
     private OkHttpClient okHttpClient;
     private Call httpCall;
-    
+
     //自定义上传文件的 MIME 类型
     @Deprecated
     private String customMimeType;
     private CustomMimeInterceptor customMimeInterceptor;
     private Boolean async = null;
-    
+
     private Parameter parameter;
     private Parameter headers;
     private WeakReference<Context> context;
@@ -96,21 +96,21 @@ public class HttpRequest extends BaseOkHttp {
     private int timeoutDuration = TIME_OUT_DURATION;
     private Proxy proxy;
     private UploadProgressListener uploadProgressListener;
-    
+
     private CustomOkHttpClient customOkHttpClient;
     private CustomOkHttpClientBuilder customOkHttpClientBuilder;
-    
+
     private String cookieStr;
-    
+
     private int requestType;
-    
+
     private boolean isSending;
-    
+
     //POST一步创建方法
     public static void POST(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         POST(context, url, null, parameter, listener);
     }
-    
+
     //POST一步创建总方法
     public static void POST(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
@@ -125,20 +125,20 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.send();
         }
     }
-    
+
     //JSON格式POST一步创建方法
     public static void JSONPOST(Context context, String url, String jsonParameter, BaseResponseListener listener) {
         JSONPOST(context, url, null, jsonParameter, listener);
     }
-    
+
     public static void JSONPOST(Context context, String url, JsonMap jsonMap, BaseResponseListener listener) {
         JSONPOST(context, url, null, jsonMap.toString(), listener);
     }
-    
+
     public static void JSONPOST(Context context, String url, JSONObject jsonObject, BaseResponseListener listener) {
         JSONPOST(context, url, null, jsonObject.toString(), listener);
     }
-    
+
     //JSON格式POST一步创建总方法
     public static void JSONPOST(Context context, String url, Parameter headers, String jsonParameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
@@ -153,20 +153,20 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.send();
         }
     }
-    
+
     public static void JSONPOST(Context context, String url, Parameter headers, JsonMap jsonMap, BaseResponseListener listener) {
         JSONPOST(context, url, headers, jsonMap.toString(), listener);
     }
-    
+
     public static void JSONPOST(Context context, String url, Parameter headers, JSONObject jsonObject, BaseResponseListener listener) {
         JSONPOST(context, url, headers, jsonObject.toString(), listener);
     }
-    
+
     //String文本POST一步创建方法
     public static void StringPOST(Context context, String url, String stringParameter, BaseResponseListener listener) {
         StringPOST(context, url, null, stringParameter, listener);
     }
-    
+
     //String文本POST一步创建总方法
     public static void StringPOST(Context context, String url, Parameter headers, String stringParameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
@@ -181,12 +181,12 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.send();
         }
     }
-    
+
     //GET一步创建方法
     public static void GET(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         GET(context, url, null, parameter, listener);
     }
-    
+
     //GET一步创建总方法
     public static void GET(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
@@ -201,12 +201,12 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.send();
         }
     }
-    
+
     //PUT一步创建方法
     public static void PUT(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         PUT(context, url, null, parameter, listener);
     }
-    
+
     //PUT一步创建总方法
     public static void PUT(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
@@ -221,12 +221,12 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.send();
         }
     }
-    
+
     //DELETE一步创建方法
     public static void DELETE(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         DELETE(context, url, null, parameter, listener);
     }
-    
+
     //PUT一步创建总方法
     public static void DELETE(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
@@ -241,11 +241,11 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.send();
         }
     }
-    
+
     public static void PATCH(Context context, String url, Parameter parameter, BaseResponseListener listener) {
         PATCH(context, url, null, parameter, listener);
     }
-    
+
     public static void PATCH(Context context, String url, Parameter headers, Parameter parameter, BaseResponseListener listener) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
@@ -259,7 +259,7 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.send();
         }
     }
-    
+
     //DOWNLOAD一步创建
     public static void DOWNLOAD(Context context, String url, File downloadFile, OnDownloadListener onDownloadListener) {
         synchronized (HttpRequest.class) {
@@ -269,16 +269,16 @@ public class HttpRequest extends BaseOkHttp {
             httpRequest.doDownload(downloadFile, onDownloadListener);
         }
     }
-    
+
     private boolean isFileRequest = false;
     private boolean isJsonRequest = false;
     private boolean isStringRequest = false;
     private boolean skipSSLCheck = false;
-    
+
     private String url;
-    
+
     private RequestInfo requestInfo;
-    
+
     private void send() {
         timeoutDuration = TIME_OUT_DURATION;
         isFileRequest = false;
@@ -287,7 +287,7 @@ public class HttpRequest extends BaseOkHttp {
         if (proxy == null) {
             proxy = BaseOkHttp.proxy;
         }
-        
+
         if (parameter != null && !parameter.entrySet().isEmpty()) {
             for (Map.Entry<String, Object> entry : parameter.entrySet()) {
                 if (entry.getValue() instanceof File) {
@@ -312,12 +312,12 @@ public class HttpRequest extends BaseOkHttp {
             isStringRequest = true;
             isJsonRequest = false;
         }
-        
+
         try {
             if (parameter == null) {
                 parameter = new Parameter();
             }
-            
+
             if (!requestUrl.startsWith("http")) {
                 url = getRealRequestUrl(requestUrl);
             } else {
@@ -331,30 +331,30 @@ public class HttpRequest extends BaseOkHttp {
                         .build();
                 return;
             }
-            
+
             //全局参数
             if (overallParameter != null && !overallParameter.entrySet().isEmpty()) {
                 for (Map.Entry<String, Object> entry : overallParameter.entrySet()) {
                     parameter.add(entry.getKey(), entry.getValue());
                 }
             }
-            
+
             okHttpClient = createClient();
             if (okHttpClient == null) {
                 return;
             }
-            
+
             Request request = createRequest();
             if (request == null) {
                 return;
             }
-            
+
             if (DEBUGMODE) {
                 LockLog.Builder logBuilder = LockLog.Builder.create()
                         .i(">>>", "-------------------------------------")
                         .i(">>>", "创建请求:" + url)
                         .i(">>>", "参数:");
-                
+
                 if (isJsonRequest) {
                     List<LockLog.LogBody> jsonLogList = JsonFormat.formatJson(jsonParameter);
                     if (jsonLogList == null) {
@@ -370,11 +370,11 @@ public class HttpRequest extends BaseOkHttp {
                 logBuilder.i(">>>", "请求已发送 ->")
                         .build();
             }
-            
+
             isSending = true;
             checkTimeOut();
             httpCall = okHttpClient.newCall(request);
-            
+
             if (isAsync()) {
                 try {
                     Response response = httpCall.execute();
@@ -388,7 +388,7 @@ public class HttpRequest extends BaseOkHttp {
                     public void onResponse(Call call, Response response) throws IOException {
                         onFinish(response);
                     }
-                    
+
                     @Override
                     public void onFailure(Call call, final IOException e) {
                         onFail(e);
@@ -399,7 +399,7 @@ public class HttpRequest extends BaseOkHttp {
             onFail(e);
         }
     }
-    
+
     /**
      * 请求异常处理
      *
@@ -418,7 +418,7 @@ public class HttpRequest extends BaseOkHttp {
                 if (reserveUrlIndex != BaseOkHttp.reserveServiceUrls.length) {
                     BaseOkHttp.serviceUrl = BaseOkHttp.reserveServiceUrls[reserveUrlIndex];
                     reserveUrlIndex++;
-                    
+
                     logBuilder.e(">>>", "尝试更换为备用地址后重试：" + BaseOkHttp.serviceUrl);
                     send();
                 } else {
@@ -471,7 +471,7 @@ public class HttpRequest extends BaseOkHttp {
             });
         }
     }
-    
+
     /**
      * 请求完成处理
      *
@@ -512,7 +512,7 @@ public class HttpRequest extends BaseOkHttp {
                 logBuilder.i(">>>", "=====================================")
                         .build();
             }
-            
+
             //回到主线程处理
             runOnMain(new Runnable() {
                 @Override
@@ -531,10 +531,11 @@ public class HttpRequest extends BaseOkHttp {
                 }
             });
         } catch (Exception e) {
+            if (DEBUGMODE) e.printStackTrace();
             onFail(e);
         }
     }
-    
+
     private OkHttpClient createClient() {
         if (BaseOkHttp.globalCustomOkHttpClient != null) {
             return BaseOkHttp.globalCustomOkHttpClient.customBuilder(this, okHttpClient);
@@ -598,7 +599,7 @@ public class HttpRequest extends BaseOkHttp {
                                 }
                             }
                         }
-                        
+
                         @Override
                         public List<Cookie> loadForRequest(HttpUrl url) {
                             List<Cookie> cookies = cookieStore.get(url.host());
@@ -643,12 +644,12 @@ public class HttpRequest extends BaseOkHttp {
             }
         }
     }
-    
+
     private Request createRequest() {
         Request.Builder builder = new Request.Builder();
-        
+
         RequestBodyImpl requestBody = null;
-        
+
         if (isFileRequest) {
             requestInfo = new RequestInfo(url, parameter);
             if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
@@ -661,9 +662,9 @@ public class HttpRequest extends BaseOkHttp {
                 } catch (Exception e) {
                 }
             }
-            
+
             MultipartBody.Builder multipartBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-            
+
             if (parameter != null && !parameter.entrySet().isEmpty()) {
                 for (Map.Entry<String, Object> entry : parameter.entrySet()) {
                     if (entry.getValue() instanceof File) {
@@ -789,7 +790,7 @@ public class HttpRequest extends BaseOkHttp {
                 };
             }
         }
-        
+
         //请求类型处理
         switch (requestType) {
             case GET_REQUEST:               //GET
@@ -816,7 +817,7 @@ public class HttpRequest extends BaseOkHttp {
                 if (requestBody != null) builder.post(requestBody);
                 break;
         }
-        
+
         //请求头处理
         if (DEBUGMODE) {
             LockLog.logI(">>>", "添加请求头:");
@@ -842,7 +843,7 @@ public class HttpRequest extends BaseOkHttp {
         }
         return builder.build();
     }
-    
+
     private void uploadProgressCallback(final long current, final long total, final boolean done) {
         runOnMain(new Runnable() {
             @Override
@@ -853,7 +854,7 @@ public class HttpRequest extends BaseOkHttp {
             }
         });
     }
-    
+
     private String getMimeType(RequestInfo requestInfo, Call httpCall, String defaultMimeType) {
         if (customMimeInterceptor == null) {
             return defaultMimeType;
@@ -862,7 +863,7 @@ public class HttpRequest extends BaseOkHttp {
         if (isNull(mimeType)) return defaultMimeType;
         return mimeType;
     }
-    
+
     public String getMimeType(File file) {
         if (customMimeInterceptor != null) {
             if (!isNull(customMimeInterceptor.onUploadFileMimeInterceptor(file))) {
@@ -882,7 +883,7 @@ public class HttpRequest extends BaseOkHttp {
         }
         return "file/*";
     }
-    
+
     private static String getSuffix(File file) {
         if (file == null || !file.exists() || file.isDirectory()) {
             return null;
@@ -898,7 +899,7 @@ public class HttpRequest extends BaseOkHttp {
             return null;
         }
     }
-    
+
     private String getRealRequestUrl(String url) {
         String serviceUrl = BaseOkHttp.serviceUrl;
         if (serviceUrl.endsWith("/") && url.startsWith("/")) {
@@ -909,9 +910,9 @@ public class HttpRequest extends BaseOkHttp {
         }
         return serviceUrl + url;
     }
-    
+
     private int oldDownloadProgress = -1;
-    
+
     private void download() {
         if (proxy == null) {
             proxy = BaseOkHttp.proxy;
@@ -930,17 +931,17 @@ public class HttpRequest extends BaseOkHttp {
             } else {
                 url = requestUrl;
             }
-            
+
             okHttpClient = createClient();
             if (okHttpClient == null) {
                 return;
             }
-            
+
             Request request = createRequest();
             if (request == null) {
                 return;
             }
-            
+
             if (DEBUGMODE) {
                 LockLog.Builder.create()
                         .i(">>>", "-------------------------------------")
@@ -962,7 +963,7 @@ public class HttpRequest extends BaseOkHttp {
                     public void onFailure(Call call, final IOException e) {
                         onDownloadFail(e);
                     }
-                    
+
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         onDownloadFinish(response);
@@ -973,7 +974,7 @@ public class HttpRequest extends BaseOkHttp {
             onDownloadFail(e);
         }
     }
-    
+
     private void onDownloadFail(Exception e) {
         if (DEBUGMODE) {
             LockLog.Builder.create()
@@ -989,19 +990,19 @@ public class HttpRequest extends BaseOkHttp {
             }
         });
     }
-    
+
     private void onDownloadFinish(Response response) {
         InputStream is = null;
         byte[] buf = new byte[2048];
         int len = 0;
         FileOutputStream fos = null;
-        
+
         //储存下载文件的目录
         File dir = downloadFile.getParentFile();
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        
+
         try {
             is = response.body().byteStream();
             long total = response.body().contentLength();
@@ -1063,14 +1064,14 @@ public class HttpRequest extends BaseOkHttp {
                     fos.close();
                 }
             } catch (IOException e) {
-            
+
             }
         }
     }
-    
+
     private Timer timer;
     private static int reserveUrlIndex;
-    
+
     private void checkTimeOut() {
         if (timer != null) {
             timer.cancel();
@@ -1125,7 +1126,7 @@ public class HttpRequest extends BaseOkHttp {
             }
         }, timeoutDuration * 1000);
     }
-    
+
     private static SSLSocketFactory getSSLSocketFactory(InputStream... certificates) {
         try {
             CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
@@ -1135,7 +1136,7 @@ public class HttpRequest extends BaseOkHttp {
             for (InputStream certificate : certificates) {
                 String certificateAlias = Integer.toString(index++);
                 keyStore.setCertificateEntry(certificateAlias, certificateFactory.generateCertificate(certificate));
-                
+
                 try {
                     if (certificate != null) {
                         certificate.close();
@@ -1153,26 +1154,26 @@ public class HttpRequest extends BaseOkHttp {
         }
         return null;
     }
-    
+
     private boolean isNull(String s) {
         if (s == null || s.trim().isEmpty() || "null".equals(s) || "(null)".equals(s)) {
             return true;
         }
         return false;
     }
-    
+
     public Proxy getProxy() {
         return proxy;
     }
-    
+
     public HttpRequest setProxy(Proxy proxy) {
         this.proxy = proxy;
         return this;
     }
-    
+
     private HttpRequest() {
     }
-    
+
     public static HttpRequest build(Context context, String url) {
         synchronized (HttpRequest.class) {
             HttpRequest httpRequest = new HttpRequest();
@@ -1182,7 +1183,7 @@ public class HttpRequest extends BaseOkHttp {
             return httpRequest;
         }
     }
-    
+
     public HttpRequest addParameter(String key, Object value) {
         if (parameter == null) {
             parameter = new Parameter();
@@ -1192,25 +1193,25 @@ public class HttpRequest extends BaseOkHttp {
         this.stringParameter = null;
         return this;
     }
-    
+
     public HttpRequest setParameter(Parameter parameter) {
         this.parameter = parameter;
         this.jsonParameter = null;
         this.stringParameter = null;
         return this;
     }
-    
+
     public HttpRequest setStringParameter(String stringParameter) {
         this.stringParameter = stringParameter;
         this.parameter = null;
         return this;
     }
-    
+
     public HttpRequest setJsonParameter(String jsonParameter) {
         this.jsonParameter = jsonParameter;
         return this;
     }
-    
+
     public HttpRequest setJsonParameter(JsonMap jsonParameter) {
         if (jsonParameter == null) {
             this.jsonParameter = null;
@@ -1219,7 +1220,7 @@ public class HttpRequest extends BaseOkHttp {
         }
         return this;
     }
-    
+
     public HttpRequest setJsonParameter(JsonList jsonParameter) {
         if (jsonParameter == null) {
             this.jsonParameter = null;
@@ -1228,7 +1229,7 @@ public class HttpRequest extends BaseOkHttp {
         }
         return this;
     }
-    
+
     public HttpRequest addHeaders(String key, String value) {
         if (headers == null) {
             headers = new Parameter();
@@ -1236,85 +1237,85 @@ public class HttpRequest extends BaseOkHttp {
         headers.add(key, value);
         return this;
     }
-    
+
     public HttpRequest setHeaders(Parameter headers) {
         this.headers = headers;
         return this;
     }
-    
+
     public HashMap<HttpUrl, List<Cookie>> getCookies() {
         return cookieStore;
     }
-    
+
     public HttpRequest cleanCookies() {
         this.cookieStore = new HashMap<>();
         return this;
     }
-    
+
     public HttpRequest setUrl(String url) {
         this.requestUrl = url;
         return this;
     }
-    
+
     public HttpRequest setResponseListener(ResponseListener listener) {
         this.responseListener = listener;
         return this;
     }
-    
+
     public HttpRequest setJsonResponseListener(JsonResponseListener jsonResponseListener) {
         this.responseListener = jsonResponseListener;
         return this;
     }
-    
+
     public void doPost() {
         requestType = POST_REQUEST;
         send();
     }
-    
+
     public void doPatch() {
         requestType = PATCH_REQUEST;
         send();
     }
-    
+
     public void doGet() {
         requestType = GET_REQUEST;
         send();
     }
-    
+
     public void doDelete() {
         requestType = DELETE_REQUEST;
         send();
     }
-    
+
     public void doPut() {
         requestType = PUT_REQUEST;
         send();
     }
-    
+
     private File downloadFile;
     private OnDownloadListener onDownloadListener;
-    
+
     public void doDownload(File downloadFile, OnDownloadListener onDownloadListener) {
         requestType = DOWNLOAD;
         this.downloadFile = downloadFile;
         this.onDownloadListener = onDownloadListener;
         download();
     }
-    
+
     public String getCookie() {
         return cookieStr;
     }
-    
+
     public HttpRequest setCookie(String cookie) {
         this.cookieStr = cookieStr;
         return this;
     }
-    
+
     @Deprecated
     public HttpRequest setMediaType(MediaType mediaType) {
         return this;
     }
-    
+
     /**
      * 请改为使用 setCustomMimeInterceptor(...)
      *
@@ -1326,36 +1327,36 @@ public class HttpRequest extends BaseOkHttp {
         this.customMimeType = customMimeType;
         return this;
     }
-    
+
     @Deprecated
     public String getCustomMimeType() {
         return customMimeType;
     }
-    
+
     public CustomMimeInterceptor getCustomMimeInterceptor() {
         return customMimeInterceptor;
     }
-    
+
     public HttpRequest setCustomMimeInterceptor(CustomMimeInterceptor customMimeInterceptor) {
         this.customMimeInterceptor = customMimeInterceptor;
         return this;
     }
-    
+
     public HttpRequest skipSSLCheck() {
         skipSSLCheck = true;
         return this;
     }
-    
+
     public File getDownloadFile() {
         return downloadFile;
     }
-    
+
     public void stop() {
         if (httpCall != null) {
             httpCall.cancel();
         }
     }
-    
+
     private void runOnMain(Runnable runnable) {
         if (context == null || context.get() == null) {
             stop();
@@ -1374,51 +1375,51 @@ public class HttpRequest extends BaseOkHttp {
             runnable.run();
         }
     }
-    
+
     public void onDetach() {
         context.clear();
     }
-    
+
     public int getTimeoutDuration() {
         return timeoutDuration;
     }
-    
+
     public HttpRequest setTimeoutDuration(int timeoutDuration) {
         this.timeoutDuration = timeoutDuration;
         return this;
     }
-    
+
     public UploadProgressListener getUploadProgressListener() {
         return uploadProgressListener;
     }
-    
+
     public HttpRequest setUploadProgressListener(UploadProgressListener uploadProgressListener) {
         this.uploadProgressListener = uploadProgressListener;
         return this;
     }
-    
+
     private MultipartBuilderInterceptor multipartBuilderInterceptor;
-    
+
     protected MultipartBody.Builder interceptMultipartBuilder(MultipartBody.Builder multipartBuilder) {
         if (multipartBuilderInterceptor != null) {
             multipartBuilder = multipartBuilderInterceptor.interceptMultipartBuilder(multipartBuilder);
         }
         return multipartBuilder;
     }
-    
+
     public MultipartBuilderInterceptor getMultipartBuilderInterceptor() {
         return multipartBuilderInterceptor;
     }
-    
+
     public HttpRequest setMultipartBuilderInterceptor(MultipartBuilderInterceptor multipartBuilderInterceptor) {
         this.multipartBuilderInterceptor = multipartBuilderInterceptor;
         return this;
     }
-    
+
     public CustomOkHttpClient getCustomOkHttpClient() {
         return customOkHttpClient;
     }
-    
+
     /**
      * 此方法用于请求前修改发出的 OkHttpClient，请将修改后的 OkHttpClient return 到此接口中
      * 警告：要使此方法生效，请使用 build(...) 方法构建 HttpRequest
@@ -1427,11 +1428,11 @@ public class HttpRequest extends BaseOkHttp {
         this.customOkHttpClient = customOkHttpClient;
         return this;
     }
-    
+
     public CustomOkHttpClientBuilder getCustomOkHttpClientBuilder() {
         return customOkHttpClientBuilder;
     }
-    
+
     /**
      * 此方法用于请求前修改发出的 OkHttpClientBuilder，请将修改后的 OkHttpClientBuilder return 到此接口中
      * 警告：要使此方法生效，请使用 build(...) 方法构建 HttpRequest
@@ -1440,40 +1441,40 @@ public class HttpRequest extends BaseOkHttp {
         this.customOkHttpClientBuilder = customOkHttpClientBuilder;
         return this;
     }
-    
+
     public Parameter getParameter() {
         return parameter;
     }
-    
+
     public String getUrl() {
         return url;
     }
-    
+
     public String getJsonParameter() {
         return jsonParameter;
     }
-    
+
     public String getStringParameter() {
         return stringParameter;
     }
-    
+
     public boolean isFileRequest() {
         return isFileRequest;
     }
-    
+
     public boolean isJsonRequest() {
         return isJsonRequest;
     }
-    
+
     public boolean isStringRequest() {
         return isStringRequest;
     }
-    
+
     public boolean isAsync() {
         if (async == null) return BaseOkHttp.async;
         return async || BaseOkHttp.async;
     }
-    
+
     public HttpRequest setAsync(boolean async) {
         this.async = async;
         return this;

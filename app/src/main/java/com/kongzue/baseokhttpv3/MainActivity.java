@@ -36,9 +36,9 @@ import okhttp3.Response;
 import okio.ByteString;
 
 public class MainActivity extends AppCompatActivity {
-    
+
     private ProgressDialog progressDialog;
-    
+
     private Button btnHttp;
     private ListView listView;
     private TextView resultHttp;
@@ -50,14 +50,14 @@ public class MainActivity extends AppCompatActivity {
     private Button btnDownload;
     private Button btnDownloadCancel;
     private ProgressBar psgDownload;
-    
+
     private BaseWebSocket baseWebSocket;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         btnHttp = findViewById(R.id.btn_http);
         listView = findViewById(R.id.listView);
         resultHttp = findViewById(R.id.result_http);
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         btnDownload = findViewById(R.id.btn_download);
         btnDownloadCancel = findViewById(R.id.btn_download_cancel);
         psgDownload = findViewById(R.id.psg_download);
-        
+
         BaseOkHttp.DEBUGMODE = true;
         BaseOkHttp.disallowSameRequest = true;
         BaseOkHttp.serviceUrl = "https://api.apiopen.top";
@@ -101,9 +101,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         JsonMap.preParsing = true;
-        
+
         final Context context = this;
-        
+
         btnHttp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,25 +118,25 @@ public class MainActivity extends AppCompatActivity {
                                 if (error == null) {
                                     resultHttp.setText(main.toString());
                                     JsonList dataList = main.getList("result");
-                                    
+
                                     BaseAdapter<ViewHolder, JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
                                             MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
                                         @Override
                                         public ViewHolder setViewHolder(View convertView) {
                                             ViewHolder viewHolder = new ViewHolder();
                                             viewHolder.txtList = convertView.findViewById(R.id.txt_list);
-                                            
+
                                             return viewHolder;
                                         }
-                                        
+
                                         @Override
                                         public void setData(ViewHolder viewHolder, JsonMap data, int index) {
                                             viewHolder.txtList.setText(data.getString("title"));
                                         }
                                     });
-                                    
+
                                     listView.setAdapter(baseAdapter);
-                                    
+
                                 } else {
                                     resultHttp.setText("请求失败");
                                     Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
@@ -144,8 +144,8 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 );
-                
-                
+
+
                 HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
                                 .add("page", "1")
                                 .add("count", 5)
@@ -156,25 +156,25 @@ public class MainActivity extends AppCompatActivity {
                                 if (error == null) {
                                     resultHttp.setText(main.toString());
                                     JsonList dataList = main.getList("result");
-                                    
+
                                     BaseAdapter<ViewHolder, JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
                                             MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
                                         @Override
                                         public ViewHolder setViewHolder(View convertView) {
                                             ViewHolder viewHolder = new ViewHolder();
                                             viewHolder.txtList = convertView.findViewById(R.id.txt_list);
-                                            
+
                                             return viewHolder;
                                         }
-                                        
+
                                         @Override
                                         public void setData(ViewHolder viewHolder, JsonMap data, int index) {
                                             viewHolder.txtList.setText(data.getString("title"));
                                         }
                                     });
-                                    
+
                                     listView.setAdapter(baseAdapter);
-                                    
+
                                 } else {
                                     resultHttp.setText("请求失败");
                                     Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
@@ -182,8 +182,8 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 );
-                
-                
+
+
                 HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
                                 .add("page", "1")
                                 .add("count", 5)
@@ -194,25 +194,25 @@ public class MainActivity extends AppCompatActivity {
                                 if (error == null) {
                                     resultHttp.setText(main.toString());
                                     JsonList dataList = main.getList("result");
-                                    
+
                                     BaseAdapter<ViewHolder, JsonMap> baseAdapter = new BaseAdapter<ViewHolder, JsonMap>(
                                             MainActivity.this, dataList, R.layout.item_list, new SimpleAdapterSettings<ViewHolder, JsonMap>() {
                                         @Override
                                         public ViewHolder setViewHolder(View convertView) {
                                             ViewHolder viewHolder = new ViewHolder();
                                             viewHolder.txtList = convertView.findViewById(R.id.txt_list);
-                                            
+
                                             return viewHolder;
                                         }
-                                        
+
                                         @Override
                                         public void setData(ViewHolder viewHolder, JsonMap data, int index) {
                                             viewHolder.txtList.setText(data.getString("title"));
                                         }
                                     });
-                                    
+
                                     listView.setAdapter(baseAdapter);
-                                    
+
                                 } else {
                                     resultHttp.setText("请求失败");
                                     Toast.makeText(MainActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
@@ -317,10 +317,10 @@ public class MainActivity extends AppCompatActivity {
 //                            }
 //                        })
 //                        .doPost();
-            
+
             }
         });
-        
+
         btnConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -336,17 +336,17 @@ public class MainActivity extends AppCompatActivity {
                                 editSend.setEnabled(true);
                                 btnSend.setEnabled(true);
                             }
-                            
+
                             @Override
                             public void onMessage(String message) {
                                 resultWebsocket.setText("收到返回消息：" + message);
                             }
-                            
+
                             @Override
                             public void onMessage(ByteString message) {
-                            
+
                             }
-                            
+
                             @Override
                             public void onReconnect() {
                                 resultWebsocket.setText("正在重连");
@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                                 editSend.setEnabled(false);
                                 btnSend.setEnabled(false);
                             }
-                            
+
                             @Override
                             public void onDisconnected(int breakStatus) {
                                 resultWebsocket.setText("已断开连接");
@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                                 editSend.setEnabled(false);
                                 btnSend.setEnabled(false);
                             }
-                            
+
                             @Override
                             public void onConnectionFailed(Throwable t) {
                                 resultWebsocket.setText("连接失败");
@@ -378,14 +378,14 @@ public class MainActivity extends AppCompatActivity {
                         .startConnect();
             }
         });
-        
+
         btnDisconnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (baseWebSocket != null) baseWebSocket.disConnect();
             }
         });
-        
+
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -395,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        
+
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -411,12 +411,12 @@ public class MainActivity extends AppCompatActivity {
                                 btnDownloadCancel.setEnabled(false);
                                 Toast.makeText(MainActivity.this, "文件已下载完成：" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
                             }
-                            
+
                             @Override
                             public void onDownloading(int progress) {
                                 psgDownload.setProgress(progress);
                             }
-                            
+
                             @Override
                             public void onDownloadFailed(Exception e) {
                                 Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
@@ -447,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
 //                );
             }
         });
-        
+
         btnDownloadCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -457,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     public static String readAssetsTxt(Context context, String fileName) {
         try {
             //Return an AssetManager instance for your application's package
@@ -478,24 +478,24 @@ public class MainActivity extends AppCompatActivity {
         }
         return "读取错误，请检查文件名";
     }
-    
+
     private HttpRequest httpRequest;
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (baseWebSocket != null) baseWebSocket.disConnect();
     }
-    
+
     class ViewHolder {
         TextView txtList;
     }
-    
-    
+
+
     private void ready() {
         request(0);
     }
-    
+
     private void request(final int index) {
         HttpRequest.POST(MainActivity.this, "/getWangYiNews", new Parameter()
                         .add("page", "1")

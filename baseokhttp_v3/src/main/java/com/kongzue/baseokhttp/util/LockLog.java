@@ -49,32 +49,44 @@ public class LockLog {
     }
     
     private static Thread logThread;
+
+    public static void recycle(){
+        if (logThread != null){
+            try {
+                logThread.interrupt();
+            }catch (Exception e) {}
+        }
+        logThread = null;
+        logS = null;
+    }
     
     private static void logPrint() {
-        if (logThread == null) {
-            logThread = new Thread() {
-                @Override
-                public void run() {
-                    if (logS != null) {
-                        while (!logS.isEmpty()) {
-                            LogBody log = logS.get(0);
-                            if (log != null) {
-                                switch (log.getLevel()) {
-                                    case INFO:
-                                        Log.i(log.getTag(), log.getLog());
-                                        break;
-                                    case ERROR:
-                                        Log.e(log.getTag(), log.getLog());
-                                        break;
+        synchronized (LockLog.class){
+            if (logThread == null) {
+                logThread = new Thread() {
+                    @Override
+                    public void run() {
+                        if (logS != null) {
+                            while (!logS.isEmpty()) {
+                                LogBody log = logS.get(0);
+                                if (log != null) {
+                                    switch (log.getLevel()) {
+                                        case INFO:
+                                            Log.i(log.getTag(), log.getLog());
+                                            break;
+                                        case ERROR:
+                                            Log.e(log.getTag(), log.getLog());
+                                            break;
+                                    }
+                                    logS.remove(log);
                                 }
-                                logS.remove(log);
                             }
+                            logThread = null;
                         }
-                        logThread = null;
                     }
-                }
-            };
-            logThread.start();
+                };
+                logThread.start();
+            }
         }
     }
     

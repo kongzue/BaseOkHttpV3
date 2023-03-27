@@ -4,7 +4,7 @@ def siteUrl = 'https://github.com/kongzue/BaseOkHttp' //项目在github主页地
 def gitUrl = 'https://github.com/kongzue/BaseOkHttp.git'   //Git仓库的地址
 
 group = "com.kongzue.baseokhttp_v3"//发布aar前缀根节点
-version = "3.2.4.3"//发布aar的库版本
+version = "3.2.4.5"//发布aar的库版本
 
 android {
     compileSdkVersion 30
@@ -13,7 +13,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 53
-        versionName "3.2.4.4"
+        versionName "3.2.4.5"
     }
 
     buildTypes {
@@ -27,6 +27,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api 'org.conscrypt:conscrypt-openjdk:1.1.3:'
-    compileOnly 'com.github.kongzue:BaseJson:1.0.7.1+'
-    compileOnly 'com.squareup.okhttp3:okhttp:4.9.0+'
+    compileOnly 'com.github.kongzue:BaseJson:1.1.1+'
+    compileOnly 'com.squareup.okhttp3:okhttp:4.9.1+'
 }
