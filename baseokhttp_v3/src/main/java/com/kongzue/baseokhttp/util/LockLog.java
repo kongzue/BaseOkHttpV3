@@ -4,10 +4,8 @@ import android.util.Log;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.CopyOnWriteArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteCopyOnWriteArrayList;
 
 /**
  * @author: Kongzue
