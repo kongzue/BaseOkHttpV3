@@ -31,13 +31,7 @@ public abstract class RequestBodyImpl extends RequestBody {
     @Override
     public void writeTo(BufferedSink sink) throws IOException {
         if (bufferedSink == null) {
-            try {
-                bufferedSink = Okio.buffer(sink(sink));
-            } catch (Exception e) {
-                if (BaseOkHttp.DEBUGMODE) {
-                    e.printStackTrace();
-                }
-            }
+            bufferedSink = Okio.buffer(sink(sink));
         }
         requestBody.writeTo(bufferedSink);
         //必须调用flush，否则最后一部分数据可能不会被写入
@@ -51,16 +45,22 @@ public abstract class RequestBodyImpl extends RequestBody {
             private long last = 0;
 
             @Override
-            public void write(okio.Buffer source, long byteCount) throws IOException {
-                super.write(source, byteCount);
-                if (total == 0) {
-                    total = contentLength();
-                }
-                current += byteCount;
-                long now = current;
-                if (last < now) {
-                    loading(now, total, total == current);
-                    last = now;
+            public void write(okio.Buffer source, long byteCount) {
+                try {
+                    super.write(source, byteCount);
+                    if (total == 0) {
+                        total = contentLength();
+                    }
+                    current += byteCount;
+                    long now = current;
+                    if (last < now) {
+                        loading(now, total, total == current);
+                        last = now;
+                    }
+                } catch (Exception e) {
+                    if (BaseOkHttp.DEBUGMODE) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };

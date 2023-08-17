@@ -7,7 +7,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 50
-        versionName "3.2.5"
+        versionName "3.2.5.1"
     }
     buildTypes {
         release {
