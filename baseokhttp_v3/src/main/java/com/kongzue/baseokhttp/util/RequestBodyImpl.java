@@ -30,12 +30,18 @@ public abstract class RequestBodyImpl extends RequestBody {
 
     @Override
     public void writeTo(BufferedSink sink) throws IOException {
-        if (bufferedSink == null) {
-            bufferedSink = Okio.buffer(sink(sink));
+        try {
+            if (bufferedSink == null) {
+                bufferedSink = Okio.buffer(sink(sink));
+            }
+            requestBody.writeTo(bufferedSink);
+            //必须调用flush，否则最后一部分数据可能不会被写入
+            bufferedSink.flush();
+        } catch (Exception e) {
+            if (BaseOkHttp.DEBUGMODE) {
+                e.printStackTrace();
+            }
         }
-        requestBody.writeTo(bufferedSink);
-        //必须调用flush，否则最后一部分数据可能不会被写入
-        bufferedSink.flush();
     }
 
     private Sink sink(Sink sink) {
