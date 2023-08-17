@@ -1,11 +1,5 @@
 apply plugin: 'com.android.library'
 
-def siteUrl = 'https://github.com/kongzue/BaseOkHttp' //项目在github主页地址
-def gitUrl = 'https://github.com/kongzue/BaseOkHttp.git'   //Git仓库的地址
-
-group = "com.kongzue.baseokhttp_v3"//发布aar前缀根节点
-version = "3.2.4.6"//发布aar的库版本
-
 android {
     compileSdkVersion 30
 
@@ -13,7 +7,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 54
-        versionName "3.2.4.6"
+        versionName "3.2.5"
     }
 
     buildTypes {
