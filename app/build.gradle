@@ -6,8 +6,8 @@ android {
         applicationId "com.kongzue.baseokhttpv3"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 50
-        versionName "3.2.5.2"
+        versionCode 55
+        versionName "3.2.6"
     }
     buildTypes {
         release {

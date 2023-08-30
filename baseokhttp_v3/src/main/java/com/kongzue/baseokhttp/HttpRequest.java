@@ -26,6 +26,8 @@ import com.kongzue.baseokhttp.util.Parameter;
 import com.kongzue.baseokhttp.util.RequestBodyImpl;
 import com.kongzue.baseokhttp.util.RequestInfo;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -57,6 +59,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
+import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -64,6 +67,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.BufferedSink;
 
 //待办：单独设置某一次请求超时时间
 
@@ -648,7 +652,7 @@ public class HttpRequest extends BaseOkHttp {
     private Request createRequest() {
         Request.Builder builder = new Request.Builder();
 
-        RequestBodyImpl requestBody = null;
+        RequestBody requestBody = null;
 
         if (isFileRequest) {
             requestInfo = new RequestInfo(url, parameter);
@@ -701,12 +705,7 @@ public class HttpRequest extends BaseOkHttp {
                 return null;
             }
             multipartBuilder = interceptMultipartBuilder(multipartBuilder);
-            requestBody = new RequestBodyImpl(multipartBuilder.build()) {
-                @Override
-                public void loading(long current, long total, boolean done) {
-                    uploadProgressCallback(current, total, done);
-                }
-            };
+            requestBody = createRequestBody(multipartBuilder.build());
         } else if (isJsonRequest) {
             requestInfo = new RequestInfo(url, jsonParameter);
             if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
@@ -735,12 +734,7 @@ public class HttpRequest extends BaseOkHttp {
                 }
                 return null;
             }
-            requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse(getMimeType(requestInfo, httpCall, "application/json; charset=utf-8")), jsonParameter)) {
-                @Override
-                public void loading(long current, long total, boolean done) {
-                    uploadProgressCallback(current, total, done);
-                }
-            };
+            requestBody = createRequestBody(RequestBody.create(MediaType.parse(getMimeType(requestInfo, httpCall, "application/json; charset=utf-8")), jsonParameter));
         } else if (isStringRequest) {
             requestInfo = new RequestInfo(url, stringParameter);
             if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
@@ -763,12 +757,7 @@ public class HttpRequest extends BaseOkHttp {
                 }
                 return null;
             }
-            requestBody = new RequestBodyImpl(RequestBody.create(MediaType.parse(getMimeType(requestInfo, httpCall, "text/plain; charset=utf-8")), stringParameter)) {
-                @Override
-                public void loading(long current, long total, boolean done) {
-                    uploadProgressCallback(current, total, done);
-                }
-            };
+            requestBody = createRequestBody(RequestBody.create(MediaType.parse(getMimeType(requestInfo, httpCall, "text/plain; charset=utf-8")), stringParameter));
         } else {
             if (parameter != null) {
                 requestInfo = new RequestInfo(url, parameter);
@@ -782,12 +771,7 @@ public class HttpRequest extends BaseOkHttp {
                     } catch (Exception e) {
                     }
                 }
-                requestBody = new RequestBodyImpl(parameter.toOkHttpParameter()) {
-                    @Override
-                    public void loading(long current, long total, boolean done) {
-                        uploadProgressCallback(current, total, done);
-                    }
-                };
+                requestBody = createRequestBody(parameter.toOkHttpParameter());
             }
         }
 
@@ -842,6 +826,19 @@ public class HttpRequest extends BaseOkHttp {
             builder.addHeader("Cookie", cookieStr);
         }
         return builder.build();
+    }
+
+    private RequestBody createRequestBody(RequestBody requestBody) {
+        if (uploadProgressListener != null) {
+            return new RequestBodyImpl(requestBody) {
+                @Override
+                public void loading(long current, long total, boolean done) {
+                    uploadProgressCallback(current, total, done);
+                }
+            };
+        } else {
+            return requestBody;
+        }
     }
 
     private void uploadProgressCallback(final long current, final long total, final boolean done) {
