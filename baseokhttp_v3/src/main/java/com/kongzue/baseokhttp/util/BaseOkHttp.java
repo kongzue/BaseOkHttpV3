@@ -127,11 +127,11 @@ public class BaseOkHttp {
         }
     }
     
-    protected boolean equalsRequestInfo(RequestInfo requestInfo) {
+    protected RequestInfo equalsRequestInfo(RequestInfo requestInfo) {
         synchronized (BaseOkHttp.class) {
             if (requestInfoList == null || requestInfoList.isEmpty()) {
                 if (DEBUGMODE) Log.d(">>>", "requestInfoList: null");
-                return false;
+                return null;
             }
             for (RequestInfo requestInfo1 : requestInfoList) {
                 if (DEBUGMODE) Log.d(">>>", "equalsRequestInfo: " + requestInfo1);
@@ -139,10 +139,10 @@ public class BaseOkHttp {
                     if (DEBUGMODE) {
                         Log.w(">>>", "发生重复请求: " + requestInfo);
                     }
-                    return true;
+                    return requestInfo1;
                 }
             }
-            return false;
+            return null;
         }
     }
     

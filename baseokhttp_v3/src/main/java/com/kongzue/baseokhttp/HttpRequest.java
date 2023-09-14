@@ -6,6 +6,7 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.kongzue.baseokhttp.exceptions.DecodeJsonException;
+import com.kongzue.baseokhttp.exceptions.SameRequestException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
 import com.kongzue.baseokhttp.listener.BaseResponseListener;
 import com.kongzue.baseokhttp.listener.CustomMimeInterceptor;
@@ -656,7 +657,9 @@ public class HttpRequest extends BaseOkHttp {
 
         if (isFileRequest) {
             requestInfo = new RequestInfo(url, parameter);
-            if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+            RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
+            if (disallowSameRequest && sameRequestInfo!=null) {
+                responseListener.response(requestInfo.getResult(),new SameRequestException("发生重复请求: "+requestInfo));
                 return null;
             }
             addRequestInfo(requestInfo);
@@ -708,7 +711,9 @@ public class HttpRequest extends BaseOkHttp {
             requestBody = createRequestBody(multipartBuilder.build());
         } else if (isJsonRequest) {
             requestInfo = new RequestInfo(url, jsonParameter);
-            if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+            RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
+            if (disallowSameRequest && sameRequestInfo!=null) {
+                responseListener.response(requestInfo.getResult(),new SameRequestException("发生重复请求: "+requestInfo));
                 return null;
             }
             addRequestInfo(requestInfo);
@@ -737,7 +742,9 @@ public class HttpRequest extends BaseOkHttp {
             requestBody = createRequestBody(RequestBody.create(MediaType.parse(getMimeType(requestInfo, httpCall, "application/json; charset=utf-8")), jsonParameter));
         } else if (isStringRequest) {
             requestInfo = new RequestInfo(url, stringParameter);
-            if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+            RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
+            if (disallowSameRequest && sameRequestInfo!=null) {
+                responseListener.response(requestInfo.getResult(),new SameRequestException("发生重复请求: "+requestInfo));
                 return null;
             }
             addRequestInfo(requestInfo);
@@ -761,7 +768,9 @@ public class HttpRequest extends BaseOkHttp {
         } else {
             if (parameter != null) {
                 requestInfo = new RequestInfo(url, parameter);
-                if (disallowSameRequest && equalsRequestInfo(requestInfo)) {
+                RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
+                if (disallowSameRequest && sameRequestInfo!=null) {
+                    responseListener.response(requestInfo.getResult(),new SameRequestException("发生重复请求: "+requestInfo));
                     return null;
                 }
                 addRequestInfo(requestInfo);

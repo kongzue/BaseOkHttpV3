@@ -12,8 +12,8 @@ import java.util.Objects;
 public class RequestInfo {
     
     private String url;
-    
     private String parameter;
+    private Object result;
     
     public RequestInfo(String url, String parameter) {
         this.url = url;
@@ -53,7 +53,16 @@ public class RequestInfo {
         if (a == null || b == null) return false;
         return a.equals(b);
     }
-    
+
+    public Object getResult() {
+        return result;
+    }
+
+    public RequestInfo setResult(Object result) {
+        this.result = result;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "RequestInfo{" +
