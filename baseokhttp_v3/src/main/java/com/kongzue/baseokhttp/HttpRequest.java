@@ -457,6 +457,7 @@ public class HttpRequest extends BaseOkHttp {
                 logBuilder.e(">>>", "=====================================")
                         .build();
             }
+
             //回到主线程处理
             runOnMain(new Runnable() {
                 @Override
@@ -517,6 +518,8 @@ public class HttpRequest extends BaseOkHttp {
                 logBuilder.i(">>>", "=====================================")
                         .build();
             }
+
+            requestInfo.setResult(strResponse);
 
             //回到主线程处理
             runOnMain(new Runnable() {
