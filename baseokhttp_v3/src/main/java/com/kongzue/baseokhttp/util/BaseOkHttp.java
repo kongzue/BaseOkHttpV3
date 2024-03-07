@@ -148,4 +148,7 @@ public class BaseOkHttp {
     
     //显示时间戳（详细诊断）
     public static boolean showTimeStamp = false;
+
+    //忽略不显示日志的接口（以实际调用时为准，不包含 serviceUrl）
+    public static String[] skipShowLogUrl;
 }

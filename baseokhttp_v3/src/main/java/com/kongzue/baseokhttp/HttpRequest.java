@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -95,6 +96,7 @@ public class HttpRequest extends BaseOkHttp {
     private int timeoutDuration = TIME_OUT_DURATION;
     private Proxy proxy;
     private UploadProgressListener uploadProgressListener;
+    private boolean showLog = true;
 
     private CustomOkHttpClient customOkHttpClient;
     private CustomOkHttpClientBuilder customOkHttpClientBuilder;
@@ -287,6 +289,14 @@ public class HttpRequest extends BaseOkHttp {
             proxy = BaseOkHttp.proxy;
         }
 
+        if (skipShowLogUrl != null) {
+            for (String element : skipShowLogUrl) {
+                if (Objects.equals(element, url)) {
+                    setShowLog(true);
+                }
+            }
+        }
+
         if (parameter != null && !parameter.entrySet().isEmpty()) {
             for (Map.Entry<String, Object> entry : parameter.entrySet()) {
                 if (entry.getValue() instanceof File) {
@@ -322,7 +332,7 @@ public class HttpRequest extends BaseOkHttp {
             } else {
                 url = requestUrl;
             }
-            if (isNull(url)) {
+            if (isNull(url) && isShowLog() && DEBUGMODE) {
                 LockLog.Builder.create()
                         .e(">>>", "-------------------------------------")
                         .e(">>>", "创建请求失败: 请求地址不能为空")
@@ -348,7 +358,7 @@ public class HttpRequest extends BaseOkHttp {
                 return;
             }
 
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.Builder logBuilder = LockLog.Builder.create()
                         .i(">>>", "-------------------------------------")
                         .i(">>>", "创建请求:" + url)
@@ -411,7 +421,7 @@ public class HttpRequest extends BaseOkHttp {
         }
         isSending = false;
         if (BaseOkHttp.reserveServiceUrls != null && BaseOkHttp.reserveServiceUrls.length != 0) {
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.Builder logBuilder = LockLog.Builder.create()
                         .e(">>>", "服务器：" + BaseOkHttp.serviceUrl + "请求失败 ×");
                 if (reserveUrlIndex != BaseOkHttp.reserveServiceUrls.length) {
@@ -427,7 +437,7 @@ public class HttpRequest extends BaseOkHttp {
                         .build();
             }
         } else {
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.Builder logBuilder = LockLog.Builder.create()
                         .e(">>>", "请求失败:" + url)
                         .e(">>>", "参数:");
@@ -486,7 +496,7 @@ public class HttpRequest extends BaseOkHttp {
         final String strResponse;
         try {
             strResponse = response.body().string();
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.Builder logBuilder = LockLog.Builder.create()
                         .i(">>>", "请求成功:" + url)
                         .i(">>>", "参数:");
@@ -522,9 +532,9 @@ public class HttpRequest extends BaseOkHttp {
                             if (responseListener != null) {
                                 responseListener.response(strResponse, null);
                             }
-                            for (ResponseListener listener : requestInfo.getSameRequestCallbacks()){
+                            for (ResponseListener listener : requestInfo.getSameRequestCallbacks()) {
                                 if (listener != null) {
-                                    listener.response(strResponse, new SameRequestException("发生重复请求: "+requestInfo));
+                                    listener.response(strResponse, new SameRequestException("发生重复请求: " + requestInfo));
                                 }
                             }
                         }
@@ -532,9 +542,9 @@ public class HttpRequest extends BaseOkHttp {
                         if (responseListener != null) {
                             responseListener.response(strResponse, null);
                         }
-                        for (ResponseListener listener : requestInfo.getSameRequestCallbacks()){
+                        for (ResponseListener listener : requestInfo.getSameRequestCallbacks()) {
                             if (listener != null) {
-                                listener.response(strResponse, new SameRequestException("发生重复请求: "+requestInfo));
+                                listener.response(strResponse, new SameRequestException("发生重复请求: " + requestInfo));
                             }
                         }
                     }
@@ -559,10 +569,12 @@ public class HttpRequest extends BaseOkHttp {
                 try {
                     certificates = context.get().getAssets().open(SSLInAssetsFileName);
                 } catch (IOException e) {
-                    LockLog.Builder logBuilder = LockLog.Builder.create();
-                    logBuilder.e(">>>", "读取SSL证书错误:" + LockLog.getExceptionInfo(e));
-                    logBuilder.e(">>>", "=====================================");
-                    logBuilder.build();
+                    if (DEBUGMODE && isShowLog()) {
+                        LockLog.Builder logBuilder = LockLog.Builder.create();
+                        logBuilder.e(">>>", "读取SSL证书错误:" + LockLog.getExceptionInfo(e));
+                        logBuilder.e(">>>", "=====================================");
+                        logBuilder.build();
+                    }
                     return null;
                 }
                 int cacheSize = 10 * 1024 * 1024;
@@ -574,7 +586,7 @@ public class HttpRequest extends BaseOkHttp {
                         .hostnameVerifier(new HostnameVerifier() {
                             @Override
                             public boolean verify(String hostname, SSLSession session) {
-                                if (DEBUGMODE) {
+                                if (DEBUGMODE && isShowLog()) {
                                     LockLog.logI("<<<", "hostnameVerifier: " + hostname);
                                 }
                                 if (httpsVerifyServiceUrl) {
@@ -605,7 +617,9 @@ public class HttpRequest extends BaseOkHttp {
                             cookieStore.put(url, cookies);
                             if (DEBUGMODE) {
                                 for (Cookie cookie : cookies) {
-                                    LockLog.logI("<<<", "saveCookie: " + cookie.name() + " path:" + cookie.path());
+                                    if (DEBUGMODE && isShowLog()) {
+                                        LockLog.logI("<<<", "saveCookie: " + cookie.name() + " path:" + cookie.path());
+                                    }
                                 }
                             }
                         }
@@ -661,9 +675,9 @@ public class HttpRequest extends BaseOkHttp {
         RequestBody requestBody = null;
 
         if (isFileRequest) {
-            requestInfo = new RequestInfo(url, parameter,context.get().hashCode());
+            requestInfo = new RequestInfo(url, parameter, context.get().hashCode());
             RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
-            if (disallowSameRequest && sameRequestInfo!=null) {
+            if (disallowSameRequest && sameRequestInfo != null) {
                 return null;
             }
             addRequestInfo(requestInfo);
@@ -681,7 +695,7 @@ public class HttpRequest extends BaseOkHttp {
                     if (entry.getValue() instanceof File) {
                         File file = (File) entry.getValue();
                         multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
-                        if (DEBUGMODE) {
+                        if (DEBUGMODE && isShowLog()) {
                             LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
                         }
                     } else if (entry.getValue() instanceof List) {
@@ -690,7 +704,7 @@ public class HttpRequest extends BaseOkHttp {
                             if (value instanceof File) {
                                 File file = (File) value;
                                 multipartBuilder.addFormDataPart(entry.getKey(), file.getName(), RequestBody.create(MediaType.parse(getMimeType(file)), file));
-                                if (DEBUGMODE) {
+                                if (DEBUGMODE && isShowLog()) {
                                     LockLog.logI(">>>", "添加文件：" + entry.getKey() + ":" + file.getName());
                                 }
                             } else {
@@ -702,7 +716,7 @@ public class HttpRequest extends BaseOkHttp {
                     }
                 }
             } else {
-                if (DEBUGMODE) {
+                if (DEBUGMODE && isShowLog()) {
                     LockLog.Builder.create()
                             .e(">>>", "-------------------------------------")
                             .e(">>>", "创建请求失败:无上传的文件")
@@ -714,9 +728,9 @@ public class HttpRequest extends BaseOkHttp {
             multipartBuilder = interceptMultipartBuilder(multipartBuilder);
             requestBody = createRequestBody(multipartBuilder.build());
         } else if (isJsonRequest) {
-            requestInfo = new RequestInfo(url, jsonParameter,context.get().hashCode());
+            requestInfo = new RequestInfo(url, jsonParameter, context.get().hashCode());
             RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
-            if (disallowSameRequest && sameRequestInfo!=null) {
+            if (disallowSameRequest && sameRequestInfo != null) {
                 return null;
             }
             addRequestInfo(requestInfo);
@@ -733,7 +747,7 @@ public class HttpRequest extends BaseOkHttp {
                 }
             }
             if (isNull(jsonParameter)) {
-                if (DEBUGMODE) {
+                if (DEBUGMODE && isShowLog()) {
                     LockLog.Builder.create()
                             .e(">>>", "-------------------------------------")
                             .e(">>>", "创建请求失败:" + jsonParameter + " 不是正确的json格式参数")
@@ -744,9 +758,9 @@ public class HttpRequest extends BaseOkHttp {
             }
             requestBody = createRequestBody(RequestBody.create(MediaType.parse(getMimeType(requestInfo, httpCall, "application/json; charset=utf-8")), jsonParameter));
         } else if (isStringRequest) {
-            requestInfo = new RequestInfo(url, stringParameter,context.get().hashCode());
+            requestInfo = new RequestInfo(url, stringParameter, context.get().hashCode());
             RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
-            if (disallowSameRequest && sameRequestInfo!=null) {
+            if (disallowSameRequest && sameRequestInfo != null) {
                 return null;
             }
             addRequestInfo(requestInfo);
@@ -757,7 +771,7 @@ public class HttpRequest extends BaseOkHttp {
                 }
             }
             if (isNull(stringParameter)) {
-                if (DEBUGMODE) {
+                if (DEBUGMODE && isShowLog()) {
                     LockLog.Builder.create()
                             .e(">>>", "-------------------------------------")
                             .e(">>>", "创建请求失败:" + stringParameter)
@@ -769,9 +783,9 @@ public class HttpRequest extends BaseOkHttp {
             requestBody = createRequestBody(RequestBody.create(MediaType.parse(getMimeType(requestInfo, httpCall, "text/plain; charset=utf-8")), stringParameter));
         } else {
             if (parameter != null) {
-                requestInfo = new RequestInfo(url, parameter,context.get().hashCode());
+                requestInfo = new RequestInfo(url, parameter, context.get().hashCode());
                 RequestInfo sameRequestInfo = equalsRequestInfo(requestInfo);
-                if (disallowSameRequest && sameRequestInfo!=null) {
+                if (disallowSameRequest && sameRequestInfo != null) {
                     return null;
                 }
                 addRequestInfo(requestInfo);
@@ -813,7 +827,7 @@ public class HttpRequest extends BaseOkHttp {
         }
 
         //请求头处理
-        if (DEBUGMODE) {
+        if (DEBUGMODE && isShowLog()) {
             LockLog.logI(">>>", "添加请求头:");
         }
         Parameter allHeader = new Parameter();
@@ -828,7 +842,7 @@ public class HttpRequest extends BaseOkHttp {
         }
         for (Map.Entry<String, Object> entry : allHeader.entrySet()) {
             builder.addHeader(entry.getKey(), entry.getValue() + "");
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.logI(">>>>>>", entry.getKey() + "=" + entry.getValue());
             }
         }
@@ -926,7 +940,7 @@ public class HttpRequest extends BaseOkHttp {
         }
         try {
             oldDownloadProgress = -1;
-            if (isNull(requestUrl)) {
+            if (isNull(requestUrl) && DEBUGMODE && isShowLog()) {
                 LockLog.Builder.create()
                         .e(">>>", "-------------------------------------")
                         .e(">>>", "创建请求失败: 请求地址不能为空")
@@ -949,7 +963,7 @@ public class HttpRequest extends BaseOkHttp {
                 return;
             }
 
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.Builder.create()
                         .i(">>>", "-------------------------------------")
                         .i(">>>", "开始下载:" + url)
@@ -983,7 +997,7 @@ public class HttpRequest extends BaseOkHttp {
     }
 
     private void onDownloadFail(Exception e) {
-        if (DEBUGMODE) {
+        if (DEBUGMODE && isShowLog()) {
             LockLog.Builder.create()
                     .e(">>>", "-------------------------------------")
                     .e(">>>", "下载失败:" + e.getMessage())
@@ -1034,7 +1048,7 @@ public class HttpRequest extends BaseOkHttp {
             }
             fos.flush();
             //下载完成
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.Builder.create()
                         .i(">>>", "-------------------------------------")
                         .i(">>>", "下载完成:" + url)
@@ -1049,7 +1063,7 @@ public class HttpRequest extends BaseOkHttp {
                 }
             });
         } catch (final Exception e) {
-            if (DEBUGMODE) {
+            if (DEBUGMODE && isShowLog()) {
                 LockLog.Builder.create()
                         .e(">>>", "-------------------------------------")
                         .e(">>>", "下载过程错误:" + e.getMessage())
@@ -1091,7 +1105,7 @@ public class HttpRequest extends BaseOkHttp {
                     deleteRequestInfo(requestInfo);
                     isSending = false;
                     if (BaseOkHttp.reserveServiceUrls != null && BaseOkHttp.reserveServiceUrls.length != 0) {
-                        if (DEBUGMODE) {
+                        if (DEBUGMODE && isShowLog()) {
                             LockLog.Builder logBuilder = LockLog.Builder.create()
                                     .e(">>>", "服务器：" + BaseOkHttp.serviceUrl + "请求超时 ×");
                             if (reserveUrlIndex != BaseOkHttp.reserveServiceUrls.length) {
@@ -1106,7 +1120,7 @@ public class HttpRequest extends BaseOkHttp {
                             logBuilder.build();
                         }
                     } else {
-                        if (DEBUGMODE) {
+                        if (DEBUGMODE && isShowLog()) {
                             LockLog.Builder.create()
                                     .e(">>>", "请求超时 ×")
                                     .e(">>>", "=====================================")
@@ -1376,7 +1390,7 @@ public class HttpRequest extends BaseOkHttp {
             }
             ((Activity) context.get()).runOnUiThread(runnable);
         } else {
-            if (DEBUGMODE && DETAILSLOGS) {
+            if (DEBUGMODE && DETAILSLOGS && isShowLog()) {
                 LockLog.logI(">>>", "context 不是 Activity，本次请求在异步线程返回 >>>");
             }
             runnable.run();
@@ -1484,6 +1498,15 @@ public class HttpRequest extends BaseOkHttp {
 
     public HttpRequest setAsync(boolean async) {
         this.async = async;
+        return this;
+    }
+
+    public boolean isShowLog() {
+        return showLog;
+    }
+
+    public HttpRequest setShowLog(boolean showLog) {
+        this.showLog = showLog;
         return this;
     }
 }
