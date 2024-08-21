@@ -291,7 +291,7 @@ public class HttpRequest extends BaseOkHttp {
 
         if (skipShowLogUrl != null) {
             for (String element : skipShowLogUrl) {
-                if (Objects.equals(element, url)) {
+                if (Objects.equals(element, requestUrl)) {
                     setShowLog(true);
                 }
             }
@@ -1029,6 +1029,12 @@ public class HttpRequest extends BaseOkHttp {
             long total = response.body().contentLength();
             fos = new FileOutputStream(downloadFile);
             long sum = 0;
+            runOnMain(new Runnable() {
+                @Override
+                public void run() {
+                    onDownloadListener.onDownloadBegin(response,total);
+                }
+            });
             while ((len = is.read(buf)) != -1) {
                 fos.write(buf, 0, len);
                 sum += len;
