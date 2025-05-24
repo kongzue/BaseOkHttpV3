@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.webkit.MimeTypeMap;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
+
 import com.kongzue.baseokhttp.exceptions.SameRequestException;
 import com.kongzue.baseokhttp.exceptions.TimeOutException;
 import com.kongzue.baseokhttp.listener.BaseResponseListener;
@@ -333,15 +337,11 @@ public class HttpRequest extends BaseOkHttp {
                 url = requestUrl;
             }
             if (isNull(url) && isShowLog() && DEBUGMODE) {
-                LockLog.Builder.create()
-                        .e(">>>", "-------------------------------------")
-                        .e(">>>", "创建请求失败: 请求地址不能为空")
-                        .e(">>>", "=====================================")
-                        .build();
+                logError("创建请求失败: 请求地址不能为空");
                 return;
             }
 
-            //全局参数
+            // 全局参数
             if (overallParameter != null && !overallParameter.entrySet().isEmpty()) {
                 for (Map.Entry<String, Object> entry : overallParameter.entrySet()) {
                     parameter.add(entry.getKey(), entry.getValue());
@@ -358,27 +358,7 @@ public class HttpRequest extends BaseOkHttp {
                 return;
             }
 
-            if (DEBUGMODE && isShowLog()) {
-                LockLog.Builder logBuilder = LockLog.Builder.create()
-                        .i(">>>", "-------------------------------------")
-                        .i(">>>", "创建请求:" + url)
-                        .i(">>>", "参数:");
-
-                if (isJsonRequest) {
-                    List<LockLog.LogBody> jsonLogList = JsonFormat.formatJson(jsonParameter);
-                    if (jsonLogList == null) {
-                        logBuilder.i(">>>>>>", jsonParameter);
-                    } else {
-                        logBuilder.add(jsonLogList);
-                    }
-                } else if (isStringRequest) {
-                    logBuilder.i(">>>>>>", stringParameter);
-                } else {
-                    logBuilder.i(">>>>>>", parameter.toParameterString());
-                }
-                logBuilder.i(">>>", "请求已发送 ->")
-                        .build();
-            }
+            logRequestDetails(request);
 
             isSending = true;
             checkTimeOut();
@@ -406,6 +386,38 @@ public class HttpRequest extends BaseOkHttp {
             }
         } catch (Exception e) {
             onFail(e);
+        }
+    }
+
+    private void logError(String s) {
+        LockLog.Builder.create()
+                .e(">>>", "-------------------------------------")
+                .e(">>>", s)
+                .e(">>>", "=====================================")
+                .build();
+    }
+
+    private void logRequestDetails(Request request) {
+        if (DEBUGMODE && isShowLog()) {
+            LockLog.Builder logBuilder = LockLog.Builder.create()
+                    .i(">>>", "-------------------------------------")
+                    .i(">>>", "创建请求:" + url)
+                    .i(">>>", "参数:");
+
+            if (isJsonRequest) {
+                List<LockLog.LogBody> jsonLogList = JsonFormat.formatJson(jsonParameter);
+                if (jsonLogList == null) {
+                    logBuilder.i(">>>>>>", jsonParameter);
+                } else {
+                    logBuilder.add(jsonLogList);
+                }
+            } else if (isStringRequest) {
+                logBuilder.i(">>>>>>", stringParameter);
+            } else {
+                logBuilder.i(">>>>>>", parameter.toParameterString());
+            }
+            logBuilder.i(">>>", "请求已发送 ->")
+                    .build();
         }
     }
 
@@ -1032,7 +1044,7 @@ public class HttpRequest extends BaseOkHttp {
             runOnMain(new Runnable() {
                 @Override
                 public void run() {
-                    onDownloadListener.onDownloadBegin(response,total);
+                    onDownloadListener.onDownloadBegin(response, total);
                 }
             });
             while ((len = is.read(buf)) != -1) {
@@ -1384,27 +1396,58 @@ public class HttpRequest extends BaseOkHttp {
         }
     }
 
+    public void onDetach() {
+        if (context != null) {
+            context.clear();
+            context = null;
+        }
+        if (httpCall != null) {
+            httpCall.cancel(); // 取消未完成的请求
+            httpCall = null;
+        }
+    }
+
+    // 新增方法：判断 context 是否为 LifecycleOwner
+    private boolean isLifecycleOwner(Context context) {
+        return context instanceof LifecycleOwner;
+    }
+
+    // 新增方法：观察 LifecycleOwner 的生命周期
+    private void observeLifecycle(LifecycleOwner lifecycleOwner) {
+        lifecycleOwner.getLifecycle().addObserver(new LifecycleEventObserver() {
+            @Override
+            public void onStateChanged(LifecycleOwner source, Lifecycle.Event event) {
+                if (event == Lifecycle.Event.ON_DESTROY) {
+                    // 生命周期结束，取消请求并清理 context
+                    onDetach();
+                }
+            }
+        });
+    }
+
+    // 修改 runOnMain 方法，增加对 LifecycleOwner 的支持
     private void runOnMain(Runnable runnable) {
         if (context == null || context.get() == null) {
             stop();
             return;
         }
         if (context.get() instanceof Activity) {
-            if (((Activity) context.get()).isFinishing()) {
+            Activity activity = (Activity) context.get();
+            if (activity.isFinishing() || activity.isDestroyed()) { // 检查 Activity 是否已销毁
                 stop();
                 return;
             }
-            ((Activity) context.get()).runOnUiThread(runnable);
+            activity.runOnUiThread(runnable);
+        } else if (isLifecycleOwner(context.get())) {
+            // 如果 context 是 LifecycleOwner，则注册生命周期观察者
+            observeLifecycle((LifecycleOwner) context.get());
+            runnable.run();
         } else {
             if (DEBUGMODE && DETAILSLOGS && isShowLog()) {
                 LockLog.logI(">>>", "context 不是 Activity，本次请求在异步线程返回 >>>");
             }
             runnable.run();
         }
-    }
-
-    public void onDetach() {
-        context.clear();
     }
 
     public int getTimeoutDuration() {
