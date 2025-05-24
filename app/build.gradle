@@ -19,12 +19,12 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.kongzue.baseframework:baseframework:6.7.0'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation "com.kongzue.baseframework:BaseFramework:6.8.8"
 
     implementation project(':baseokhttp_v3')
 //    implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.2.1.3'
-    implementation 'com.github.kongzue:BaseJson:1.0.7.1'
+    implementation 'com.github.kongzue:BaseJson:1.2.7'
 
     implementation "com.squareup.okhttp3:okhttp:4.9.1"
 }

@@ -2,8 +2,6 @@ package com.kongzue.baseokhttpv3;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +11,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.kongzue.baseframework.BaseAdapter;
 import com.kongzue.baseframework.interfaces.SimpleAdapterSettings;
@@ -31,6 +31,7 @@ import com.kongzue.baseokhttp.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import okhttp3.Response;
 import okio.ByteString;
@@ -130,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                                         }
 
                                         @Override
-                                        public void setData(ViewHolder viewHolder, JsonMap data, int index) {
+                                        public void setData(ViewHolder viewHolder, JsonMap data, List<JsonMap> list, int i) {
                                             viewHolder.txtList.setText(data.getString("title"));
                                         }
                                     });
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                                         }
 
                                         @Override
-                                        public void setData(ViewHolder viewHolder, JsonMap data, int index) {
+                                        public void setData(ViewHolder viewHolder, JsonMap data, List<JsonMap> list, int i) {
                                             viewHolder.txtList.setText(data.getString("title"));
                                         }
                                     });
@@ -206,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
                                         }
 
                                         @Override
-                                        public void setData(ViewHolder viewHolder, JsonMap data, int index) {
+                                        public void setData(ViewHolder viewHolder, JsonMap data, List<JsonMap> list, int i) {
                                             viewHolder.txtList.setText(data.getString("title"));
                                         }
                                     });
@@ -420,6 +421,11 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onDownloadFailed(Exception e) {
                                 Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onDownloadBegin(Response response, long totalContentLength) {
+
                             }
                         }
                 );
