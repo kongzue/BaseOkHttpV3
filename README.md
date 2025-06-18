@@ -21,6 +21,9 @@
 - 强大的全局方法和事件让您的请求得心应手。
 - BaseOkHttp V3是基于BaseOkHttp V2( <https://github.com/kongzue/BaseOkHttp> )的升级版本，基于能够快速创建常用请求链接而封装的库。
 
+> [!TIP]
+> BaseOkHttpX 现已发布，不妨试试看全新重构更好用的 BaseOkHttpX？https://github.com/kongzue/BaseOkHttpX。
+
 ## Maven仓库或Gradle的引用方式
 
 ### jitPack 方式
